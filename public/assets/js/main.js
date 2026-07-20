@@ -2,14 +2,37 @@
 document.addEventListener('DOMContentLoaded', () => {
   const toggleBtn = document.getElementById('sidebar-toggle');
   const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebar-overlay');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('open');
+    overlay && overlay.classList.add('show');
+  }
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('show');
+  }
+
   if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
-    document.addEventListener('click', (e) => {
-      if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-        sidebar.classList.remove('open');
-      }
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
     });
   }
+
+  // Clicking overlay closes sidebar
+  if (overlay) {
+    overlay.addEventListener('click', closeSidebar);
+  }
+
+  // Close sidebar on nav-link click (mobile)
+  if (sidebar) {
+    sidebar.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
+  }
+
 
   // ── Flash auto-dismiss ─────────────────────────────────
   const flash = document.getElementById('flash-message');

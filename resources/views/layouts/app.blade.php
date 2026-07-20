@@ -10,6 +10,9 @@
   @yield('styles')
 </head>
 <body>
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <div class="wrapper">
     <!-- ── Sidebar ─────────────────────────────────────────── -->
     <aside class="sidebar" id="sidebar">
@@ -198,6 +201,53 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    @if(in_array(Auth::user()->role, ['admin', 'staff']))
+      <a href="{{ route('admin.dashboard') }}" class="mobile-nav-item {{ Route::is('admin.dashboard') ? 'active' : '' }}">
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ route('admin.requests') }}" class="mobile-nav-item {{ Route::is('admin.requests') ? 'active' : '' }}">
+        <i class="fas fa-file-alt"></i>
+        <span>Requests</span>
+      </a>
+      <a href="{{ route('admin.residents') }}" class="mobile-nav-item {{ Route::is('admin.residents') ? 'active' : '' }}">
+        <i class="fas fa-users"></i>
+        <span>Residents</span>
+      </a>
+      <a href="{{ route('admin.payments') }}" class="mobile-nav-item {{ Route::is('admin.payments') ? 'active' : '' }}">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Payments</span>
+      </a>
+      <button class="mobile-nav-item" onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show');">
+        <i class="fas fa-bars"></i>
+        <span>More</span>
+      </button>
+    @else
+      <a href="{{ route('resident.request') }}" class="mobile-nav-item {{ Route::is('resident.request') ? 'active' : '' }}">
+        <i class="fas fa-plus-circle"></i>
+        <span>New</span>
+      </a>
+      <a href="{{ route('resident.my_requests') }}" class="mobile-nav-item {{ Route::is('resident.my_requests') ? 'active' : '' }}">
+        <i class="fas fa-list"></i>
+        <span>Requests</span>
+      </a>
+      <a href="{{ route('resident.bulletins') }}" class="mobile-nav-item {{ Route::is('resident.bulletins') ? 'active' : '' }}">
+        <i class="fas fa-bullhorn"></i>
+        <span>Bulletins</span>
+      </a>
+      <a href="{{ route('resident.profile') }}" class="mobile-nav-item {{ Route::is('resident.profile') ? 'active' : '' }}">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+      <button class="mobile-nav-item" onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show');">
+        <i class="fas fa-bars"></i>
+        <span>More</span>
+      </button>
+    @endif
+  </nav>
 
   <script src="{{ asset('assets/js/main.js') }}"></script>
   @yield('scripts')
