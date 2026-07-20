@@ -38,6 +38,7 @@ class MainActivity : Activity() {
         root.addView(errorView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         setContentView(root)
 
+        val defaultUa = webView.settings.userAgentString
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -48,6 +49,8 @@ class MainActivity : Activity() {
             displayZoomControls = false
             loadWithOverviewMode = true
             useWideViewPort = true
+            // Custom UA so the server can detect the native WebView and hide the install banner
+            userAgentString = "$defaultUa BrgyPiliApp/1.0"
         }
 
         webView.webViewClient = object : WebViewClient() {
