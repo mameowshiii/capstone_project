@@ -159,7 +159,7 @@
             <i class="fas fa-mobile-screen-button"></i>
             <span>Resident mobile app is available.</span>
           </div>
-          <a href="{{ asset('downloads/resident-portal-mobile-kotlin.zip') }}" class="resident-app-banner__link" download>
+          <a href="{{ asset('downloads/brgy-pili-portal.apk') }}" class="resident-app-banner__link" download="brgy-pili-portal.apk">
             <i class="fas fa-download"></i>
             Download Now
           </a>

@@ -24,4 +24,13 @@ android {
             "\"https://capstone-project-orpin-theta.vercel.app/resident/my-requests\""
         )
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
