@@ -115,14 +115,17 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             ActivityLog::log('LOGOUT', 'Auth', 'User logged out');
-            Auth::logout();
         }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('web')->logout();
 
-        return redirect()->route('login');
+        $request->session()->flush();
+        $request->session()->regenerate(true);
+
+        return redirect()->route('login')
+            ->withCookie(\Cookie::forget(config('session.cookie', 'laravel_session')));
     }
+
 
     private function redirectUser()
     {

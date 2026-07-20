@@ -31,7 +31,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::match(['get', 'post'], '/track', [TrackingController::class, 'track'])->name('track');
 
 Route::middleware('auth')->get('/home', function () {

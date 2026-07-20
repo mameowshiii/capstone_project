@@ -95,9 +95,13 @@
         @endif
 
         <span class="nav-section-label">General</span>
-        <a href="{{ route('logout') }}" class="nav-link" onclick="return confirm('Log out?')">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <form method="POST" action="{{ route('logout') }}" id="logout-form" style="margin:0;">
+          @csrf
+          <button type="submit" class="nav-link" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;"
+            onclick="return confirm('Log out?')">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </form>
       </nav>
 
       <div class="sidebar-footer">
