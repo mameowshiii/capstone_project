@@ -153,7 +153,8 @@
         </div>
       </header>
 
-      @if(Auth::user()->role === 'resident')
+      @php $isNativeApp = str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp'); @endphp
+      @if(Auth::user()->role === 'resident' && !$isNativeApp)
         <div class="resident-app-banner no-print">
           <div class="resident-app-banner__copy">
             <i class="fas fa-mobile-screen-button"></i>
