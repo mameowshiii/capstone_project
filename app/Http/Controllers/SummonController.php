@@ -92,6 +92,49 @@ class SummonController extends Controller
 
         ActivityLog::log('CREATE_SUMMON', 'Summons', "Created " . ucfirst($request->case_type) . " case {$caseNumber}");
 
+        // ── Dispatch Email Notifications ─────────────────────────────────
+        $adminEmail = 'admin@brgy-pili.gov.ph';
+        
+        // 1. Notify Admin
+        try {
+            \Illuminate\Support\Facades\Mail::send('emails.summon-filed-admin', ['summon' => $summon], function ($message) use ($adminEmail, $summon) {
+                $message->to($adminEmail)
+                        ->subject('Request for Summon Issuance - Case #' . $summon->case_number);
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to mail Admin for Case {$summon->case_number}: " . $e->getMessage());
+        }
+
+        // 2. Notify Complainant (if linked and has email)
+        if ($summon->complainant_resident_id) {
+            $complainant = $summon->complainantResident;
+            if ($complainant && $complainant->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::send('emails.summon-acknowledged', ['summon' => $summon], function ($message) use ($complainant, $summon) {
+                        $message->to($complainant->email)
+                                ->subject('Acknowledgment of Summon Request - Case #' . $summon->case_number);
+                    });
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to mail Complainant for Case {$summon->case_number}: " . $e->getMessage());
+                }
+            }
+        }
+
+        // 3. Notify Respondent (if case is summon, respondent is linked, and has email)
+        if ($summon->case_type === 'summon' && $summon->respondent_resident_id && $summon->schedule_date) {
+            $respondent = $summon->respondentResident;
+            if ($respondent && $respondent->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::send('emails.summon-notice', ['summon' => $summon], function ($message) use ($respondent, $summon) {
+                        $message->to($respondent->email)
+                                ->subject('Official Summon Notice - Case #' . $summon->case_number);
+                    });
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to mail Respondent for Case {$summon->case_number}: " . $e->getMessage());
+                }
+            }
+        }
+
         return back()->with('success', "Case {$caseNumber} created successfully.");
     }
 
@@ -132,6 +175,8 @@ class SummonController extends Controller
             }
         }
 
+        $rescheduled = false;
+
         // Add new hearing if provided
         if ($request->new_schedule_date) {
             $nextNumber = $summon->hearings()->count() + 1;
@@ -148,9 +193,44 @@ class SummonController extends Controller
                 'schedule_date' => $request->new_schedule_date,
                 'status' => 'scheduled' // Automatically set status to scheduled on new appointment
             ]);
+
+            $rescheduled = true;
         }
 
         ActivityLog::log('UPDATE_SUMMON', 'Summons', "Updated case {$summon->case_number}");
+
+        // ── Dispatch Rescheduling Email Notifications ─────────────────────
+        if ($rescheduled) {
+            // 1. Notify Complainant about rescheduled hearing
+            if ($summon->complainant_resident_id) {
+                $complainant = $summon->complainantResident;
+                if ($complainant && $complainant->email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::send('emails.summon-acknowledged', ['summon' => $summon], function ($message) use ($complainant, $summon) {
+                            $message->to($complainant->email)
+                                    ->subject('Rescheduled Summon Hearing - Case #' . $summon->case_number);
+                        });
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Failed to mail Complainant on update for Case {$summon->case_number}: " . $e->getMessage());
+                    }
+                }
+            }
+
+            // 2. Notify Respondent about rescheduled hearing
+            if ($summon->respondent_resident_id) {
+                $respondent = $summon->respondentResident;
+                if ($respondent && $respondent->email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::send('emails.summon-notice', ['summon' => $summon], function ($message) use ($respondent, $summon) {
+                            $message->to($respondent->email)
+                                    ->subject('Rescheduled Official Summon Notice - Case #' . $summon->case_number);
+                        });
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Failed to mail Respondent on update for Case {$summon->case_number}: " . $e->getMessage());
+                    }
+                }
+            }
+        }
 
         return back()->with('success', "Case {$summon->case_number} updated successfully.");
     }
