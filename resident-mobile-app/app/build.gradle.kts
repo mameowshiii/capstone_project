@@ -21,7 +21,7 @@ android {
         buildConfigField(
             "String",
             "PORTAL_URL",
-            "\"https://capstone-project-orpin-theta.vercel.app/resident/my-requests\""
+            "\"https://brgypiliclearance.vercel.app/\""
         )
     }
 
