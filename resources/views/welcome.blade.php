@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #1e3a8a, #0f172a);
+      --primary-gradient: linear-gradient(135deg, #b91c1c, #450a0a);
       --secondary-gradient: linear-gradient(135deg, #10b981, #047857);
       --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       --font-family: 'Plus Jakarta Sans', sans-serif;
@@ -45,7 +45,7 @@
       gap: 12px;
     }
     .logo-badge {
-      background: #1e3a8a;
+      background: #b91c1c;
       color: #fff;
       font-weight: 800;
       width: 40px;
@@ -77,7 +77,7 @@
       transition: color 0.2s ease;
     }
     .nav-links a:hover {
-      color: #1e3a8a;
+      color: #b91c1c;
     }
     .nav-actions {
       display: flex;
@@ -85,7 +85,7 @@
       align-items: center;
     }
     .btn-nav-primary {
-      background: #1e3a8a;
+      background: #b91c1c;
       color: white !important;
       padding: 10px 20px;
       border-radius: 8px;
@@ -95,7 +95,7 @@
       transition: transform 0.2s ease, background 0.2s ease;
     }
     .btn-nav-primary:hover {
-      background: #1e40af;
+      background: #991b1b;
       transform: translateY(-1px);
     }
     .btn-nav-secondary {
@@ -259,7 +259,7 @@
       font-size: 22px;
       margin-bottom: 24px;
     }
-    .service-icon.blue { background: #eff6ff; color: #1e3a8a; }
+    .service-icon.blue { background: #fef2f2; color: #b91c1c; }
     .service-icon.green { background: #ecfdf5; color: #10b981; }
     .service-icon.yellow { background: #fffbeb; color: #d97706; }
     .service-icon.purple { background: #faf5ff; color: #7c3aed; }
@@ -277,7 +277,7 @@
       flex: 1;
     }
     .service-link {
-      color: #1e3a8a;
+      color: #b91c1c;
       text-decoration: none;
       font-weight: 700;
       font-size: 13px;
@@ -360,12 +360,12 @@
       transition: border-color 0.2s;
     }
     .track-form input:focus {
-      border-color: #1e3a8a;
+      border-color: #b91c1c;
       outline: none;
     }
     .btn-track-submit {
       width: 100%;
-      background: #1e3a8a;
+      background: #b91c1c;
       color: white;
       border: none;
       padding: 14px;
@@ -380,7 +380,7 @@
       transition: background 0.2s;
     }
     .btn-track-submit:hover {
-      background: #1e40af;
+      background: #991b1b;
     }
 
     /* Bulletins Section */
