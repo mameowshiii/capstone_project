@@ -18,8 +18,11 @@ use App\Http\Controllers\BulletinController;
 use App\Http\Controllers\BorrowRequestController;
 
 // ── Public Routes ─────────────────────────────────────────
+Route::get('/', function () {
+    return view('welcome');
+})->name('index');
+
 Route::middleware('guest')->group(function () {
-    Route::get('/', [AuthController::class, 'showLogin'])->name('index');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register'])->name('register');
