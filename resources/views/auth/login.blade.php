@@ -93,9 +93,12 @@
             </button>
             <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
           </form>
-          <div style="margin-top: 16px; text-align: center;">
-            <a href="{{ route('track') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
+          <div style="margin-top: 16px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <a href="{{ route('track') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width: 100%; max-width: 220px; justify-content: center;">
               <i class="fas fa-search-location"></i> Track Request Status
+            </a>
+            <a href="{{ route('index') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width: 100%; max-width: 220px; justify-content: center;">
+              <i class="fas fa-home"></i> Back to Homepage
             </a>
           </div>
         </div>
