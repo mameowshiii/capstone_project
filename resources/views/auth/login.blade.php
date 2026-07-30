@@ -77,7 +77,7 @@
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
-                <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
+                
               </div>
               <div style="position:relative; margin-top: 6px;">
                 <input type="password" id="password" name="password" class="form-control"
@@ -91,6 +91,7 @@
             <button type="submit" class="btn btn-primary w-100" style="margin-top:8px;">
               <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
+            <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
           </form>
           <div style="margin-top: 16px; text-align: center;">
             <a href="{{ route('track') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
