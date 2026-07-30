@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Request as CertificateRequest;
 use App\Models\Official;
+use App\Models\Summon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,5 +57,33 @@ class PrintController extends Controller
         }
 
         return view($viewName, compact('certReq', 'officials', 'captainName', 'autoPrint'));
+    }
+
+    public function printSummon($id, $formType, Request $request)
+    {
+        $summon = Summon::with(['complainantResident', 'respondentResident', 'hearings'])
+            ->findOrFail($id);
+
+        // Security check: residents can only print/view their own cases
+        if (Auth::user()->role === 'resident') {
+            $resident = Auth::user()->resident;
+            if (!$resident || ($summon->complainant_resident_id !== $resident->id && $summon->respondent_resident_id !== $resident->id)) {
+                abort(403, 'Unauthorized.');
+            }
+        }
+
+        // Find Punong Barangay
+        $captain = Official::where('status', 'active')
+            ->where(function ($q) {
+                $q->where('position', 'like', '%Captain%')
+                  ->orWhere('position', 'like', '%Punong%');
+            })->first();
+        
+        $captainName = $captain ? $captain->name : 'HON. JERRY S. CARANZO';
+
+        // Auto print check
+        $autoPrint = $request->has('print');
+
+        return view('print.kp_form', compact('summon', 'formType', 'captainName', 'autoPrint'));
     }
 }

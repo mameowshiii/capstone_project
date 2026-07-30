@@ -135,3 +135,4 @@ Route::middleware(['auth', 'role:staff,admin'])->prefix('admin')->name('admin.')
 
 // ── Print Routes ──────────────────────────────────────────
 Route::middleware('auth')->get('/print/certificate/{id}', [PrintController::class, 'print'])->name('print.certificate');
+Route::middleware('auth')->get('/print/summon/{id}/{form_type}', [PrintController::class, 'printSummon'])->name('print.summon');

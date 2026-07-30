@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Resident;
 use App\Models\Certificate;
 use App\Models\Request as CertificateRequest;
+use App\Models\Summon;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,9 @@ class ArchiveController extends Controller
         $certificates = Certificate::whereNotNull('archived_at')->orderBy('archived_at', 'desc')->get();
         $requests = CertificateRequest::with(['resident', 'certificate'])->whereNotNull('archived_at')->orderBy('archived_at', 'desc')->get();
         $users = User::whereIn('role', ['admin', 'staff'])->whereNotNull('archived_at')->orderBy('archived_at', 'desc')->get();
+        $summons = Summon::whereNotNull('archived_at')->orderBy('archived_at', 'desc')->get();
 
-        return view('admin.archive', compact('residents', 'certificates', 'requests', 'users'));
+        return view('admin.archive', compact('residents', 'certificates', 'requests', 'users', 'summons'));
     }
 
     public function restore($type, $id)
@@ -68,6 +70,14 @@ class ArchiveController extends Controller
                 'archived_by' => null
             ]);
             $name = $user->username;
+            $restored = true;
+        } elseif ($type === 'summon') {
+            $summon = Summon::findOrFail($id);
+            $summon->update([
+                'archived_at' => null,
+                'archived_by' => null
+            ]);
+            $name = $summon->case_number;
             $restored = true;
         }
 

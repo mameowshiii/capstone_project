@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Summon;
+use App\Models\SummonHearing;
 use App\Models\Resident;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
@@ -14,14 +15,17 @@ class SummonController extends Controller
     {
         $search = $request->input('search');
         $status = $request->input('status', 'all');
+        $type = $request->input('case_type', 'all');
 
-        $query = Summon::with(['complainantResident', 'respondentResident']);
+        $query = Summon::with(['complainantResident', 'respondentResident', 'hearings'])
+            ->whereNull('archived_at');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('case_number', 'like', "%{$search}%")
                     ->orWhere('complainant_name', 'like', "%{$search}%")
-                    ->orWhere('respondent_name', 'like', "%{$search}%");
+                    ->orWhere('respondent_name', 'like', "%{$search}%")
+                    ->orWhere('nature_of_complaint', 'like', "%{$search}%");
             });
         }
 
@@ -29,15 +33,21 @@ class SummonController extends Controller
             $query->where('status', $status);
         }
 
-        $summons = $query->orderBy('schedule_date', 'asc')->paginate(10);
+        if ($type !== 'all') {
+            $query->where('case_type', $type);
+        }
+
+        // Order by latest schedule, or latest updated
+        $summons = $query->orderBy('created_at', 'desc')->paginate(10);
         $residents = Resident::where('status', 'active')->orderBy('last_name')->get();
 
-        return view('admin.summons', compact('summons', 'residents', 'search', 'status'));
+        return view('admin.summons', compact('summons', 'residents', 'search', 'status', 'type'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'case_type' => 'required|in:blotter,summon',
             'complainant_name' => 'required|string|max:255',
             'complainant_contact' => 'nullable|string|max:100',
             'complainant_resident_id' => 'nullable|exists:residents,id',
@@ -45,13 +55,17 @@ class SummonController extends Controller
             'respondent_contact' => 'nullable|string|max:100',
             'respondent_resident_id' => 'nullable|exists:residents,id',
             'complain_details' => 'required|string',
-            'schedule_date' => 'required|date|after_or_equal:today',
+            'incident_date' => 'nullable|date',
+            'incident_location' => 'nullable|string|max:255',
+            'nature_of_complaint' => 'nullable|string|max:255',
+            'schedule_date' => 'required_if:case_type,summon|nullable|date|after_or_equal:today',
         ]);
 
         $caseNumber = 'SUMMON-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
-        Summon::create([
+        $summon = Summon::create([
             'case_number' => $caseNumber,
+            'case_type' => $request->case_type,
             'complainant_name' => $request->complainant_name,
             'complainant_contact' => $request->complainant_contact,
             'complainant_resident_id' => $request->complainant_resident_id,
@@ -59,45 +73,102 @@ class SummonController extends Controller
             'respondent_contact' => $request->respondent_contact,
             'respondent_resident_id' => $request->respondent_resident_id,
             'complain_details' => $request->complain_details,
-            'schedule_date' => $request->schedule_date,
+            'incident_date' => $request->incident_date,
+            'incident_location' => $request->incident_location,
+            'nature_of_complaint' => $request->nature_of_complaint,
+            'schedule_date' => $request->case_type === 'summon' ? $request->schedule_date : null,
             'status' => 'pending',
         ]);
 
-        ActivityLog::log('CREATE_SUMMON', 'Summons', "Created summon case {$caseNumber}");
+        if ($request->case_type === 'summon' && $request->schedule_date) {
+            SummonHearing::create([
+                'summon_id' => $summon->id,
+                'hearing_number' => 1,
+                'schedule_date' => $request->schedule_date,
+                'remarks' => 'First hearing schedule created.',
+                'conducted_by' => 'Punong Barangay'
+            ]);
+        }
 
-        return back()->with('success', "Summon case {$caseNumber} created successfully.");
+        ActivityLog::log('CREATE_SUMMON', 'Summons', "Created " . ucfirst($request->case_type) . " case {$caseNumber}");
+
+        return back()->with('success', "Case {$caseNumber} created successfully.");
     }
 
     public function update(Request $request)
     {
         $request->validate([
             'summon_id' => 'required|exists:summons,id',
-            'schedule_date' => 'required|date',
-            'status' => 'required|in:pending,scheduled,resolved,cancelled',
+            'status' => 'required|string',
             'hearing_remarks' => 'nullable|string',
+            'incident_date' => 'nullable|date',
+            'incident_location' => 'nullable|string|max:255',
+            'nature_of_complaint' => 'nullable|string|max:255',
+            // If scheduling a new hearing
+            'new_schedule_date' => 'nullable|date|after_or_equal:today',
+            'new_hearing_remarks' => 'nullable|string',
+            'new_conducted_by' => 'nullable|string|max:150',
         ]);
 
         $summon = Summon::findOrFail($request->summon_id);
-        $summon->update([
-            'schedule_date' => $request->schedule_date,
+        
+        $updateData = [
             'status' => $request->status,
             'hearing_remarks' => $request->hearing_remarks,
-        ]);
+            'incident_date' => $request->incident_date,
+            'incident_location' => $request->incident_location,
+            'nature_of_complaint' => $request->nature_of_complaint,
+        ];
 
-        ActivityLog::log('UPDATE_SUMMON', 'Summons', "Updated summon case {$summon->case_number}");
+        $summon->update($updateData);
 
-        return back()->with('success', "Summon case {$summon->case_number} updated successfully.");
+        // Update latest hearing remarks if exists and no new schedule is added
+        if ($request->hearing_remarks && !$request->new_schedule_date) {
+            $latestHearing = $summon->hearings()->orderBy('hearing_number', 'desc')->first();
+            if ($latestHearing) {
+                $latestHearing->update([
+                    'remarks' => $request->hearing_remarks
+                ]);
+            }
+        }
+
+        // Add new hearing if provided
+        if ($request->new_schedule_date) {
+            $nextNumber = $summon->hearings()->count() + 1;
+            SummonHearing::create([
+                'summon_id' => $summon->id,
+                'hearing_number' => $nextNumber,
+                'schedule_date' => $request->new_schedule_date,
+                'remarks' => $request->new_hearing_remarks ?? "Hearing #{$nextNumber} scheduled.",
+                'conducted_by' => $request->new_conducted_by ?? 'Punong Barangay'
+            ]);
+
+            // Update main record schedule date to the latest
+            $summon->update([
+                'schedule_date' => $request->new_schedule_date,
+                'status' => 'scheduled' // Automatically set status to scheduled on new appointment
+            ]);
+        }
+
+        ActivityLog::log('UPDATE_SUMMON', 'Summons', "Updated case {$summon->case_number}");
+
+        return back()->with('success', "Case {$summon->case_number} updated successfully.");
     }
 
     public function delete($id)
     {
         $summon = Summon::findOrFail($id);
         $caseNum = $summon->case_number;
-        $summon->delete();
+        
+        // Soft archive instead of hard delete
+        $summon->update([
+            'archived_at' => now(),
+            'archived_by' => Auth::id() ?? 1
+        ]);
 
-        ActivityLog::log('DELETE_SUMMON', 'Summons', "Deleted summon case {$caseNum}");
+        ActivityLog::log('DELETE_SUMMON', 'Summons', "Archived case {$caseNum}");
 
-        return back()->with('success', "Summon case {$caseNum} deleted successfully.");
+        return back()->with('success', "Case {$caseNum} archived successfully.");
     }
 
     public function residentIndex()
@@ -107,12 +178,13 @@ class SummonController extends Controller
             return redirect()->route('login')->with('error', 'Profile not found.');
         }
 
-        $summons = Summon::with(['complainantResident', 'respondentResident'])
+        $summons = Summon::with(['complainantResident', 'respondentResident', 'hearings'])
+            ->whereNull('archived_at')
             ->where(function ($q) use ($resident) {
                 $q->where('complainant_resident_id', $resident->id)
                     ->orWhere('respondent_resident_id', $resident->id);
             })
-            ->orderBy('schedule_date', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('resident.summons', compact('summons'));
