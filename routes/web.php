@@ -25,7 +25,14 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    
+    // GET /register redirects to /login and opens the register tab
+    Route::get('/register', function () {
+        session()->flash('reg_tab', true);
+        return redirect()->route('login');
+    })->name('register');
+    
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
     // Forgot Password
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
