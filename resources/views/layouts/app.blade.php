@@ -8,8 +8,79 @@
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   @yield('styles')
+
+  @if(str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp'))
+  <style>
+    /* Force tables to render as stacked vertical lists (cards) inside the mobile app */
+    .native-mobile-app .table,
+    .native-mobile-app .table thead,
+    .native-mobile-app .table tbody,
+    .native-mobile-app .table th,
+    .native-mobile-app .table td,
+    .native-mobile-app .table tr,
+    .native-mobile-app .table-wrapper {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* Hide the table headers completely */
+    .native-mobile-app .table thead {
+      display: none !important;
+    }
+    
+    /* Each table row becomes a single card */
+    .native-mobile-app .table tbody tr {
+      background: #ffffff !important;
+      border: 1.5px solid #e2e8f0 !important;
+      border-radius: 14px !important;
+      padding: 16px !important;
+      margin-bottom: 16px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      text-align: left !important;
+    }
+    
+    /* Each table cell stacks vertically left-aligned */
+    .native-mobile-app .table tbody td {
+      border: none !important;
+      padding: 6px 0 !important;
+      text-align: left !important;
+      width: 100% !important;
+      display: block !important;
+      box-sizing: border-box !important;
+      border-bottom: 1px dashed #f1f5f9 !important;
+    }
+
+    .native-mobile-app .table tbody td:last-child {
+      border-bottom: none !important;
+    }
+
+    /* Make sure all data items inside columns align cleanly to the left */
+    .native-mobile-app .table tbody td * {
+      text-align: left !important;
+      justify-content: flex-start !important;
+    }
+    
+    /* Specific override for My Requests mobile cards to also stack vertically in the app */
+    .native-mobile-app .request-card-meta {
+      grid-template-columns: 1fr !important;
+      text-align: left !important;
+    }
+    
+    .native-mobile-app .request-card-meta-item {
+      text-align: left !important;
+    }
+
+    .native-mobile-app .request-card-meta-item * {
+      text-align: left !important;
+    }
+  </style>
+  @endif
 </head>
-<body>
+<body class="{{ str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp') ? 'native-mobile-app' : '' }}">
   <!-- Mobile sidebar overlay -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
