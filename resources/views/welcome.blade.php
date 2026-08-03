@@ -114,15 +114,15 @@
 
     /* Hero Section */
     .hero {
-      background: linear-gradient(135deg, rgba(185, 28, 28, 0.9), rgba(69, 10, 10, 0.95)), url("{{ asset('assets/images/background.jpg') }}") no-repeat center center / cover;
+      background: linear-gradient(135deg, rgba(185, 28, 28, 0.45), rgba(69, 10, 10, 0.65)), url("{{ asset('assets/images/background.jpg') }}") no-repeat center center / cover;
       padding: 180px 20px 120px 20px;
       text-align: center;
       color: white;
       position: relative;
     }
     .hero-badge {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 6px 16px;
       border-radius: 100px;
       font-weight: 700;
@@ -133,6 +133,7 @@
       align-items: center;
       gap: 6px;
       margin-bottom: 24px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
     .hero h1 {
       font-size: 48px;
@@ -141,14 +142,16 @@
       margin: 0 auto 20px auto;
       line-height: 1.2;
       letter-spacing: -1.5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
     }
     .hero p {
       font-size: 18px;
       max-width: 600px;
       margin: 0 auto 36px auto;
-      opacity: 0.85;
+      opacity: 0.95;
       font-weight: 400;
       line-height: 1.6;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
     }
     .hero-ctas {
       display: flex;

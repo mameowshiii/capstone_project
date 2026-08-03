@@ -881,7 +881,7 @@ textarea.form-control {
 /* ── Landing / Auth Pages ───────────────────────────────── */
 .auth-page {
   min-height: 100vh;
-  background: url('../images/background.jpg') center center / cover no-repeat;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -891,12 +891,7 @@ textarea.form-control {
 }
 
 .auth-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  display: none;
 }
 
 .auth-container {
@@ -909,7 +904,7 @@ textarea.form-control {
   background: var(--white);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
 }
 
 .auth-left {
