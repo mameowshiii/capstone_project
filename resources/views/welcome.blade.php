@@ -114,7 +114,7 @@
 
     /* Hero Section */
     .hero {
-      background: var(--primary-gradient);
+      background: linear-gradient(135deg, rgba(185, 28, 28, 0.9), rgba(69, 10, 10, 0.95)), url("{{ asset('assets/images/background.jpg') }}") no-repeat center center / cover;
       padding: 180px 20px 120px 20px;
       text-align: center;
       color: white;
@@ -491,14 +491,15 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="logo-container">
-      <div class="logo-badge"><i class="fas fa-landmark"></i></div>
+      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 40px; width: auto; object-fit: contain;">
       <div class="logo-text">BARANGAY PILI</div>
     </div>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#services">Our Services</a></li>
-      <li><a href="#tracking">Track Application</a></li>
-      <li><a href="#bulletins">Announcements</a></li>
+      <li><a href="#">HOME</a></li>
+      <li><a href="#services">BARANGAY SERVICES</a></li>
+      <li><a href="#tracking">TRACK APPLICATION</a></li>
+      <li><a href="#bulletins">ANNOUNCEMENT</a></li>
+      <li><a href="{{ asset('downloads/brgy-pili-portal.apk') }}" download>DOWNLOAD APP</a></li>
     </ul>
     <div class="nav-actions">
       <a href="{{ route('login') }}" class="btn-nav-secondary">Resident Login</a>
