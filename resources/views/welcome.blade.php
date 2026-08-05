@@ -10,17 +10,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #b91c1c, #450a0a);
-      --secondary-gradient: linear-gradient(135deg, #10b981, #047857);
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --primary-color: #1e40af;
+      --primary-dark: #0f2c59;
+      --primary-gradient: linear-gradient(135deg, #1e40af, #0f2c59);
+      --secondary-gradient: linear-gradient(135deg, #10b981, #059669);
+      --accent-color: #0d9488;
+      --accent-light: #eff6ff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --bg-light: #f8fafc;
+      --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      --card-shadow-hover: 0 20px 40px rgba(30, 64, 175, 0.08);
       --font-family: 'Plus Jakarta Sans', sans-serif;
     }
     body {
       font-family: var(--font-family);
       margin: 0;
       padding: 0;
-      color: #1e293b;
-      background-color: #f8fafc;
+      color: var(--text-main);
+      background-color: #ffffff;
       overflow-x: hidden;
       scroll-behavior: smooth;
     }
@@ -29,7 +37,7 @@
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #e2e8f0;
-      padding: 16px 40px;
+      padding: 14px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -38,29 +46,12 @@
       width: 100%;
       box-sizing: border-box;
       z-index: 1000;
+      transition: all 0.3s ease;
     }
     .logo-container {
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    .logo-badge {
-      background: #b91c1c;
-      color: #fff;
-      font-weight: 800;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    .logo-text {
-      font-weight: 800;
-      font-size: 18px;
-      color: #0f172a;
-      letter-spacing: -0.5px;
     }
     .nav-links {
       display: flex;
@@ -77,7 +68,7 @@
       transition: color 0.2s ease;
     }
     .nav-links a:hover {
-      color: #b91c1c;
+      color: var(--primary-color);
     }
     .nav-actions {
       display: flex;
@@ -85,7 +76,7 @@
       align-items: center;
     }
     .btn-nav-primary {
-      background: #b91c1c;
+      background: var(--primary-color);
       color: white !important;
       padding: 10px 20px;
       border-radius: 8px;
@@ -95,7 +86,7 @@
       transition: transform 0.2s ease, background 0.2s ease;
     }
     .btn-nav-primary:hover {
-      background: #991b1b;
+      background: var(--primary-dark);
       transform: translateY(-1px);
     }
     .btn-nav-secondary {
@@ -109,75 +100,103 @@
       transition: background 0.2s ease;
     }
     .btn-nav-secondary:hover {
-      background: #f1f5f9;
+      background: var(--bg-light);
     }
 
-    /* Hero Section */
+    /* Hero Section - SaaS Dual Column Layout */
     .hero {
-      background: linear-gradient(135deg, rgba(185, 28, 28, 0.45), rgba(69, 10, 10, 0.65)), url("{{ asset('assets/images/background.jpg') }}") no-repeat center center / cover;
-      padding: 180px 20px 120px 20px;
-      text-align: center;
-      color: white;
+      background: radial-gradient(at 0% 0%, rgba(243, 244, 246, 1) 0, transparent 50%), radial-gradient(at 50% 0%, rgba(219, 234, 254, 0.4) 0, transparent 50%), #ffffff;
+      padding: 160px 40px 100px 40px;
       position: relative;
     }
+    .hero-grid-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero-content {
+      text-align: left;
+    }
     .hero-badge {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 6px 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary-color);
+      padding: 6px 14px;
       border-radius: 100px;
       font-weight: 700;
       font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 24px;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      0% {
+        transform: scale(0.9);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+      100% {
+        transform: scale(0.9);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
     }
     .hero h1 {
-      font-size: 48px;
+      font-size: 46px;
       font-weight: 800;
-      max-width: 800px;
-      margin: 0 auto 20px auto;
-      line-height: 1.2;
+      color: var(--primary-dark);
+      margin: 0 0 20px 0;
+      line-height: 1.15;
       letter-spacing: -1.5px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
     }
     .hero p {
-      font-size: 18px;
-      max-width: 600px;
-      margin: 0 auto 36px auto;
-      opacity: 0.95;
+      font-size: 17px;
+      color: var(--text-muted);
+      margin: 0 0 36px auto;
       font-weight: 400;
-      line-height: 1.6;
-      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+      line-height: 1.65;
     }
     .hero-ctas {
       display: flex;
-      justify-content: center;
       gap: 16px;
       flex-wrap: wrap;
     }
     .btn-hero-primary {
-      background: #10b981;
+      background: var(--primary-color);
       color: white;
       padding: 16px 32px;
       border-radius: 10px;
       font-weight: 700;
       font-size: 15px;
       text-decoration: none;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
       transition: transform 0.2s, background 0.2s;
     }
     .btn-hero-primary:hover {
-      background: #059669;
+      background: var(--primary-dark);
       transform: translateY(-2px);
     }
     .btn-hero-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
       padding: 16px 30px;
       border-radius: 10px;
       font-weight: 700;
@@ -186,8 +205,131 @@
       transition: background 0.2s, transform 0.2s;
     }
     .btn-hero-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--bg-light);
       transform: translateY(-2px);
+    }
+
+    /* Hero Illustration Mockup */
+    .hero-illustration {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero-mockup {
+      background: #0f172a;
+      border-radius: 16px;
+      border: 1px solid #334155;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+    }
+    .mockup-bar {
+      background: #1e293b;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #334155;
+    }
+    .mockup-bar .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .mockup-bar .dot.red { background: #ef4444; }
+    .mockup-bar .dot.yellow { background: #eab308; }
+    .mockup-bar .dot.green { background: #22c55e; }
+    .mockup-title {
+      color: #94a3b8;
+      font-size: 11px;
+      font-family: monospace;
+      margin-left: 8px;
+    }
+    .mockup-view {
+      background: #f8fafc;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .stats-mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-mini-card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+    .stat-mini-card i {
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .stat-mini-card i.text-blue { color: #2563eb; }
+    .stat-mini-card i.text-yellow { color: #d97706; }
+    .stat-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .mockup-chart-placeholder {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 14px;
+    }
+    .badge-live {
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 120px;
+      padding: 0 10px;
+    }
+    .chart-bar {
+      width: 40px;
+      background: #cbd5e1;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: height 0.3s ease;
+    }
+    .chart-bar::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: var(--text-muted);
     }
 
     /* Wave Divider */
@@ -203,10 +345,10 @@
       position: relative;
       display: block;
       width: calc(100% + 1.3px);
-      height: 60px;
+      height: 40px;
     }
     .hero-wave .shape-fill {
-      fill: #f8fafc;
+      fill: #ffffff;
     }
 
     /* Services Grid */
@@ -220,87 +362,94 @@
       margin-bottom: 60px;
     }
     .section-header h2 {
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 800;
       letter-spacing: -1px;
-      color: #0f172a;
+      color: var(--primary-dark);
       margin: 0 0 12px 0;
     }
     .section-header p {
-      color: #64748b;
-      max-width: 500px;
+      color: var(--text-muted);
+      max-width: 550px;
       margin: 0 auto;
       font-size: 16px;
+      line-height: 1.5;
     }
     .services-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 30px;
     }
     .service-card {
       background: white;
       border-radius: 16px;
-      padding: 30px;
+      padding: 32px;
       box-shadow: var(--card-shadow);
       border: 1px solid #e2e8f0;
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
       align-items: flex-start;
     }
     .service-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--card-shadow-hover);
+      border-color: #dbeafe;
     }
     .service-icon {
-      width: 50px;
-      height: 50px;
+      width: 54px;
+      height: 54px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 20px;
       margin-bottom: 24px;
     }
-    .service-icon.blue { background: #fef2f2; color: #b91c1c; }
-    .service-icon.green { background: #ecfdf5; color: #10b981; }
-    .service-icon.yellow { background: #fffbeb; color: #d97706; }
+    
+    /* Elegant SaaS soft color badges */
+    .service-icon.blue { background: #eff6ff; color: #1e40af; }
+    .service-icon.green { background: #ecfdf5; color: #0d9488; }
+    .service-icon.yellow { background: #fffbeb; color: #b45309; }
     .service-icon.purple { background: #faf5ff; color: #7c3aed; }
+    
     .service-card h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      color: #0f172a;
+      font-size: 19px;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
     }
     .service-card p {
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 14px;
-      line-height: 1.5;
-      margin: 0 0 20px 0;
+      line-height: 1.6;
+      margin: 0 0 24px 0;
       flex: 1;
     }
     .service-link {
-      color: #b91c1c;
+      color: var(--primary-color);
       text-decoration: none;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 13.5px;
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: gap 0.2s ease;
     }
     .service-link:hover {
-      text-decoration: underline;
+      gap: 10px;
+      text-decoration: none;
     }
 
     /* Track Document section */
     .track-section {
-      background: white;
+      background: var(--bg-light);
       border-radius: 24px;
-      box-shadow: var(--card-shadow);
       border: 1px solid #e2e8f0;
       padding: 60px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 60px;
       align-items: center;
     }
@@ -309,10 +458,10 @@
       font-weight: 800;
       letter-spacing: -1px;
       margin: 0 0 16px 0;
-      color: #0f172a;
+      color: var(--primary-dark);
     }
     .track-info p {
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 16px;
       line-height: 1.6;
       margin: 0 0 24px 0;
@@ -331,15 +480,17 @@
       gap: 10px;
       font-weight: 600;
       color: #475569;
+      font-size: 14.5px;
     }
     .feature-list i {
       color: #10b981;
     }
     .track-box-widget {
-      background: #f8fafc;
+      background: white;
       border-radius: 16px;
       padding: 32px;
       border: 1px solid #e2e8f0;
+      box-shadow: var(--card-shadow);
     }
     .track-form label {
       font-weight: 700;
@@ -353,7 +504,7 @@
     .track-form input {
       width: 100%;
       background: white;
-      border: 2px solid #e2e8f0;
+      border: 2px solid #cbd5e1;
       padding: 14px 16px;
       border-radius: 8px;
       font-family: monospace;
@@ -363,12 +514,12 @@
       transition: border-color 0.2s;
     }
     .track-form input:focus {
-      border-color: #b91c1c;
+      border-color: var(--primary-color);
       outline: none;
     }
     .btn-track-submit {
       width: 100%;
-      background: #b91c1c;
+      background: var(--primary-color);
       color: white;
       border: none;
       padding: 14px;
@@ -383,13 +534,13 @@
       transition: background 0.2s;
     }
     .btn-track-submit:hover {
-      background: #991b1b;
+      background: var(--primary-dark);
     }
 
     /* Bulletins Section */
     .bulletins-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 30px;
     }
     .bulletin-item {
@@ -397,35 +548,43 @@
       border-radius: 16px;
       border: 1px solid #e2e8f0;
       box-shadow: var(--card-shadow);
-      padding: 24px;
+      padding: 28px;
+      transition: border-color 0.3s ease;
+    }
+    .bulletin-item:hover {
+      border-color: #cbd5e1;
     }
     .bulletin-badge {
-      background: #fffbeb;
-      color: #b45309;
+      background: #eff6ff;
+      color: var(--primary-color);
       font-weight: 700;
-      font-size: 10px;
-      padding: 4px 10px;
+      font-size: 11px;
+      padding: 4px 12px;
       border-radius: 100px;
       text-transform: uppercase;
       display: inline-block;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     .bulletin-item h4 {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      color: #0f172a;
+      font-size: 19px;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
     }
     .bulletin-item p {
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 14px;
-      line-height: 1.5;
-      margin: 0 0 16px 0;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
     }
     .bulletin-meta {
       font-size: 12px;
       color: #94a3b8;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* Footer */
@@ -440,16 +599,17 @@
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
       gap: 60px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       padding-bottom: 40px;
       margin-bottom: 40px;
     }
     .footer-col h3 {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       text-transform: uppercase;
       margin: 0 0 20px 0;
       letter-spacing: 0.5px;
+      color: #94a3b8;
     }
     .footer-col ul {
       list-style: none;
@@ -480,10 +640,17 @@
       gap: 16px;
     }
 
+    @media(max-width: 992px) {
+      .hero-grid-container { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+      .hero-content { text-align: center; }
+      .hero-ctas { justify-content: center; }
+      .track-section { grid-template-columns: 1fr; gap: 40px; }
+    }
+
     @media(max-width: 768px) {
-      .navbar { padding: 16px 20px; }
+      .navbar { padding: 14px 20px; }
       .nav-links { display: none; }
-      .track-section { grid-template-columns: 1fr; padding: 40px; gap: 40px; }
+      .track-section { padding: 40px; }
       .footer-grid { grid-template-columns: 1fr; gap: 40px; }
       .hero h1 { font-size: 36px; }
     }
@@ -511,14 +678,52 @@
 
   <!-- Hero Section -->
   <header class="hero">
-    <div class="hero-badge" style="display: inline-flex; align-items: center; gap: 8px;">
-      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 24px; width: auto; object-fit: contain;"> Barangay Pili Digital Services
-    </div>
-    <h1>Modern, Streamlined Public Services for Every Resident</h1>
-    <p>Request documents, certificates, check official announcements, and resolve issues online. Fast, secure, and hassle-free.</p>
-    <div class="hero-ctas">
-      <a href="{{ route('login') }}" class="btn-hero-primary"><i class="fas fa-id-card" style="margin-right:8px;"></i> Request Certifications</a>
-      <a href="#tracking" class="btn-hero-secondary"><i class="fas fa-search" style="margin-right:8px;"></i> Track Request</a>
+    <div class="hero-grid-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span> Cloud Digital Governance
+        </div>
+        <h1>Empowering Barangay Pili Through Digital Governance</h1>
+        <p>The official secured portal to file document requests, register clearances, monitor real-time summons, and book logistics online. Optimized for transparency and convenience.</p>
+        <div class="hero-ctas">
+          <a href="{{ route('login') }}" class="btn-hero-primary"><i class="fas fa-id-card" style="margin-right:8px;"></i> Request Certifications</a>
+          <a href="#tracking" class="btn-hero-secondary"><i class="fas fa-search" style="margin-right:8px;"></i> Track Request</a>
+        </div>
+      </div>
+      <div class="hero-illustration">
+        <div class="hero-mockup">
+          <div class="mockup-bar">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            <span class="mockup-title">Resident Portal — Barangay Pili</span>
+          </div>
+          <div class="mockup-view">
+            <div class="stats-mini-grid">
+              <div class="stat-mini-card">
+                <i class="fas fa-file-invoice text-blue"></i>
+                <div class="stat-num">1,248</div>
+                <div class="stat-label">Clearances Approved</div>
+              </div>
+              <div class="stat-mini-card">
+                <i class="fas fa-circle-nodes text-yellow"></i>
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Secure QR Verified</div>
+              </div>
+            </div>
+            <div class="mockup-chart-placeholder">
+              <div class="chart-header">
+                <span>Monthly Document Request Load</span>
+                <span class="badge-live"><span class="pulse-dot"></span> Online</span>
+              </div>
+              <div class="chart-bars">
+                <div class="chart-bar" style="height: 40px;" data-label="May"></div>
+                <div class="chart-bar" style="height: 65px;" data-label="Jun"></div>
+                <div class="chart-bar" style="height: 85px;" data-label="Jul"></div>
+                <div class="chart-bar" style="height: 110px; background: #1e40af;" data-label="Aug"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Wave -->
@@ -532,8 +737,8 @@
   <!-- Services Grid -->
   <section class="section" id="services">
     <div class="section-header">
-      <h2>Document &amp; Certification Services</h2>
-      <p>Request official barangay documents online from the comfort of your home. Approved documents can be printed securely.</p>
+      <h2>Administrative &amp; Document Services</h2>
+      <p>Request official barangay certificates and submit reports completely online. Fast processing with digital logs.</p>
     </div>
     <div class="services-grid">
       
@@ -575,18 +780,16 @@
     </div>
   </section>
 
-
-
   <!-- Realtime tracking -->
   <section class="section" id="tracking" style="padding-top:0;">
     <div class="track-section">
       <div class="track-info">
-        <h2>No Account Required for Tracking</h2>
-        <p>Track your certificate requests instantly in real-time. Just enter your 10-digit application tracking number below to see the status of your document.</p>
+        <h2>Zero Login Public Tracking</h2>
+        <p>Monitor your filed document requests in real-time. Simply type in your unique 10-character application tracking number to visually track approval and printing milestones.</p>
         <ul class="feature-list">
-          <li><i class="fas fa-check-circle"></i> Live review status updates</li>
-          <li><i class="fas fa-check-circle"></i> Verification of payment records</li>
-          <li><i class="fas fa-check-circle"></i> Administrative messages &amp; notices</li>
+          <li><i class="fas fa-check-circle"></i> Live timeline checklist milestones</li>
+          <li><i class="fas fa-check-circle"></i> View payment receipt logs</li>
+          <li><i class="fas fa-check-circle"></i> Receive immediate staff notice messages</li>
         </ul>
       </div>
       <div class="track-box-widget">
@@ -608,25 +811,25 @@
     </div>
     <div class="bulletins-row">
       
-      <div class="bulletin-item">
+      <div class="bulletin-item" style="border-top: 4px solid var(--primary-color);">
         <span class="bulletin-badge">Health</span>
         <h4>Monthly Medical Mission</h4>
         <p>Free check-ups, pediatric consultations, and generic vitamin distribution at the Barangay Pili Session Hall starting this weekend.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar" style="margin-right:6px;"></i> August 05, 2026</div>
+        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 05, 2026</div>
       </div>
 
-      <div class="bulletin-item">
+      <div class="bulletin-item" style="border-top: 4px solid #10b981;">
         <span class="bulletin-badge" style="background:#ecfdf5; color:#059669;">Environment</span>
         <h4>Oplan Linis Barangay</h4>
         <p>Join our youth and barangay tanods for the weekly community-wide clean-up drive. Meet up at Purok 2 crossroads at 6:00 AM.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar" style="margin-right:6px;"></i> August 08, 2026</div>
+        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 08, 2026</div>
       </div>
 
-      <div class="bulletin-item">
+      <div class="bulletin-item" style="border-top: 4px solid #ef4444;">
         <span class="bulletin-badge" style="background:#fee2e2; color:#b91c1c;">Alert</span>
         <h4>Typhoon Preparation Advisory</h4>
         <p>All purok leaders are advised to conduct canal clearing and ensure evacuation routes are mapped out ahead of incoming weather systems.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar" style="margin-right:6px;"></i> August 12, 2026</div>
+        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 12, 2026</div>
       </div>
 
     </div>
