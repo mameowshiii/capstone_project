@@ -857,7 +857,7 @@
     <div class="hero-grid-container">
       <div class="hero-content">
         <div class="hero-badge">
-          <span class="pulse-dot"></span> Barangay Pili
+          Barangay Pili
         </div>
         <h1>Modern Digital Services for Residents</h1>
         <p>Request certificates, submit applications, track requests, and receive announcements online.</p>
