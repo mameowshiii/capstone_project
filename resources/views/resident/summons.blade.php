@@ -56,10 +56,10 @@
               <td>
                 <div style="font-weight:600; font-size:12px;">{{ $s->nature_of_complaint ?? 'Dispute / Incident' }}</div>
                 @if($s->incident_location)
-                  <div style="font-size:11px; color:var(--gray);">📍 {{ $s->incident_location }}</div>
+                  <div style="font-size:11px; color:var(--gray);"><i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> {{ $s->incident_location }}</div>
                 @endif
                 @if($s->incident_date)
-                  <div style="font-size:11px; color:var(--gray);">📅 {{ \Carbon\Carbon::parse($s->incident_date)->format('M d, Y') }}</div>
+                  <div style="font-size:11px; color:var(--gray);"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i> {{ \Carbon\Carbon::parse($s->incident_date)->format('M d, Y') }}</div>
                 @endif
               </td>
               <td>

@@ -12,7 +12,7 @@
 <div style="display:flex; flex-direction:column; gap:20px;">
   @if($bulletins->isEmpty())
     <div class="card" style="padding:40px; text-align:center;">
-      <div style="font-size:40px; margin-bottom:12px;">📢</div>
+      <div style="font-size:40px; margin-bottom:12px; color:var(--primary);"><i class="fas fa-bullhorn"></i></div>
       <p class="text-muted" style="margin:0;">No announcements posted at this time.</p>
     </div>
   @else

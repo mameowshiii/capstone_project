@@ -84,10 +84,10 @@
                   {{ Str::limit($s->nature_of_complaint ?? 'Dispute / Incident', 25) }}
                 </div>
                 <div style="font-size:11px; color:var(--gray);" title="Location">
-                  📍 {{ $s->incident_location ?? 'Barangay Pili' }}
+                  <i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> {{ $s->incident_location ?? 'Barangay Pili' }}
                 </div>
                 <div style="font-size:11px; color:var(--gray);">
-                  📅 {{ $s->incident_date ? \Carbon\Carbon::parse($s->incident_date)->format('M d, Y') : 'Date Unspecified' }}
+                  <i class="fas fa-calendar-alt" style="margin-right:4px;"></i> {{ $s->incident_date ? \Carbon\Carbon::parse($s->incident_date)->format('M d, Y') : 'Date Unspecified' }}
                 </div>
               </td>
               <td>
