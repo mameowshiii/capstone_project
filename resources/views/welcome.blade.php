@@ -397,7 +397,8 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      text-align: center;
     }
     .service-card:hover {
       transform: translateY(-5px);
@@ -413,13 +414,9 @@
       justify-content: center;
       font-size: 20px;
       margin-bottom: 24px;
+      background: #fef2f2;
+      color: #b91c1c;
     }
-    
-    /* Elegant SaaS soft color badges */
-    .service-icon.blue { background: #fef2f2; color: #b91c1c; }
-    .service-icon.green { background: #ecfdf5; color: #0d9488; }
-    .service-icon.yellow { background: #fffbeb; color: #b45309; }
-    .service-icon.purple { background: #faf5ff; color: #7c3aed; }
     
     .service-card h3 {
       font-size: 19px;
@@ -885,35 +882,35 @@
     <div class="services-grid">
       
       <div class="service-card">
-        <div class="service-icon blue"><i class="fas fa-file-shield"></i></div>
+        <div class="service-icon"><i class="fas fa-file-shield"></i></div>
         <h3>Barangay Clearances</h3>
         <p>Issuance of official barangay documents, including Barangay Clearance, Certificate of Indigency, and Certificate of Residency for residents.</p>
         <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon green"><i class="fas fa-briefcase"></i></div>
+        <div class="service-icon"><i class="fas fa-briefcase"></i></div>
         <h3>Business Clearance</h3>
         <p>Renewals of Barangay Business Clearances for local businesses and establishments operating within the barangay.</p>
         <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon yellow"><i class="fas fa-file-signature"></i></div>
+        <div class="service-icon"><i class="fas fa-file-signature"></i></div>
         <h3>Blotters</h3>
         <p>Record of incidents, complaints, or community disputes reported to the barangay for proper documentation and resolution.</p>
         <a href="{{ route('login') }}" class="service-link">File Blotter <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon purple"><i class="fas fa-gavel"></i></div>
+        <div class="service-icon"><i class="fas fa-gavel"></i></div>
         <h3>Summons</h3>
         <p>Generation, issuance, and tracking of barangay summons requiring involved parties to appear for mediation, hearings, or other official barangay proceedings.</p>
         <a href="{{ route('login') }}" class="service-link">Access Portal <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon blue"><i class="fas fa-chair"></i></div>
+        <div class="service-icon"><i class="fas fa-chair"></i></div>
         <h3>Borrow Equipment</h3>
         <p>Request and reservation of barangay-owned equipment and facilities for community events, official activities, or personal use, subject to barangay policies and availability.</p>
         <a href="{{ route('login') }}" class="service-link">Reserve Equipment <i class="fas fa-arrow-right"></i></a>
