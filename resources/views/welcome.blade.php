@@ -855,10 +855,10 @@
     <div class="hero-grid-container">
       <div class="hero-content">
         <div class="hero-badge">
-          <span class="pulse-dot"></span> Cloud Digital Governance
+          <span class="pulse-dot"></span> Barangay Pili
         </div>
-        <h1>Empowering Barangay Pili Through Digital Governance</h1>
-        <p>The official secured portal to file document requests, register clearances, monitor real-time summons, and book logistics online. Optimized for transparency and convenience.</p>
+        <h1>Modern Digital Services for Residents</h1>
+        <p>Request certificates, submit applications, track requests, and receive announcements online.</p>
         <div class="hero-ctas">
           <a href="{{ route('login') }}" class="btn-hero-primary"><i class="fas fa-id-card" style="margin-right:8px;"></i> Request Certifications</a>
           <a href="#tracking" class="btn-hero-secondary"><i class="fas fa-search" style="margin-right:8px;"></i> Track Request</a>
