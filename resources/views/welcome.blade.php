@@ -495,7 +495,6 @@
   <nav class="navbar">
     <div class="logo-container">
       <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 40px; width: auto; object-fit: contain;">
-      <div class="logo-text">BARANGAY PILI</div>
     </div>
     <ul class="nav-links">
       <li><a href="#">HOME</a></li>
