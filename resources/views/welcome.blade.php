@@ -511,8 +511,8 @@
 
   <!-- Hero Section -->
   <header class="hero">
-    <div class="hero-badge">
-      <i class="fas fa-sparkles" style="color:#f59e0b;"></i> Barangay Pili Digital Services
+    <div class="hero-badge" style="display: inline-flex; align-items: center; gap: 8px;">
+      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 18px; width: auto; object-fit: contain;"> Barangay Pili Digital Services
     </div>
     <h1>Modern, Streamlined Public Services for Every Resident</h1>
     <p>Request documents, certificates, check official announcements, and resolve issues online. Fast, secure, and hassle-free.</p>
@@ -636,7 +636,9 @@
   <footer class="footer">
     <div class="footer-grid">
       <div class="footer-col" style="padding-right:40px;">
-        <h3 style="color:white; font-size:18px; text-transform:none; margin-bottom:12px;"><i class="fas fa-landmark" style="color:#10b981; margin-right:8px;"></i> Barangay Pili Digital Services</h3>
+        <div style="margin-bottom:16px;">
+          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 45px; width: auto; object-fit: contain;">
+        </div>
         <p style="color:#94a3b8; font-size:14px; line-height:1.6;">Our mission is to establish a transparent, digital, and streamlined administrative portal empowering residents with reliable public service document deliveries and complaint conciliation facilities.</p>
       </div>
       <div class="footer-col">
