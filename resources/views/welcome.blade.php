@@ -116,15 +116,15 @@
       position: relative;
     }
     .hero-grid-container {
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 60px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      text-align: center;
     }
     .hero-content {
-      text-align: left;
+      text-align: center;
     }
     .hero-badge {
       background: #eff6ff;
@@ -175,7 +175,8 @@
     .hero p {
       font-size: 17px;
       color: var(--text-muted);
-      margin: 0 0 36px auto;
+      margin: 0 auto 36px auto;
+      max-width: 600px;
       font-weight: 400;
       line-height: 1.65;
     }
@@ -183,6 +184,7 @@
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .btn-hero-primary {
       background: var(--primary-color);
@@ -862,40 +864,6 @@
         <div class="hero-ctas">
           <a href="{{ route('login') }}" class="btn-hero-primary"><i class="fas fa-id-card" style="margin-right:8px;"></i> Request Certifications</a>
           <a href="#tracking" class="btn-hero-secondary"><i class="fas fa-search" style="margin-right:8px;"></i> Track Request</a>
-        </div>
-      </div>
-      <div class="hero-illustration">
-        <div class="hero-mockup">
-          <div class="mockup-bar">
-            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-            <span class="mockup-title">Resident Portal — Barangay Pili</span>
-          </div>
-          <div class="mockup-view">
-            <div class="stats-mini-grid">
-              <div class="stat-mini-card">
-                <i class="fas fa-file-invoice text-blue"></i>
-                <div class="stat-num">1,248</div>
-                <div class="stat-label">Clearances Approved</div>
-              </div>
-              <div class="stat-mini-card">
-                <i class="fas fa-circle-nodes text-yellow"></i>
-                <div class="stat-num">100%</div>
-                <div class="stat-label">Secure QR Verified</div>
-              </div>
-            </div>
-            <div class="mockup-chart-placeholder">
-              <div class="chart-header">
-                <span>Monthly Document Request Load</span>
-                <span class="badge-live"><span class="pulse-dot"></span> Online</span>
-              </div>
-              <div class="chart-bars">
-                <div class="chart-bar" style="height: 40px;" data-label="May"></div>
-                <div class="chart-bar" style="height: 65px;" data-label="Jun"></div>
-                <div class="chart-bar" style="height: 85px;" data-label="Jul"></div>
-                <div class="chart-bar" style="height: 110px; background: var(--primary-color);" data-label="Aug"></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
