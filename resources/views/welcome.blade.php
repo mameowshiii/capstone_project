@@ -879,7 +879,7 @@
   <!-- Services Grid -->
   <section class="section" id="services">
     <div class="section-header">
-      <h2>Administrative &amp; Document Services</h2>
+      <h2>Document Services</h2>
       <p>Request official barangay certificates and submit reports completely online. Fast processing with digital logs.</p>
     </div>
     <div class="services-grid">
