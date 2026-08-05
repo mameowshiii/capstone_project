@@ -643,7 +643,7 @@
       <div class="footer-col">
         <h3>Contact Info</h3>
         <ul style="color:#94a3b8; font-size:14px; gap:8px;">
-          <li><i class="fas fa-map-marker-alt" style="margin-right:6px; color:#10b981;"></i> Barangay Pili Hall, Minalabac, Camarines Sur</li>
+          <li><i class="fas fa-map-marker-alt" style="margin-right:6px; color:#10b981;"></i> Barangay Pili, Madridejos in Cebu, Philippines</li>
           <li><i class="fas fa-envelope" style="margin-right:6px; color:#10b981;"></i> admin@brgy-pili.gov.ph</li>
           <li><i class="fas fa-phone-alt" style="margin-right:6px; color:#10b981;"></i> +63 917 123 4567</li>
         </ul>
