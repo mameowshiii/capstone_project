@@ -10,17 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #1e40af;
-      --primary-dark: #0f2c59;
-      --primary-gradient: linear-gradient(135deg, #1e40af, #0f2c59);
+      --primary-color: #b91c1c;
+      --primary-dark: #450a0a;
+      --primary-gradient: linear-gradient(135deg, #b91c1c, #450a0a);
       --secondary-gradient: linear-gradient(135deg, #10b981, #059669);
-      --accent-color: #0d9488;
-      --accent-light: #eff6ff;
+      --accent-color: #b91c1c;
+      --accent-light: #fef2f2;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --bg-light: #f8fafc;
       --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-      --card-shadow-hover: 0 20px 40px rgba(30, 64, 175, 0.08);
+      --card-shadow-hover: 0 20px 40px rgba(185, 28, 28, 0.08);
       --font-family: 'Plus Jakarta Sans', sans-serif;
     }
     body {
@@ -277,7 +277,7 @@
       margin-bottom: 8px;
       display: block;
     }
-    .stat-mini-card i.text-blue { color: #2563eb; }
+    .stat-mini-card i.text-blue { color: #b91c1c; }
     .stat-mini-card i.text-yellow { color: #d97706; }
     .stat-num {
       font-size: 18px;
@@ -414,7 +414,7 @@
     }
     
     /* Elegant SaaS soft color badges */
-    .service-icon.blue { background: #eff6ff; color: #1e40af; }
+    .service-icon.blue { background: #fef2f2; color: #b91c1c; }
     .service-icon.green { background: #ecfdf5; color: #0d9488; }
     .service-icon.yellow { background: #fffbeb; color: #b45309; }
     .service-icon.purple { background: #faf5ff; color: #7c3aed; }
@@ -892,7 +892,7 @@
                 <div class="chart-bar" style="height: 40px;" data-label="May"></div>
                 <div class="chart-bar" style="height: 65px;" data-label="Jun"></div>
                 <div class="chart-bar" style="height: 85px;" data-label="Jul"></div>
-                <div class="chart-bar" style="height: 110px; background: #1e40af;" data-label="Aug"></div>
+                <div class="chart-bar" style="height: 110px; background: var(--primary-color);" data-label="Aug"></div>
               </div>
             </div>
           </div>
