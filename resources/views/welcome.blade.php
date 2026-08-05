@@ -34,10 +34,9 @@
     }
     /* Navigation Bar */
     .navbar {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #e2e8f0;
-      padding: 14px 40px;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      padding: 24px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -46,7 +45,14 @@
       width: 100%;
       box-sizing: border-box;
       z-index: 1000;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 12px 40px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
     }
     .logo-container {
       display: flex;
@@ -867,7 +873,17 @@
     </div>
   </footer>
 
-
+  <!-- Scroll Listener to add .scrolled class to Navbar -->
+  <script>
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 20) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
 
 </body>
 </html>
