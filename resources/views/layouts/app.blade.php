@@ -228,20 +228,6 @@
         </div>
       </header>
 
-      @php $isNativeApp = str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp'); @endphp
-      @if(Auth::user()->role === 'resident' && !$isNativeApp)
-        <div class="resident-app-banner no-print">
-          <div class="resident-app-banner__copy">
-            <i class="fas fa-mobile-screen-button"></i>
-            <span>Resident mobile app is available.</span>
-          </div>
-          <a href="{{ asset('downloads/brgy-pili-portal.apk') }}" class="resident-app-banner__link" download="brgy-pili-portal.apk">
-            <i class="fas fa-download"></i>
-            Download Now
-          </a>
-        </div>
-      @endif
-
       <!-- Flash messages -->
       @if(session('success'))
         <div id="flash-message" style="margin:16px 24px 0;">
