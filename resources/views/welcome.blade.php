@@ -494,7 +494,7 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="logo-container">
-      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 40px; width: auto; object-fit: contain;">
+      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 48px; width: auto; object-fit: contain;">
     </div>
     <ul class="nav-links">
       <li><a href="#">HOME</a></li>
@@ -512,7 +512,7 @@
   <!-- Hero Section -->
   <header class="hero">
     <div class="hero-badge" style="display: inline-flex; align-items: center; gap: 8px;">
-      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 18px; width: auto; object-fit: contain;"> Barangay Pili Digital Services
+      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 24px; width: auto; object-fit: contain;"> Barangay Pili Digital Services
     </div>
     <h1>Modern, Streamlined Public Services for Every Resident</h1>
     <p>Request documents, certificates, check official announcements, and resolve issues online. Fast, secure, and hassle-free.</p>
@@ -637,7 +637,7 @@
     <div class="footer-grid">
       <div class="footer-col" style="padding-right:40px;">
         <div style="margin-bottom:16px;">
-          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 45px; width: auto; object-fit: contain;">
+          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 60px; width: auto; object-fit: contain;">
         </div>
         <p style="color:#94a3b8; font-size:14px; line-height:1.6;">Our mission is to establish a transparent, digital, and streamlined administrative portal empowering residents with reliable public service document deliveries and complaint conciliation facilities.</p>
       </div>
