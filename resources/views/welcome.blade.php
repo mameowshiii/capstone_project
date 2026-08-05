@@ -646,19 +646,162 @@
       gap: 16px;
     }
 
+    /* Mobile Drawer & Hamburger Styles */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 6px;
+      z-index: 1010;
+      transition: color 0.2s ease;
+    }
+    .mobile-menu-toggle:hover {
+      color: var(--primary-color);
+    }
+    .mobile-drawer {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 300px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -10px 0 40px rgba(15, 23, 42, 0.08);
+      z-index: 2000;
+      box-sizing: border-box;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mobile-drawer.active {
+      right: 0;
+    }
+    .mobile-drawer-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .mobile-drawer-close:hover {
+      color: var(--text-main);
+    }
+    .drawer-logo-container {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 8px;
+    }
+    .drawer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .drawer-links a {
+      text-decoration: none;
+      color: #334155;
+      font-weight: 700;
+      font-size: 15px;
+      display: block;
+      transition: color 0.2s;
+    }
+    .drawer-links a:hover {
+      color: var(--primary-color);
+    }
+    .drawer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .btn-drawer-primary {
+      background: var(--primary-color);
+      color: white;
+      text-align: center;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-drawer-primary:hover {
+      background: var(--primary-dark);
+    }
+    .btn-drawer-secondary {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      text-align: center;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-drawer-secondary:hover {
+      background: var(--bg-light);
+    }
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Media Queries for Cross-Device Responsiveness */
     @media(max-width: 992px) {
       .hero-grid-container { grid-template-columns: 1fr; gap: 40px; text-align: center; }
       .hero-content { text-align: center; }
       .hero-ctas { justify-content: center; }
       .track-section { grid-template-columns: 1fr; gap: 40px; }
+      .chart-bar { width: 18%; }
     }
 
     @media(max-width: 768px) {
       .navbar { padding: 14px 20px; }
-      .nav-links { display: none; }
-      .track-section { padding: 40px; }
+      .navbar.scrolled { padding: 10px 20px; }
+      .nav-links, .nav-actions { display: none; }
+      .mobile-menu-toggle { display: block; }
+      .track-section { padding: 40px 24px; }
       .footer-grid { grid-template-columns: 1fr; gap: 40px; }
       .hero h1 { font-size: 36px; }
+    }
+
+    @media(max-width: 576px) {
+      .section { padding: 60px 20px; }
+      .services-grid { grid-template-columns: 1fr; gap: 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 15px; margin-bottom: 24px; }
+      .hero-ctas { flex-direction: column; gap: 12px; }
+      .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; box-sizing: border-box; }
+      .track-section { padding: 32px 16px; }
+      .track-info h2 { font-size: 24px; }
+      .track-info p { font-size: 14px; }
+      .feature-list li { font-size: 13px; }
+      .track-box-widget { padding: 24px 16px; }
+      .footer { padding: 60px 20px 30px 20px; }
     }
   </style>
 </head>
@@ -680,7 +823,32 @@
       <a href="{{ route('login') }}" class="btn-nav-secondary">Resident Login</a>
       <a href="{{ route('register') }}" class="btn-nav-primary">Register Account</a>
     </div>
+    <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+      <i class="fas fa-bars"></i>
+    </button>
   </nav>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="mobile-drawer">
+    <button class="mobile-drawer-close" aria-label="Close Menu">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="drawer-logo-container">
+      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 54px; width: auto; object-fit: contain;">
+    </div>
+    <ul class="drawer-links">
+      <li><a href="#">HOME</a></li>
+      <li><a href="#services">BARANGAY SERVICES</a></li>
+      <li><a href="#tracking">TRACK APPLICATION</a></li>
+      <li><a href="#bulletins">ANNOUNCEMENT</a></li>
+      <li><a href="{{ asset('downloads/brgy-pili-portal.apk') }}" download>DOWNLOAD APP</a></li>
+    </ul>
+    <div class="drawer-actions">
+      <a href="{{ route('login') }}" class="btn-drawer-secondary">Resident Login</a>
+      <a href="{{ route('register') }}" class="btn-drawer-primary">Register Account</a>
+    </div>
+  </div>
+  <div class="drawer-overlay"></div>
 
   <!-- Hero Section -->
   <header class="hero">
@@ -873,8 +1041,9 @@
     </div>
   </footer>
 
-  <!-- Scroll Listener to add .scrolled class to Navbar -->
+  <!-- Scroll & Mobile Drawer JS Script -->
   <script>
+    // Scroll Listener
     window.addEventListener('scroll', function() {
       const navbar = document.querySelector('.navbar');
       if (window.scrollY > 20) {
@@ -882,6 +1051,34 @@
       } else {
         navbar.classList.remove('scrolled');
       }
+    });
+
+    // Mobile Drawer Toggle
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const drawerClose = document.querySelector('.mobile-drawer-close');
+    const mobileDrawer = document.querySelector('.mobile-drawer');
+    const drawerOverlay = document.querySelector('.drawer-overlay');
+    const drawerLinks = document.querySelectorAll('.drawer-links a, .drawer-actions a');
+
+    function openDrawer() {
+      mobileDrawer.classList.add('active');
+      drawerOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      mobileDrawer.classList.remove('active');
+      drawerOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    if (mobileToggle) mobileToggle.addEventListener('click', openDrawer);
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+    if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+    // Auto close drawer when a drawer link is clicked
+    drawerLinks.forEach(link => {
+      link.addEventListener('click', closeDrawer);
     });
   </script>
 
