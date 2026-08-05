@@ -539,30 +539,37 @@
       
       <div class="service-card">
         <div class="service-icon blue"><i class="fas fa-file-shield"></i></div>
-        <h3>Barangay Clearance</h3>
-        <p>Official clearance certification issued by the barangay for employment, banking, or business requirements.</p>
+        <h3>Barangay Clearances</h3>
+        <p>Issuance of official barangay documents, including Barangay Clearance, Certificate of Indigency, and Certificate of Residency for residents.</p>
         <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon green"><i class="fas fa-heart-pulse"></i></div>
-        <h3>Certificate of Indigency</h3>
-        <p>Free certification issued to indigent residents seeking social services, scholarships, or medical assistance.</p>
+        <div class="service-icon green"><i class="fas fa-briefcase"></i></div>
+        <h3>Business Clearance</h3>
+        <p>Renewals of Barangay Business Clearances for local businesses and establishments operating within the barangay.</p>
         <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon yellow"><i class="fas fa-house-chimney-user"></i></div>
-        <h3>Certificate of Residency</h3>
-        <p>Certifies legitimacy of residency in Barangay Pili, commonly used for government and bank registrations.</p>
-        <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
+        <div class="service-icon yellow"><i class="fas fa-file-signature"></i></div>
+        <h3>Blotters</h3>
+        <p>Record of incidents, complaints, or community disputes reported to the barangay for proper documentation and resolution.</p>
+        <a href="{{ route('login') }}" class="service-link">File Blotter <i class="fas fa-arrow-right"></i></a>
       </div>
 
       <div class="service-card">
-        <div class="service-icon purple"><i class="fas fa-award"></i></div>
-        <h3>Good Moral Character</h3>
-        <p>Formal document certifying a resident is in good standing and has no pending disputes or criminal records.</p>
-        <a href="{{ route('login') }}" class="service-link">File Request <i class="fas fa-arrow-right"></i></a>
+        <div class="service-icon purple"><i class="fas fa-gavel"></i></div>
+        <h3>Summons</h3>
+        <p>Generation, issuance, and tracking of barangay summons requiring involved parties to appear for mediation, hearings, or other official barangay proceedings.</p>
+        <a href="{{ route('login') }}" class="service-link">Access Portal <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon blue"><i class="fas fa-chair"></i></div>
+        <h3>Borrow Equipment</h3>
+        <p>Request and reservation of barangay-owned equipment and facilities for community events, official activities, or personal use, subject to barangay policies and availability.</p>
+        <a href="{{ route('login') }}" class="service-link">Reserve Equipment <i class="fas fa-arrow-right"></i></a>
       </div>
 
     </div>
