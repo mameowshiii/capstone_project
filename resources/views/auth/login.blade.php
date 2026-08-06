@@ -105,89 +105,142 @@
 
         <!-- Register Tab -->
         <div id="tab-register" class="tab-panel" style="display:{{ session('reg_tab') || ($errors->any() && old('first_name')) ? 'block' : 'none' }};">
-          <form method="POST" action="{{ route('register') }}">
+          
+          <!-- Registration Wizard Steps Indicator -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <div id="wiz-step-1-node" style="display: flex; align-items: center; gap: 8px;">
+              <span id="wiz-step-1-circle" style="width: 28px; height: 28px; border-radius: 50%; background-color: #1e3a8a; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px;">1</span>
+              <span id="wiz-step-1-label" style="font-size: 13px; font-weight: 600; color: #1e3a8a;">Info</span>
+            </div>
+            <div style="flex: 1; height: 2px; background-color: #e2e8f0; margin: 0 12px; transition: background-color 0.3s;" id="wiz-step-line-1"></div>
+            <div id="wiz-step-2-node" style="display: flex; align-items: center; gap: 8px; opacity: 0.5; transition: opacity 0.3s;">
+              <span id="wiz-step-2-circle" style="width: 28px; height: 28px; border-radius: 50%; background-color: #e5e7eb; color: #6b7280; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px;">2</span>
+              <span id="wiz-step-2-label" style="font-size: 13px; font-weight: 500; color: #6b7280;">Password</span>
+            </div>
+            <div style="flex: 1; height: 2px; background-color: #e2e8f0; margin: 0 12px;"></div>
+            <div style="display: flex; align-items: center; gap: 8px; opacity: 0.5;">
+              <span style="width: 28px; height: 28px; border-radius: 50%; background-color: #e5e7eb; color: #6b7280; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px;">3</span>
+              <span style="font-size: 13px; font-weight: 500; color: #6b7280;">Verify</span>
+            </div>
+          </div>
+
+          <form method="POST" action="{{ route('register') }}" id="register-wizard-form">
             @csrf
-            <div class="grid-2">
+            
+            <!-- Step 1 Container: Personal Information -->
+            <div id="register-step-1-container">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">First Name *</label>
+                  <input type="text" name="first_name" class="form-control" required placeholder="Juan"
+                    value="{{ old('first_name') }}"
+                    pattern="[A-Za-z\s\-\.,]+" title="Only letters, spaces, hyphens, and periods are allowed"
+                    oninput="this.value = this.value.replace(/[^A-Za-z\s\-\.,]/g, '')">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name *</label>
+                  <input type="text" name="last_name" class="form-control" required placeholder="Dela Cruz"
+                    value="{{ old('last_name') }}"
+                    pattern="[A-Za-z\s\-\.,]+" title="Only letters, spaces, hyphens, and periods are allowed"
+                    oninput="this.value = this.value.replace(/[^A-Za-z\s\-\.,]/g, '')">
+                </div>
+              </div>
               <div class="form-group">
-                <label class="form-label">First Name *</label>
-                <input type="text" name="first_name" class="form-control" required placeholder="Juan"
-                  value="{{ old('first_name') }}"
+                <label class="form-label">Middle Name</label>
+                <input type="text" name="middle_name" class="form-control" placeholder="Optional"
+                  value="{{ old('middle_name') }}"
                   pattern="[A-Za-z\s\-\.,]+" title="Only letters, spaces, hyphens, and periods are allowed"
                   oninput="this.value = this.value.replace(/[^A-Za-z\s\-\.,]/g, '')">
               </div>
-              <div class="form-group">
-                <label class="form-label">Last Name *</label>
-                <input type="text" name="last_name" class="form-control" required placeholder="Dela Cruz"
-                  value="{{ old('last_name') }}"
-                  pattern="[A-Za-z\s\-\.,]+" title="Only letters, spaces, hyphens, and periods are allowed"
-                  oninput="this.value = this.value.replace(/[^A-Za-z\s\-\.,]/g, '')">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Middle Name</label>
-              <input type="text" name="middle_name" class="form-control" placeholder="Optional"
-                value="{{ old('middle_name') }}"
-                pattern="[A-Za-z\s\-\.,]+" title="Only letters, spaces, hyphens, and periods are allowed"
-                oninput="this.value = this.value.replace(/[^A-Za-z\s\-\.,]/g, '')">
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label">Gender *</label>
-                <select name="gender" class="form-select" required>
-                  <option value="">Select</option>
-                  <option {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
-                  <option {{ old('gender') === 'Female' ? 'selected' : '' }}>Female</option>
-                  <option {{ old('gender') === 'Other' ? 'selected' : '' }}>Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Birthdate *</label>
-                <input type="date" name="birthdate" class="form-control" min="1900-01-01" max="{{ date('Y-m-d') }}"
-                  value="{{ old('birthdate') }}" required>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Gender *</label>
+                  <select name="gender" class="form-select" required>
+                    <option value="">Select</option>
+                    <option {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
+                    <option {{ old('gender') === 'Female' ? 'selected' : '' }}>Female</option>
+                    <option {{ old('gender') === 'Other' ? 'selected' : '' }}>Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Birthdate *</label>
+                  <input type="date" name="birthdate" class="form-control" min="1900-01-01" max="{{ date('Y-m-d') }}"
+                    value="{{ old('birthdate') }}" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Civil Status *</label>
+                  <select name="civil_status" class="form-select" required>
+                    <option value="">Select</option>
+                    <option {{ old('civil_status') === 'Single' ? 'selected' : '' }}>Single</option>
+                    <option {{ old('civil_status') === 'Married' ? 'selected' : '' }}>Married</option>
+                    <option {{ old('civil_status') === 'Widowed' ? 'selected' : '' }}>Widowed</option>
+                    <option {{ old('civil_status') === 'Separated' ? 'selected' : '' }}>Separated</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contact Number</label>
+                  <input type="text" name="contact_number" class="form-control" placeholder="09XXXXXXXXX" value="{{ old('contact_number') }}">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Purok</label>
+                  <input type="text" name="purok" class="form-control" placeholder="e.g. Purok 1" value="{{ old('purok') }}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Years of Residency</label>
+                  <input type="number" name="years_of_residency" class="form-control" min="0" value="{{ old('years_of_residency', 0) }}">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" name="email" class="form-control" required placeholder="you@email.com" value="{{ old('email') }}">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Username *</label>
+                  <input type="text" name="username" class="form-control" required placeholder="username" value="{{ old('username') }}">
+                </div>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Civil Status *</label>
-                <select name="civil_status" class="form-select" required>
-                  <option value="">Select</option>
-                  <option {{ old('civil_status') === 'Single' ? 'selected' : '' }}>Single</option>
-                  <option {{ old('civil_status') === 'Married' ? 'selected' : '' }}>Married</option>
-                  <option {{ old('civil_status') === 'Widowed' ? 'selected' : '' }}>Widowed</option>
-                  <option {{ old('civil_status') === 'Separated' ? 'selected' : '' }}>Separated</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Contact Number</label>
-                <input type="text" name="contact_number" class="form-control" placeholder="09XXXXXXXXX" value="{{ old('contact_number') }}">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Purok</label>
-                <input type="text" name="purok" class="form-control" placeholder="e.g. Purok 1" value="{{ old('purok') }}">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Years of Residency</label>
-                <input type="number" name="years_of_residency" class="form-control" min="0" value="{{ old('years_of_residency', 0) }}">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Email Address *</label>
-                <input type="email" name="email" class="form-control" required placeholder="you@email.com" value="{{ old('email') }}">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Username *</label>
-                <input type="text" name="username" class="form-control" required placeholder="username" value="{{ old('username') }}">
-              </div>
-              <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Password *</label>
-                <input type="password" name="password" class="form-control" required placeholder="Min 6 characters" minlength="6">
-              </div>
-
-              <button type="submit" class="btn btn-primary w-100" style="grid-column: span 2; margin-top: 8px;">
-                <i class="fas fa-user-plus"></i> Create Account
+              <button type="button" class="btn btn-primary w-100" style="margin-top: 16px;" onclick="goToRegisterStep2()">
+                Next Step: Confirm Password <i class="fas fa-arrow-right" style="margin-left: 6px;"></i>
               </button>
             </div>
+
+            <!-- Step 2 Container: Password & Confirmation -->
+            <div id="register-step-2-container" style="display: none;">
+              <div class="form-group">
+                <label class="form-label">Password *</label>
+                <div style="position:relative;">
+                  <input type="password" name="password" id="register_password" class="form-control" placeholder="Min 6 characters" minlength="6">
+                  <button type="button" onclick="toggleRegisterPw('register_password', 'reg-pw-icon-1')"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6b7280;">
+                    <i class="fas fa-eye" id="reg-pw-icon-1"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top: 16px;">
+                <label class="form-label">Confirm Password *</label>
+                <div style="position:relative;">
+                  <input type="password" name="password_confirmation" id="register_password_confirmation" class="form-control" placeholder="Re-enter your password" minlength="6">
+                  <button type="button" onclick="toggleRegisterPw('register_password_confirmation', 'reg-pw-icon-2')"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6b7280;">
+                    <i class="fas fa-eye" id="reg-pw-icon-2"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="button" class="btn btn-outline-secondary" style="flex: 1; min-height: 42px;" onclick="goToRegisterStep1()">
+                  <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> Back
+                </button>
+                <button type="submit" class="btn btn-primary" style="flex: 2; min-height: 42px;">
+                  <i class="fas fa-user-plus" style="margin-right: 6px;"></i> Complete Step 2
+                </button>
+              </div>
+            </div>
+
           </form>
         </div>
 
@@ -203,6 +256,74 @@
       if (el.type === 'password') { el.type = 'text'; icon.className = 'fas fa-eye-slash'; }
       else { el.type = 'password'; icon.className = 'fas fa-eye'; }
     }
+
+    function toggleRegisterPw(id, iconId) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(iconId);
+      if (el.type === 'password') { el.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+      else { el.type = 'password'; icon.className = 'fas fa-eye'; }
+    }
+
+    function goToRegisterStep2() {
+      // Find all input/select fields in step 1
+      const step1Container = document.getElementById('register-step-1-container');
+      const fields = step1Container.querySelectorAll('input[required], select[required]');
+      let allValid = true;
+      
+      // Validate all required fields in Step 1
+      fields.forEach(field => {
+        if (!field.reportValidity()) {
+          allValid = false;
+        }
+      });
+      
+      if (!allValid) return;
+      
+      // Mark password inputs as required now that we're going to step 2
+      document.getElementById('register_password').required = true;
+      document.getElementById('register_password_confirmation').required = true;
+
+      // Transition to step 2 UI
+      document.getElementById('register-step-1-container').style.display = 'none';
+      document.getElementById('register-step-2-container').style.display = 'block';
+      
+      // Update wizard header step 2 indicator
+      document.getElementById('wiz-step-2-node').style.opacity = '1';
+      document.getElementById('wiz-step-2-circle').style.backgroundColor = '#1e3a8a';
+      document.getElementById('wiz-step-2-circle').style.color = 'white';
+      document.getElementById('wiz-step-2-label').style.fontWeight = '600';
+      document.getElementById('wiz-step-2-label').style.color = '#1e3a8a';
+      document.getElementById('wiz-step-line-1').style.backgroundColor = '#16a34a';
+    }
+
+    function goToRegisterStep1() {
+      // Un-require password fields since they shouldn't block validation in step 1 if the user goes back
+      document.getElementById('register_password').required = false;
+      document.getElementById('register_password_confirmation').required = false;
+
+      // Transition back to step 1 UI
+      document.getElementById('register-step-2-container').style.display = 'none';
+      document.getElementById('register-step-1-container').style.display = 'block';
+      
+      // Revert wizard header step 2 indicator
+      document.getElementById('wiz-step-2-node').style.opacity = '0.5';
+      document.getElementById('wiz-step-2-circle').style.backgroundColor = '#e5e7eb';
+      document.getElementById('wiz-step-2-circle').style.color = '#6b7280';
+      document.getElementById('wiz-step-2-label').style.fontWeight = '500';
+      document.getElementById('wiz-step-2-label').style.color = '#6b7280';
+      document.getElementById('wiz-step-line-1').style.backgroundColor = '#e2e8f0';
+    }
+
+    // Client-side passwords match validation
+    document.getElementById('register-wizard-form').addEventListener('submit', function(e) {
+      const pw = document.getElementById('register_password').value;
+      const confirmPw = document.getElementById('register_password_confirmation').value;
+      if (pw !== confirmPw) {
+        e.preventDefault();
+        alert('Passwords do not match. Please re-enter.');
+        document.getElementById('register_password_confirmation').focus();
+      }
+    });
   </script>
 </body>
 </html>

@@ -33,6 +33,17 @@ class AuthController extends Controller
         $user = User::where($loginField, $credentials['username'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Step 3 Check: Email verification check
+            if ($user->role === 'resident' && $user->email_verified_at === null) {
+                if (!$user->verification_code) {
+                    $user->verification_code = sprintf("%06d", mt_rand(100000, 999999));
+                    $user->save();
+                    $this->sendVerificationEmail($user);
+                }
+                $request->session()->put('verify_email', $user->email);
+                return redirect()->route('verification.notice')->with('error', 'Please verify your email address first.');
+            }
+
             if ($user->status === 'inactive') {
                 return back()->with('error', 'Your account is pending approval by the administrator.');
             }
@@ -65,7 +76,7 @@ class AuthController extends Controller
             'years_of_residency' => 'nullable|integer|min:0',
             'email' => 'required|email|unique:users,email',
             'username' => 'required|string|unique:users,username',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
         ], [
             'first_name.regex' => 'First name must contain only letters, spaces, hyphens, and periods.',
             'last_name.regex' => 'Last name must contain only letters, spaces, hyphens, and periods.',
@@ -92,19 +103,27 @@ class AuthController extends Controller
                 'status' => 'active'
             ]);
 
+            $code = sprintf("%06d", mt_rand(100000, 999999));
+
             // 2. Create User account linked to Resident
-            User::create([
+            $user = User::create([
                 'username' => $request->username,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'resident',
                 'status' => 'inactive', // pending approval
                 'resident_id' => $resident->id,
+                'verification_code' => $code,
+                'email_verified_at' => null,
             ]);
+
+            $this->sendVerificationEmail($user);
 
             DB::commit();
 
-            return redirect()->route('login')->with('success', 'Registration successful! Your account is pending approval by the administrator.');
+            $request->session()->put('verify_email', $user->email);
+
+            return redirect()->route('verification.notice')->with('success', 'Registration Step 2 complete! Please verify your email address (Step 3) to complete registration.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Registration failed. Please try again.')->withInput();
@@ -227,5 +246,81 @@ class AuthController extends Controller
         ActivityLog::log('PASSWORD_RESET', 'Auth', "User {$user->username} reset their password");
 
         return redirect()->route('login')->with('success', 'Your password has been successfully reset! You can now log in.');
+    }
+
+    public function showVerifyEmail(Request $request)
+    {
+        $email = $request->session()->get('verify_email') ?: $request->query('email');
+        if (!$email) {
+            return redirect()->route('login')->with('error', 'Invalid verification request.');
+        }
+
+        return view('auth.verify-email', compact('email'));
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'code' => 'required|string|size:6',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->email_verified_at !== null) {
+            return redirect()->route('login')->with('success', 'Your email is already verified. Please wait for admin approval.');
+        }
+
+        if ($user->verification_code !== $request->code) {
+            return back()->with('error', 'Invalid verification code. Please check and try again.');
+        }
+
+        // Complete Verification
+        $user->verification_code = null;
+        $user->email_verified_at = now();
+        $user->save();
+
+        ActivityLog::log('EMAIL_VERIFIED', 'Auth', "User {$user->username} verified their email address");
+
+        // Forget verify_email from session
+        $request->session()->forget('verify_email');
+
+        return redirect()->route('login')->with('success', 'Email verification successful! Your account is now pending approval by the administrator.');
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->email_verified_at !== null) {
+            return redirect()->route('login')->with('success', 'Your email is already verified.');
+        }
+
+        // Regenerate verification code
+        $user->verification_code = sprintf("%06d", mt_rand(100000, 999999));
+        $user->save();
+
+        $this->sendVerificationEmail($user);
+
+        return back()->with('success', 'A new verification code has been sent to your email.');
+    }
+
+    private function sendVerificationEmail($user)
+    {
+        $code = $user->verification_code;
+        $email = $user->email;
+        try {
+            \Illuminate\Support\Facades\Mail::send('emails.verify-email', ['code' => $code], function ($message) use ($email) {
+                $message->to($email);
+                $message->subject('Verify Your Email Address - Barangay Pili Clearance & Certificate System');
+            });
+            \Illuminate\Support\Facades\Log::info("Verification code sent to {$email}: {$code}");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send verification email to {$email}: " . $e->getMessage());
+        }
     }
 }

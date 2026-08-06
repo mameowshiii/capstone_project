@@ -39,6 +39,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+    // Email Verification
+    Route::get('/verify-email', [AuthController::class, 'showVerifyEmail'])->name('verification.notice');
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+    Route::post('/verify-email/resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

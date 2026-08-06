@@ -74,9 +74,10 @@ class AuthTest extends TestCase
             'email' => 'clara@santos.com',
             'username' => 'mariaclara',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
         ]);
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('verification.notice'));
         $response->assertSessionHas('success');
 
         // Check resident profile exists
@@ -84,11 +85,107 @@ class AuthTest extends TestCase
         $this->assertNotNull($resident);
         $this->assertEquals('Maria Clara', $resident->first_name);
 
-        // Check user account exists and is inactive (pending approval)
+        // Check user account exists, has a verification code, is unverified, and inactive (pending approval)
         $user = User::where('username', 'mariaclara')->first();
         $this->assertNotNull($user);
         $this->assertEquals('resident', $user->role);
         $this->assertEquals('inactive', $user->status);
+        $this->assertNotNull($user->verification_code);
+        $this->assertNull($user->email_verified_at);
         $this->assertEquals($resident->id, $user->resident_id);
+    }
+
+    public function test_user_cannot_login_without_email_verification()
+    {
+        $user = User::create([
+            'username' => 'unverifieduser',
+            'email' => 'unverified@user.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'resident',
+            'status' => 'inactive',
+            'verification_code' => '123456',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => 'unverifieduser',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertRedirect(route('verification.notice'));
+        $response->assertSessionHas('error', 'Please verify your email address first.');
+        $this->assertGuest();
+    }
+
+    public function test_user_can_verify_email_with_correct_code()
+    {
+        $user = User::create([
+            'username' => 'verifyme',
+            'email' => 'verify@me.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'resident',
+            'status' => 'inactive',
+            'verification_code' => '654321',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/verify-email', [
+            'email' => 'verify@me.com',
+            'code' => '654321',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('success', 'Email verification successful! Your account is now pending approval by the administrator.');
+
+        $user->refresh();
+        $this->assertNull($user->verification_code);
+        $this->assertNotNull($user->email_verified_at);
+    }
+
+    public function test_user_cannot_verify_email_with_incorrect_code()
+    {
+        $user = User::create([
+            'username' => 'verifyme2',
+            'email' => 'verify2@me.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'resident',
+            'status' => 'inactive',
+            'verification_code' => '654321',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/verify-email', [
+            'email' => 'verify2@me.com',
+            'code' => '111111',
+        ]);
+
+        $response->assertSessionHas('error', 'Invalid verification code. Please check and try again.');
+
+        $user->refresh();
+        $this->assertEquals('654321', $user->verification_code);
+        $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_user_can_resend_verification_code()
+    {
+        $user = User::create([
+            'username' => 'resendme',
+            'email' => 'resend@me.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'resident',
+            'status' => 'inactive',
+            'verification_code' => '000000',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/verify-email/resend', [
+            'email' => 'resend@me.com',
+        ]);
+
+        $response->assertSessionHas('success', 'A new verification code has been sent to your email.');
+
+        $user->refresh();
+        $this->assertNotEquals('000000', $user->verification_code);
+        $this->assertNotNull($user->verification_code);
     }
 }

@@ -19,6 +19,8 @@ class User extends Authenticatable
         'status',
         'resident_id',
         'photo',
+        'verification_code',
+        'email_verified_at',
         'archived_at',
         'archived_by'
     ];
