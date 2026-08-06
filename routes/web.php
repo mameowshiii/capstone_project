@@ -19,6 +19,9 @@ use App\Http\Controllers\BorrowRequestController;
 
 // ── Public Routes ─────────────────────────────────────────
 Route::get('/', function () {
+    if (str_contains(request()->header('User-Agent'), 'BrgyPiliApp')) {
+        return redirect()->route('register');
+    }
     return view('welcome');
 })->name('index');
 
