@@ -80,7 +80,12 @@ class MainActivity : Activity() {
         }
 
         if (savedInstanceState == null) {
-            webView.loadUrl(BuildConfig.PORTAL_URL)
+            val startUrl = if (BuildConfig.PORTAL_URL.endsWith("/")) {
+                "${BuildConfig.PORTAL_URL}register"
+            } else {
+                "${BuildConfig.PORTAL_URL}/register"
+            }
+            webView.loadUrl(startUrl)
         } else {
             webView.restoreState(savedInstanceState)
         }
