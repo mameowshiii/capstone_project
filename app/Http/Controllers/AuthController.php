@@ -190,6 +190,9 @@ class AuthController extends Controller
         $email = $request->email;
         try {
             \Illuminate\Support\Facades\Mail::send('emails.forgot-password', ['resetUrl' => $resetUrl], function ($message) use ($email) {
+                $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
+                $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
+                $message->from($fromAddress, $fromName);
                 $message->to($email);
                 $message->subject('Reset Password - Barangay Pili Clearance & Certificate System');
             });
@@ -321,6 +324,9 @@ class AuthController extends Controller
         $email = $user->email;
         try {
             \Illuminate\Support\Facades\Mail::send('emails.verify-email', ['code' => $code], function ($message) use ($email) {
+                $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
+                $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
+                $message->from($fromAddress, $fromName);
                 $message->to($email);
                 $message->subject('Verify Your Email Address - Barangay Pili Clearance & Certificate System');
             });

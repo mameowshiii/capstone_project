@@ -140,6 +140,9 @@ class ResidentController extends Controller
             $email = $user->email;
             try {
                 \Illuminate\Support\Facades\Mail::send('emails.password-otp', ['code' => $otp], function ($message) use ($email) {
+                    $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
+                    $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
+                    $message->from($fromAddress, $fromName);
                     $message->to($email);
                     $message->subject('Confirm Password Change - Barangay Pili Clearance & Certificate System');
                 });
