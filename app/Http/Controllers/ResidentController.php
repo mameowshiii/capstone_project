@@ -125,16 +125,56 @@ class ResidentController extends Controller
 
             $user = Auth::user();
 
-            if (!Hash::check($request->current_password, $user->password)) {
+            if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
                 return back()->with('error', 'Current password is incorrect.');
             }
 
-            $user->update([
-                'password' => Hash::make($request->new_password)
+            // Generate 6-digit OTP
+            $otp = sprintf("%06d", mt_rand(100000, 999999));
+
+            // Save to session
+            $request->session()->put('password_change_otp', $otp);
+            $request->session()->put('password_change_new', \Illuminate\Support\Facades\Hash::make($request->new_password));
+
+            // Send Email OTP
+            $email = $user->email;
+            try {
+                \Illuminate\Support\Facades\Mail::send('emails.password-otp', ['code' => $otp], function ($message) use ($email) {
+                    $message->to($email);
+                    $message->subject('Confirm Password Change - Barangay Pili Clearance & Certificate System');
+                });
+                \Illuminate\Support\Facades\Log::info("Password change OTP sent to {$email}: {$otp}");
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send password OTP to {$email}: " . $e->getMessage());
+            }
+
+            return back()->with('success', 'A 6-digit verification code has been sent to your email. Please enter it below to confirm and finalize your password change.')
+                ->with('password_change_pending', true);
+
+        } elseif ($action === 'verify_password_otp') {
+            $request->validate([
+                'otp_code' => 'required|string|size:6',
             ]);
 
-            ActivityLog::log('CHANGE_PASSWORD', 'Profile', 'Password changed');
-            return back()->with('success', 'Password changed successfully.');
+            if (!$request->session()->has('password_change_otp') || !$request->session()->has('password_change_new')) {
+                return back()->with('error', 'Your password change session has expired. Please request a new password change.');
+            }
+
+            if ($request->otp_code !== $request->session()->get('password_change_otp')) {
+                return back()->with('error', 'Invalid verification code. Please check and try again.')
+                    ->with('password_change_pending', true);
+            }
+
+            $user = Auth::user();
+            $user->update([
+                'password' => $request->session()->get('password_change_new')
+            ]);
+
+            // Clear session values
+            $request->session()->forget(['password_change_otp', 'password_change_new']);
+
+            ActivityLog::log('CHANGE_PASSWORD', 'Profile', 'Password changed with email OTP confirmation');
+            return back()->with('success', 'Password changed successfully!');
 
         } elseif ($action === 'update_photo') {
             $request->validate([

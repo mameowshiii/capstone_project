@@ -188,4 +188,123 @@ class AuthTest extends TestCase
         $this->assertNotEquals('000000', $user->verification_code);
         $this->assertNotNull($user->verification_code);
     }
+
+    public function test_resident_can_request_password_change_with_otp()
+    {
+        // Seed resident and linked user
+        $resident = Resident::create([
+            'first_name' => 'Juan',
+            'last_name' => 'Dela Cruz',
+            'gender' => 'Male',
+            'birthdate' => '1990-01-01',
+            'civil_status' => 'Single',
+            'email' => 'juan@delacruz.com',
+            'address' => 'Barangay Pili, Madridejos, Cebu',
+            'status' => 'active',
+        ]);
+
+        $user = User::create([
+            'username' => 'juandelacruz',
+            'email' => 'juan@delacruz.com',
+            'password' => Hash::make('oldpassword123'),
+            'role' => 'resident',
+            'status' => 'active',
+            'resident_id' => $resident->id,
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->post('/resident/profile', [
+            'action' => 'change_password',
+            'current_password' => 'oldpassword123',
+            'new_password' => 'newpassword123',
+            'confirm_password' => 'newpassword123',
+        ]);
+
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('password_change_pending', true);
+        $this->assertTrue(session()->has('password_change_otp'));
+        $this->assertTrue(session()->has('password_change_new'));
+    }
+
+    public function test_resident_can_verify_password_change_otp()
+    {
+        $resident = Resident::create([
+            'first_name' => 'Juan',
+            'last_name' => 'Dela Cruz',
+            'gender' => 'Male',
+            'birthdate' => '1990-01-01',
+            'civil_status' => 'Single',
+            'email' => 'juan@delacruz.com',
+            'address' => 'Barangay Pili, Madridejos, Cebu',
+            'status' => 'active',
+        ]);
+
+        $user = User::create([
+            'username' => 'juandelacruz',
+            'email' => 'juan@delacruz.com',
+            'password' => Hash::make('oldpassword123'),
+            'role' => 'resident',
+            'status' => 'active',
+            'resident_id' => $resident->id,
+            'email_verified_at' => now(),
+        ]);
+
+        // Put pending change info in the session
+        session([
+            'password_change_otp' => '999999',
+            'password_change_new' => Hash::make('newpassword123'),
+        ]);
+
+        $response = $this->actingAs($user)->post('/resident/profile', [
+            'action' => 'verify_password_otp',
+            'otp_code' => '999999',
+        ]);
+
+        $response->assertSessionHas('success', 'Password changed successfully!');
+        $this->assertFalse(session()->has('password_change_otp'));
+        $this->assertFalse(session()->has('password_change_new'));
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('newpassword123', $user->password));
+    }
+
+    public function test_resident_cannot_verify_password_change_otp_with_incorrect_code()
+    {
+        $resident = Resident::create([
+            'first_name' => 'Juan',
+            'last_name' => 'Dela Cruz',
+            'gender' => 'Male',
+            'birthdate' => '1990-01-01',
+            'civil_status' => 'Single',
+            'email' => 'juan@delacruz.com',
+            'address' => 'Barangay Pili, Madridejos, Cebu',
+            'status' => 'active',
+        ]);
+
+        $user = User::create([
+            'username' => 'juandelacruz',
+            'email' => 'juan@delacruz.com',
+            'password' => Hash::make('oldpassword123'),
+            'role' => 'resident',
+            'status' => 'active',
+            'resident_id' => $resident->id,
+            'email_verified_at' => now(),
+        ]);
+
+        session([
+            'password_change_otp' => '999999',
+            'password_change_new' => Hash::make('newpassword123'),
+        ]);
+
+        $response = $this->actingAs($user)->post('/resident/profile', [
+            'action' => 'verify_password_otp',
+            'otp_code' => '111111',
+        ]);
+
+        $response->assertSessionHas('error', 'Invalid verification code. Please check and try again.');
+        $response->assertSessionHas('password_change_pending', true);
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('oldpassword123', $user->password));
+    }
 }

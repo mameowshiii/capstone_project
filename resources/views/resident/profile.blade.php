@@ -118,23 +118,86 @@
   <div class="card">
     <div class="card-header"><h5><i class="fas fa-lock" style="color:var(--primary);margin-right:8px;"></i>Change Password</h5></div>
     <div class="card-body">
-      <form method="POST" action="{{ route('resident.profile') }}">
-        @csrf
-        <input type="hidden" name="action" value="change_password">
-        <div class="form-group">
-          <label class="form-label">Current Password</label>
-          <input type="password" name="current_password" class="form-control" required>
+      @if (session('password_change_pending'))
+        <!-- Verification OTP form -->
+        <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 16px; border-radius: 4px; font-size: 14px; color: #b45309;">
+          <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> A confirmation code has been sent to your email.
         </div>
-        <div class="form-group">
-          <label class="form-label">New Password</label>
-          <input type="password" name="new_password" class="form-control" required minlength="6">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Confirm New Password</label>
-          <input type="password" name="confirm_password" class="form-control" required minlength="6">
-        </div>
-        <button type="submit" class="btn btn-warning w-100"><i class="fas fa-key"></i> Change Password</button>
-      </form>
+        <form method="POST" action="{{ route('resident.profile') }}" id="password-otp-form">
+          @csrf
+          <input type="hidden" name="action" value="verify_password_otp">
+          <div class="form-group">
+            <label class="form-label" style="text-align: center; display: block; margin-bottom: 8px;">Enter 6-Digit Confirmation Code</label>
+            <div style="display: flex; justify-content: center; gap: 8px; margin: 16px 0;" id="password-otp-inputs">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+              <input type="text" maxlength="1" pattern="[0-9]" required autocomplete="off" class="form-control otp-box-field" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; border: 1px solid #ced4da; border-radius: .25rem;">
+            </div>
+            <input type="hidden" name="otp_code" id="password_otp_code_val" required>
+          </div>
+          <button type="submit" class="btn btn-warning w-100"><i class="fas fa-shield-halved"></i> Confirm Password Change</button>
+        </form>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.otp-box-field');
+            const hiddenInput = document.getElementById('password_otp_code_val');
+            const form = document.getElementById('password-otp-form');
+            
+            inputs.forEach((input, index) => {
+              input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+                if (input.value && index < inputs.length - 1) {
+                  inputs[index + 1].focus();
+                }
+                updateHiddenValue();
+              });
+
+              input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                  inputs[index - 1].focus();
+                }
+              });
+            });
+
+            function updateHiddenValue() {
+              let code = '';
+              inputs.forEach(input => code += input.value);
+              hiddenInput.value = code;
+            }
+
+            form.addEventListener('submit', function(e) {
+              updateHiddenValue();
+              if (hiddenInput.value.length !== 6) {
+                e.preventDefault();
+                alert('Please enter all 6 digits of the code.');
+              }
+            });
+          });
+        </script>
+      @else
+        <!-- Standard Change Password Form -->
+        <form method="POST" action="{{ route('resident.profile') }}">
+          @csrf
+          <input type="hidden" name="action" value="change_password">
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input type="password" name="current_password" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" name="new_password" class="form-control" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" name="confirm_password" class="form-control" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-warning w-100"><i class="fas fa-key"></i> Request Password Change</button>
+        </form>
+      @endif
     </div>
   </div>
 
