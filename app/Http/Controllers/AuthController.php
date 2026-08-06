@@ -126,7 +126,13 @@ class AuthController extends Controller
             return redirect()->route('verification.notice')->with('success', 'Registration Step 2 complete! Please verify your email address (Step 3) to complete registration.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Registration failed. Please try again.')->withInput();
+            \Illuminate\Support\Facades\Log::error("Registration failed exception: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            
+            $msg = 'Registration failed. Please try again.';
+            if (config('app.debug')) {
+                $msg .= ' Details: ' . $e->getMessage();
+            }
+            return back()->with('error', $msg)->withInput();
         }
     }
 
