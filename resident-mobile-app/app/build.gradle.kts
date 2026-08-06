@@ -21,7 +21,7 @@ android {
         buildConfigField(
             "String",
             "PORTAL_URL",
-            "\"https://brgypiliclearance.vercel.app/\""
+            "\"https://brgypilieclearance.com/\""
         )
     }
 
