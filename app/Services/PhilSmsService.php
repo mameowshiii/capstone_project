@@ -18,7 +18,7 @@ class PhilSmsService
     {
         $enabled   = config('services.philsms.enabled', true);
         $apiToken  = config('services.philsms.api_token');
-        $apiUrl    = config('services.philsms.api_url', 'https://philsms.com/api/v3/sms/send');
+        $apiUrl    = config('services.philsms.api_url', 'https://app.philsms.com/api/v3/sms/send');
         $senderId  = config('services.philsms.sender_id', 'PhilSMS');
 
         if (!$enabled) {
@@ -52,11 +52,18 @@ class PhilSmsService
                 Log::info("PhilSMS sent successfully to {$formattedNumber}: Response: " . $response->body());
                 return true;
             } else {
-                Log::error("PhilSMS API failed for recipient {$formattedNumber}. HTTP Status: {$response->status()}, Response: " . $response->body());
+                $status = $response->status();
+                $body = $response->body();
+                Log::error(
+                    "PhilSMS API failed for recipient {$formattedNumber}. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . 
+                    ", Response: " . $body
+                );
+
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Exception occurred while sending PhilSMS to {$formattedNumber}: " . $e->getMessage());
+            $err = $e->getMessage();
+            Log::error("Exception occurred while sending PhilSMS to {$formattedNumber}: {$err}. URL: {$apiUrl}. Payload: " . (isset($payload) ? json_encode($payload) : '[]'));
             return false;
         }
     }

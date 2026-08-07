@@ -32,7 +32,7 @@ return [
 
     'philsms' => [
         'api_token' => env('PHILSMS_API_TOKEN', ''),
-        'api_url'   => env('PHILSMS_API_URL', 'https://philsms.com/api/v3/sms/send'),
+        'api_url'   => env('PHILSMS_API_URL', 'https://app.philsms.com/api/v3/sms/send'),
         'sender_id' => env('PHILSMS_SENDER_ID', 'PhilSMS'),  // Your registered Sender ID on PhilSMS
         'enabled'   => env('PHILSMS_ENABLED', true),
     ],
