@@ -17,7 +17,7 @@ class PhilSmsService
     public function sendSms($recipientNumber, $message)
     {
         $enabled   = config('services.philsms.enabled', true);
-        $apiToken  = config('services.philsms.api_token');
+        $apiToken  = trim((string) config('services.philsms.api_token', ''));
         $apiUrl    = config('services.philsms.api_url', 'https://app.philsms.com/api/v3/sms/send');
         $senderId  = config('services.philsms.sender_id', 'PhilSMS');
 
@@ -30,6 +30,9 @@ class PhilSmsService
             Log::warning("PhilSMS API Token is missing in environment/config. Unable to send SMS to {$recipientNumber}");
             return false;
         }
+
+        // Masked token for safe logging (first 8 chars)
+        $maskedToken = strlen($apiToken) > 8 ? substr($apiToken, 0, 8) . '...' : '***';
 
         $formattedNumber = $this->formatPhoneNumber($recipientNumber);
         if (empty($formattedNumber)) {
@@ -54,10 +57,24 @@ class PhilSmsService
             } else {
                 $status = $response->status();
                 $body = $response->body();
-                Log::error(
-                    "PhilSMS API failed for recipient {$formattedNumber}. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . 
-                    ", Response: " . $body
-                );
+                $contentType = $response->header('Content-Type', '');
+
+                // Detect HTML responses (common when hitting a web page or wrong host)
+                $isHtml = false;
+                if (!empty($contentType) && stripos($contentType, 'text/html') !== false) {
+                    $isHtml = true;
+                } elseif (is_string($body) && (stripos($body, '<!doctype html') !== false || stripos($body, '<html') !== false)) {
+                    $isHtml = true;
+                }
+
+                if ($isHtml) {
+                    Log::error("PhilSMS API returned HTML for recipient {$formattedNumber}. This usually indicates the configured API URL is incorrect or the provider returned an HTML error page. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . ", Response snippet: " . substr($body, 0, 1024));
+                } else {
+                    Log::error(
+                        "PhilSMS API failed for recipient {$formattedNumber}. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . 
+                        ", Response: " . $body
+                    );
+                }
 
                 return false;
             }
