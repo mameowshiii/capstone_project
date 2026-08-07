@@ -142,9 +142,9 @@ class BorrowRequestController extends Controller
             "Marked borrow request ID {$borrow->id} as {$request->status}"
         );
 
-        // Dispatch SMS notification to resident via iProg SMS
+        // Dispatch SMS notification to resident via PhilSMS
         try {
-            app(\App\Services\IprogSmsService::class)->sendBorrowStatusSms($borrow->fresh());
+            app(\App\Services\PhilSmsService::class)->sendBorrowStatusSms($borrow->fresh());
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Failed sending SMS for Borrow ID {$borrow->id}: " . $e->getMessage());
         }

@@ -5,10 +5,10 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class IprogSmsService
+class PhilSmsService
 {
     /**
-     * Send an SMS using the iProg SMS API gateway.
+     * Send an SMS using the PhilSMS API v3.
      *
      * @param string $recipientNumber
      * @param string $message
@@ -16,58 +16,53 @@ class IprogSmsService
      */
     public function sendSms($recipientNumber, $message)
     {
-        $enabled = config('services.iprog_sms.enabled', true);
-        $apiToken = config('services.iprog_sms.api_token');
-        $apiUrl = config('services.iprog_sms.api_url', 'https://sms.iprogtech.com/api/v1/sms_messages');
-        $provider = config('services.iprog_sms.sms_provider', '2');
-        $senderName = config('services.iprog_sms.sender_name', '');
+        $enabled   = config('services.philsms.enabled', true);
+        $apiToken  = config('services.philsms.api_token');
+        $apiUrl    = config('services.philsms.api_url', 'https://philsms.com/api/v3/sms/send');
+        $senderId  = config('services.philsms.sender_id', 'PhilSMS');
 
         if (!$enabled) {
-            Log::info("iProg SMS dispatch skipped (SMS service disabled in config). Recipient: {$recipientNumber}");
+            Log::info("PhilSMS dispatch skipped (SMS service disabled in config). Recipient: {$recipientNumber}");
             return false;
         }
 
         if (empty($apiToken)) {
-            Log::warning("iProg SMS API Token is missing in environment/config. Unable to send SMS to {$recipientNumber}");
+            Log::warning("PhilSMS API Token is missing in environment/config. Unable to send SMS to {$recipientNumber}");
             return false;
         }
 
         $formattedNumber = $this->formatPhoneNumber($recipientNumber);
         if (empty($formattedNumber)) {
-            Log::warning("Invalid phone number provided for iProg SMS: '{$recipientNumber}'");
+            Log::warning("Invalid phone number provided for PhilSMS: '{$recipientNumber}'");
             return false;
         }
 
         try {
             $payload = [
-                'api_token' => $apiToken,
-                'phone_number' => $formattedNumber,
-                'message' => $message,
-                'sms_provider' => $provider,
+                'sender_id' => $senderId,
+                'recipient' => $formattedNumber,
+                'message'   => $message,
             ];
 
-            // Include sender_name only when configured (required by IPROG once a sender name is approved)
-            if (!empty($senderName)) {
-                $payload['sender_name'] = $senderName;
-            }
-
-            $response = Http::timeout(10)->post($apiUrl, $payload);
+            $response = Http::withToken($apiToken)
+                ->timeout(10)
+                ->post($apiUrl, $payload);
 
             if ($response->successful()) {
-                Log::info("iProg SMS sent successfully to {$formattedNumber}: Response: " . $response->body());
+                Log::info("PhilSMS sent successfully to {$formattedNumber}: Response: " . $response->body());
                 return true;
             } else {
-                Log::error("iProg SMS API failed for recipient {$formattedNumber}. HTTP Status: {$response->status()}, Response: " . $response->body());
+                Log::error("PhilSMS API failed for recipient {$formattedNumber}. HTTP Status: {$response->status()}, Response: " . $response->body());
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Exception occurred while sending iProg SMS to {$formattedNumber}: " . $e->getMessage());
+            Log::error("Exception occurred while sending PhilSMS to {$formattedNumber}: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Format Philippine contact number into standard 11-digit or international 12-digit string.
+     * Format Philippine contact number into standard 11-digit format (09XXXXXXXXX).
      *
      * @param string $phone
      * @return string|null
@@ -90,7 +85,7 @@ class IprogSmsService
             return $cleaned;
         }
 
-        // International format starting with 639XXXXXXXXX (12 digits) -> convert to 09XXXXXXXXX or leave as is
+        // International format starting with 639XXXXXXXXX (12 digits) -> convert to 09XXXXXXXXX
         if (strlen($cleaned) === 12 && str_starts_with($cleaned, '639')) {
             return '0' . substr($cleaned, 2);
         }
@@ -117,10 +112,10 @@ class IprogSmsService
         }
 
         $residentName = $resident->first_name;
-        $statusUpper = strtoupper($borrow->status);
-        $itemSummary = $this->buildItemSummary($borrow);
-        $dateStr = $borrow->borrow_date ? date('M d, Y', strtotime($borrow->borrow_date)) : '';
-        $remarks = !empty($borrow->remarks) ? " Remarks: " . $borrow->remarks : "";
+        $statusUpper  = strtoupper($borrow->status);
+        $itemSummary  = $this->buildItemSummary($borrow);
+        $dateStr      = $borrow->borrow_date ? date('M d, Y', strtotime($borrow->borrow_date)) : '';
+        $remarks      = !empty($borrow->remarks) ? " Remarks: " . $borrow->remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$residentName}, your equipment borrow request ({$itemSummary}) for {$dateStr} has been marked as {$statusUpper}.{$remarks}";
 
@@ -137,13 +132,13 @@ class IprogSmsService
     public function sendSummonNoticeSms($summon, $recipientType = 'complainant')
     {
         $contactNumber = null;
-        $name = null;
+        $name          = null;
 
         if ($recipientType === 'complainant') {
-            $name = $summon->complainant_name;
+            $name          = $summon->complainant_name;
             $contactNumber = $summon->complainant_contact ?? ($summon->complainantResident ? $summon->complainantResident->contact_number : null);
         } else {
-            $name = $summon->respondent_name;
+            $name          = $summon->respondent_name;
             $contactNumber = $summon->respondent_contact ?? ($summon->respondentResident ? $summon->respondentResident->contact_number : null);
         }
 
@@ -152,9 +147,9 @@ class IprogSmsService
         }
 
         $caseTypeUpper = strtoupper($summon->case_type);
-        $statusUpper = strtoupper($summon->status);
-        $scheduleStr = $summon->schedule_date ? date('M d, Y h:i A', strtotime($summon->schedule_date)) : 'N/A';
-        $remarks = !empty($summon->hearing_remarks) ? " Remarks: " . $summon->hearing_remarks : "";
+        $statusUpper   = strtoupper($summon->status);
+        $scheduleStr   = $summon->schedule_date ? date('M d, Y h:i A', strtotime($summon->schedule_date)) : 'N/A';
+        $remarks       = !empty($summon->hearing_remarks) ? " Remarks: " . $summon->hearing_remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$name}, regarding {$caseTypeUpper} Case #{$summon->case_number}. Status: {$statusUpper}. Hearing Schedule: {$scheduleStr}.{$remarks}";
 
@@ -174,11 +169,11 @@ class IprogSmsService
             return false;
         }
 
-        $certName = $certReq->certificate ? $certReq->certificate->name : 'Document Request';
+        $certName     = $certReq->certificate ? $certReq->certificate->name : 'Document Request';
         $residentName = $resident->first_name;
-        $statusUpper = strtoupper($certReq->status);
-        $trackingNo = $certReq->tracking_number;
-        $remarks = !empty($certReq->remarks) ? " Remarks: " . $certReq->remarks : "";
+        $statusUpper  = strtoupper($certReq->status);
+        $trackingNo   = $certReq->tracking_number;
+        $remarks      = !empty($certReq->remarks) ? " Remarks: " . $certReq->remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$residentName}, your request for {$certName} (Tracking #{$trackingNo}) is now {$statusUpper}.{$remarks}";
 

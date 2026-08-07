@@ -30,11 +30,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'iprog_sms' => [
-        'api_token' => env('IPROG_SMS_API_TOKEN', ''),
-        'api_url' => env('IPROG_SMS_API_URL', 'https://sms.iprogtech.com/api/v1/sms_messages'),
-        'sms_provider' => env('IPROG_SMS_PROVIDER', '2'),
-        'enabled' => env('IPROG_SMS_ENABLED', true),
+    'philsms' => [
+        'api_token' => env('PHILSMS_API_TOKEN', ''),
+        'api_url'   => env('PHILSMS_API_URL', 'https://philsms.com/api/v3/sms/send'),
+        'sender_id' => env('PHILSMS_SENDER_ID', 'PhilSMS'),  // Your registered Sender ID on PhilSMS
+        'enabled'   => env('PHILSMS_ENABLED', true),
     ],
 
 ];

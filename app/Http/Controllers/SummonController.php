@@ -135,9 +135,9 @@ class SummonController extends Controller
             }
         }
 
-        // ── Dispatch iProg SMS Notifications ─────────────────────────────
+        // ── Dispatch PhilSMS Notifications ────────────────────────────────
         try {
-            $smsService = app(\App\Services\IprogSmsService::class);
+            $smsService = app(\App\Services\PhilSmsService::class);
             $smsService->sendSummonNoticeSms($summon, 'complainant');
             if ($summon->case_type === 'summon') {
                 $smsService->sendSummonNoticeSms($summon, 'respondent');
@@ -243,9 +243,9 @@ class SummonController extends Controller
             }
         }
 
-        // ── Dispatch iProg SMS Notifications ─────────────────────────────
+        // ── Dispatch PhilSMS Notifications ────────────────────────────────
         try {
-            $smsService = app(\App\Services\IprogSmsService::class);
+            $smsService = app(\App\Services\PhilSmsService::class);
             $freshSummon = $summon->fresh();
             $smsService->sendSummonNoticeSms($freshSummon, 'complainant');
             $smsService->sendSummonNoticeSms($freshSummon, 'respondent');

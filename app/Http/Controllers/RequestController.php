@@ -126,7 +126,7 @@ class RequestController extends Controller
 
         if (in_array($action, ['process', 'reject', 'approve', 'release'])) {
             try {
-                app(\App\Services\IprogSmsService::class)->sendDocumentStatusSms($certReq->fresh());
+                app(\App\Services\PhilSmsService::class)->sendDocumentStatusSms($certReq->fresh());
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Failed sending SMS for Request {$certReq->tracking_number}: " . $e->getMessage());
             }
