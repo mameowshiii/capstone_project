@@ -29,4 +29,10 @@ class Payment extends Model
     {
         return $this->belongsTo(User::class, 'received_by');
     }
+
+    // Alias used by PaymentController eager-load and blade
+    public function receivedBy()
+    {
+        return $this->belongsTo(User::class, 'received_by');
+    }
 }

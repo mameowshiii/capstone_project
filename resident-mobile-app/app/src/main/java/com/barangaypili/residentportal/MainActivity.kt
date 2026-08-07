@@ -2,12 +2,17 @@ package com.barangaypili.residentportal
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.net.http.SslError
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -23,6 +28,10 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
     private lateinit var errorView: LinearLayout
+
+    // File chooser callback
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private val FILE_CHOOSER_REQUEST_CODE = 1001
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +58,7 @@ class MainActivity : Activity() {
             displayZoomControls = false
             loadWithOverviewMode = true
             useWideViewPort = true
+            allowFileAccess = true
             // Custom UA so the server can detect the native WebView and hide the install banner
             userAgentString = "$defaultUa BrgyPiliApp/1.0"
         }
@@ -79,6 +89,45 @@ class MainActivity : Activity() {
             }
         }
 
+        // WebChromeClient is REQUIRED for file input (<input type="file">) to work in WebView
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                // Cancel any previous callback to avoid memory leaks
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
+                this@MainActivity.filePathCallback = filePathCallback
+
+                val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "application/pdf"))
+                }
+
+                try {
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+                } catch (e: Exception) {
+                    this@MainActivity.filePathCallback = null
+                    return false
+                }
+                return true
+            }
+        }
+
+        // Request storage permission for Android < 13
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                    100
+                )
+            }
+        }
+
         if (savedInstanceState == null) {
             val startUrl = if (BuildConfig.PORTAL_URL.endsWith("/")) {
                 "${BuildConfig.PORTAL_URL}register"
@@ -88,6 +137,21 @@ class MainActivity : Activity() {
             webView.loadUrl(startUrl)
         } else {
             webView.restoreState(savedInstanceState)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (resultCode == RESULT_OK && data != null) {
+                val results = WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+                filePathCallback?.onReceiveValue(results)
+            } else {
+                // User cancelled — pass null so the WebView knows
+                filePathCallback?.onReceiveValue(null)
+            }
+            filePathCallback = null
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
