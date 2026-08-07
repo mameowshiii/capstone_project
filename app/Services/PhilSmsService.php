@@ -16,10 +16,10 @@ class PhilSmsService
      */
     public function sendSms($recipientNumber, $message)
     {
-        $enabled   = config('services.philsms.enabled', true);
-        $apiToken  = trim((string) config('services.philsms.api_token', ''));
-        $apiUrl    = config('services.philsms.api_url', 'https://app.philsms.com/api/v3/sms/send');
-        $senderId  = config('services.philsms.sender_id', 'PhilSMS');
+        $enabled = (bool) config('services.philsms.enabled', true);
+        $apiToken = trim((string) config('services.philsms.api_token', ''));
+        $apiUrl = trim((string) config('services.philsms.api_url', 'https://dashboard.philsms.com/api/v3/sms/send'));
+        $senderId = trim((string) config('services.philsms.sender_id', 'PhilSMS'));
 
         if (!$enabled) {
             Log::info("PhilSMS dispatch skipped (SMS service disabled in config). Recipient: {$recipientNumber}");
@@ -44,10 +44,13 @@ class PhilSmsService
             $payload = [
                 'sender_id' => $senderId,
                 'recipient' => $formattedNumber,
-                'message'   => $message,
+                'message' => $message,
+                'type' => 'plain',
             ];
 
             $response = Http::withToken($apiToken)
+                ->acceptJson()
+                ->asJson()
                 ->timeout(10)
                 ->post($apiUrl, $payload);
 
@@ -71,7 +74,7 @@ class PhilSmsService
                     Log::error("PhilSMS API returned HTML for recipient {$formattedNumber}. This usually indicates the configured API URL is incorrect or the provider returned an HTML error page. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . ", Response snippet: " . substr($body, 0, 1024));
                 } else {
                     Log::error(
-                        "PhilSMS API failed for recipient {$formattedNumber}. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) . 
+                        "PhilSMS API failed for recipient {$formattedNumber}. URL: {$apiUrl}. HTTP Status: {$status}. Request: " . json_encode($payload) .
                         ", Response: " . $body
                     );
                 }
@@ -86,7 +89,7 @@ class PhilSmsService
     }
 
     /**
-     * Format Philippine contact number into standard 11-digit format (09XXXXXXXXX).
+     * Format Philippine contact number into standard PhilSMS format (639XXXXXXXXX).
      *
      * @param string $phone
      * @return string|null
@@ -104,19 +107,24 @@ class PhilSmsService
             return null;
         }
 
-        // Standard 11-digit local format: 09XXXXXXXXX
+        // Handle case where people write 6309XXXXXXXXX by mistake (13 digits)
+        if (strlen($cleaned) === 13 && str_starts_with($cleaned, '6309')) {
+            $cleaned = '63' . substr($cleaned, 3);
+        }
+
+        // Standard 11-digit local format: 09XXXXXXXXX -> convert to 639XXXXXXXXX
         if (strlen($cleaned) === 11 && str_starts_with($cleaned, '09')) {
+            return '63' . substr($cleaned, 1);
+        }
+
+        // International format starting with 639XXXXXXXXX (12 digits) -> return as is
+        if (strlen($cleaned) === 12 && str_starts_with($cleaned, '639')) {
             return $cleaned;
         }
 
-        // International format starting with 639XXXXXXXXX (12 digits) -> convert to 09XXXXXXXXX
-        if (strlen($cleaned) === 12 && str_starts_with($cleaned, '639')) {
-            return '0' . substr($cleaned, 2);
-        }
-
-        // 10-digit number without leading 0: 9XXXXXXXXX
+        // 10-digit number without leading 0: 9XXXXXXXXX -> convert to 639XXXXXXXXX
         if (strlen($cleaned) === 10 && str_starts_with($cleaned, '9')) {
-            return '0' . $cleaned;
+            return '63' . $cleaned;
         }
 
         return $cleaned;
@@ -136,10 +144,10 @@ class PhilSmsService
         }
 
         $residentName = $resident->first_name;
-        $statusUpper  = strtoupper($borrow->status);
-        $itemSummary  = $this->buildItemSummary($borrow);
-        $dateStr      = $borrow->borrow_date ? date('M d, Y', strtotime($borrow->borrow_date)) : '';
-        $remarks      = !empty($borrow->remarks) ? " Remarks: " . $borrow->remarks : "";
+        $statusUpper = strtoupper($borrow->status);
+        $itemSummary = $this->buildItemSummary($borrow);
+        $dateStr = $borrow->borrow_date ? date('M d, Y', strtotime($borrow->borrow_date)) : '';
+        $remarks = !empty($borrow->remarks) ? " Remarks: " . $borrow->remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$residentName}, your equipment borrow request ({$itemSummary}) for {$dateStr} has been marked as {$statusUpper}.{$remarks}";
 
@@ -156,13 +164,13 @@ class PhilSmsService
     public function sendSummonNoticeSms($summon, $recipientType = 'complainant')
     {
         $contactNumber = null;
-        $name          = null;
+        $name = null;
 
         if ($recipientType === 'complainant') {
-            $name          = $summon->complainant_name;
+            $name = $summon->complainant_name;
             $contactNumber = $summon->complainant_contact ?? ($summon->complainantResident ? $summon->complainantResident->contact_number : null);
         } else {
-            $name          = $summon->respondent_name;
+            $name = $summon->respondent_name;
             $contactNumber = $summon->respondent_contact ?? ($summon->respondentResident ? $summon->respondentResident->contact_number : null);
         }
 
@@ -171,9 +179,9 @@ class PhilSmsService
         }
 
         $caseTypeUpper = strtoupper($summon->case_type);
-        $statusUpper   = strtoupper($summon->status);
-        $scheduleStr   = $summon->schedule_date ? date('M d, Y h:i A', strtotime($summon->schedule_date)) : 'N/A';
-        $remarks       = !empty($summon->hearing_remarks) ? " Remarks: " . $summon->hearing_remarks : "";
+        $statusUpper = strtoupper($summon->status);
+        $scheduleStr = $summon->schedule_date ? date('M d, Y h:i A', strtotime($summon->schedule_date)) : 'N/A';
+        $remarks = !empty($summon->hearing_remarks) ? " Remarks: " . $summon->hearing_remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$name}, regarding {$caseTypeUpper} Case #{$summon->case_number}. Status: {$statusUpper}. Hearing Schedule: {$scheduleStr}.{$remarks}";
 
@@ -193,11 +201,11 @@ class PhilSmsService
             return false;
         }
 
-        $certName     = $certReq->certificate ? $certReq->certificate->name : 'Document Request';
+        $certName = $certReq->certificate ? $certReq->certificate->name : 'Document Request';
         $residentName = $resident->first_name;
-        $statusUpper  = strtoupper($certReq->status);
-        $trackingNo   = $certReq->tracking_number;
-        $remarks      = !empty($certReq->remarks) ? " Remarks: " . $certReq->remarks : "";
+        $statusUpper = strtoupper($certReq->status);
+        $trackingNo = $certReq->tracking_number;
+        $remarks = !empty($certReq->remarks) ? " Remarks: " . $certReq->remarks : "";
 
         $message = "Barangay Pili Notice: Hello {$residentName}, your request for {$certName} (Tracking #{$trackingNo}) is now {$statusUpper}.{$remarks}";
 
