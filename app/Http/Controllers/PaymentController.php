@@ -16,7 +16,7 @@ class PaymentController extends Controller
         $method = $request->input('method', 'all');
 
         // Query builder
-        $query = Payment::with(['receivedBy', 'request.resident', 'request.certificate']);
+        $query = Payment::with(['receiver', 'request.resident', 'request.certificate']);
 
         // Search filter
         if ($search) {
