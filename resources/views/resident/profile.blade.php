@@ -19,7 +19,7 @@
       </div>
       <div>
         <div style="font-size:22px;font-weight:800;">{{ $resident->full_name }}</div>
-        <div style="color:#6b7280;font-size:14px;margin-bottom:8px;">@{{ Auth::user()->username }}</div>
+        <div style="color:#6b7280;font-size:14px;margin-bottom:8px;">Username: {{ Auth::user()->username }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#374151;">
           <span><i class="fas fa-map-marker-alt" style="color:var(--primary);margin-right:4px;"></i>{{ $resident->address }}</span>
           <span><i class="fas fa-phone" style="color:var(--primary);margin-right:4px;"></i>{{ $resident->contact_number ?? '—' }}</span>

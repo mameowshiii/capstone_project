@@ -45,7 +45,7 @@
           <button class="auth-tab {{ !session('errors') && !session('reg_tab') ? 'active' : '' }}" onclick="switchTab('tab-login',this)" id="btn-login">
             <i class="fas fa-sign-in-alt"></i> Sign In
           </button>
-          <button class="auth-tab {{ session('reg_tab') || ($errors->any() && old('email') === null) ? 'active' : '' }}" onclick="switchTab('tab-register',this)" id="btn-register">
+          <button class="auth-tab {{ session('reg_tab') || ($errors->any() && old('username') === null) ? 'active' : '' }}" onclick="switchTab('tab-register',this)" id="btn-register">
             <i class="fas fa-user-plus"></i> Register
           </button>
         </div>
@@ -72,9 +72,9 @@
           <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-              <label class="form-label" for="email">Email Address</label>
-              <input type="email" id="email" name="email" class="form-control"
-                placeholder="Enter your email address" required autocomplete="email" value="{{ old('email') }}">
+              <label class="form-label" for="username">Username or Email Address</label>
+              <input type="text" id="username" name="username" class="form-control"
+                placeholder="Enter your username or email address" required autocomplete="username" value="{{ old('username') }}">
             </div>
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center;">
