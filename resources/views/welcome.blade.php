@@ -823,7 +823,7 @@
       <li><a href="#services">BARANGAY SERVICES</a></li>
       <li><a href="#tracking">TRACK APPLICATION</a></li>
       <li><a href="#bulletins">ANNOUNCEMENT</a></li>
-      <li><a href="{{ asset('downloads/brgy-pili-portal.apk') }}" download>DOWNLOAD APP</a></li>
+      <li><a href="{{ asset('downloads/barangay-pili-resident-portal-v1.0.2.apk') }}" download>DOWNLOAD APP</a></li>
     </ul>
     <div class="nav-actions">
       <a href="{{ route('login') }}" class="btn-nav-secondary">Resident Login</a>
@@ -847,7 +847,7 @@
       <li><a href="#services">BARANGAY SERVICES</a></li>
       <li><a href="#tracking">TRACK APPLICATION</a></li>
       <li><a href="#bulletins">ANNOUNCEMENT</a></li>
-      <li><a href="{{ asset('downloads/brgy-pili-portal.apk') }}" download>DOWNLOAD APP</a></li>
+      <li><a href="{{ asset('downloads/barangay-pili-resident-portal-v1.0.2.apk') }}" download>DOWNLOAD APP</a></li>
     </ul>
     <div class="drawer-actions">
       <a href="{{ route('login') }}" class="btn-drawer-secondary">Resident Login</a>
