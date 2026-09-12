@@ -23,7 +23,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->orderBy('username')->paginate(10);
+        $users = $query->orderBy('username')->paginate(8);
 
         $editUser = null;
         if ($editId) {
