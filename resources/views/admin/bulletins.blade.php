@@ -98,7 +98,7 @@
       <h5 style="margin:0; font-weight:600;"><i class="fas fa-bullhorn" style="color:var(--primary); margin-right:8px;"></i>Post Announcement</h5>
       <button type="button" class="btn-close" onclick="closeCreateModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:var(--gray);">&times;</button>
     </div>
-    <form method="POST" action="{{ route('admin.bulletins.store') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('admin.bulletins.store') }}" enctype="multipart/form-data" id="createBulletinForm">
       @csrf
       
       <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
@@ -132,14 +132,14 @@
 
         <div class="form-group" style="margin:0;">
           <label class="form-label" for="announcement_image">Announcement Image <small style="color:#6b7280;font-weight:400;">(optional)</small></label>
-          <input id="announcement_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
-          <small style="color:#6b7280;">PNG, JPG, or JPEG only. Maximum file size: 5 MB.</small>
+          <input id="announcement_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onchange="prepareAnnouncementImage(this, 'createImageStatus', 'createPublishButton')">
+          <small id="createImageStatus" style="color:#6b7280;">PNG, JPG, or JPEG only. Large photos are optimized automatically before upload.</small>
         </div>
       </div>
 
       <div style="padding:16px 24px; border-top:1px solid #f3f4f6; background:#f9fafb; display:flex; justify-content:flex-end; gap:8px;">
         <button type="button" class="btn btn-outline-secondary" onclick="closeCreateModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Publish</button>
+        <button id="createPublishButton" type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Publish</button>
       </div>
     </form>
   </div>
@@ -152,7 +152,7 @@
       <h5 style="margin:0; font-weight:600;"><i class="fas fa-edit" style="color:var(--primary); margin-right:8px;"></i>Update Announcement</h5>
       <button type="button" class="btn-close" onclick="closeEditModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:var(--gray);">&times;</button>
     </div>
-    <form method="POST" action="{{ route('admin.bulletins.update') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('admin.bulletins.update') }}" enctype="multipart/form-data" id="editBulletinForm">
       @csrf
       <input type="hidden" name="bulletin_id" id="modal_bulletin_id">
       
@@ -187,14 +187,14 @@
 
         <div class="form-group" style="margin:0;">
           <label class="form-label" for="modal_image">Replace Announcement Image <small style="color:#6b7280;font-weight:400;">(optional)</small></label>
-          <input id="modal_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
-          <small style="color:#6b7280;">PNG, JPG, or JPEG only. Leave empty to keep the current image.</small>
+          <input id="modal_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onchange="prepareAnnouncementImage(this, 'editImageStatus', 'editPublishButton')">
+          <small id="editImageStatus" style="color:#6b7280;">PNG, JPG, or JPEG only. Large photos are optimized automatically. Leave empty to keep the current image.</small>
         </div>
       </div>
 
       <div style="padding:16px 24px; border-top:1px solid #f3f4f6; background:#f9fafb; display:flex; justify-content:flex-end; gap:8px;">
         <button type="button" class="btn btn-outline-secondary" onclick="closeEditModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+        <button id="editPublishButton" type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
       </div>
     </form>
   </div>
@@ -233,6 +233,71 @@
 
   function closeEditModal() {
     document.getElementById('editModal').style.display = 'none';
+  }
+
+  async function prepareAnnouncementImage(input, statusId, buttonId) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const status = document.getElementById(statusId);
+    const button = document.getElementById(buttonId);
+    const allowedTypes = ['image/png', 'image/jpeg'];
+    if (!allowedTypes.includes(file.type)) {
+      input.value = '';
+      status.textContent = 'Please choose a PNG, JPG, or JPEG image.';
+      status.style.color = '#b91c1c';
+      return;
+    }
+
+    // Small images do not need processing. Large phone photos are resized and
+    // encoded as JPEG locally, reducing upload time substantially.
+    if (file.size <= 1024 * 1024) {
+      status.textContent = `Ready to upload (${formatFileSize(file.size)}).`;
+      status.style.color = '#15803d';
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = 'Preparing image for faster upload…';
+    status.style.color = '#475569';
+
+    try {
+      const image = await loadImage(file);
+      const maxDimension = 1600;
+      const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(image.width * scale);
+      canvas.height = Math.round(image.height * scale);
+      canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+      const optimizedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+      if (!optimizedBlob) throw new Error('Image conversion failed.');
+
+      const optimizedFile = new File([optimizedBlob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+      const files = new DataTransfer();
+      files.items.add(optimizedFile);
+      input.files = files.files;
+      status.textContent = `Ready to upload (${formatFileSize(file.size)} → ${formatFileSize(optimizedFile.size)}).`;
+      status.style.color = '#15803d';
+    } catch (error) {
+      status.textContent = 'The image will upload in its original size.';
+      status.style.color = '#a16207';
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+      image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Unable to read image.')); };
+      image.src = url;
+    });
+  }
+
+  function formatFileSize(bytes) {
+    return bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 </script>
 @endsection
