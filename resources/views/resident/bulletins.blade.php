@@ -39,6 +39,10 @@
           <span><i class="far fa-user" style="margin-right:4px;"></i> {{ $b->creator->username ?? 'Official' }}</span>
         </div>
 
+        @if($b->image_path)
+          <img src="{{ asset('assets/uploads/' . $b->image_path) }}" alt="Image for {{ $b->title }}" style="display:block;width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin:0 0 14px;">
+        @endif
+
         <div style="font-size:14px; line-height:1.65; color:#334155; white-space:pre-line;">
           {{ $b->content }}
         </div>

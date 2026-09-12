@@ -98,7 +98,7 @@
       <h5 style="margin:0; font-weight:600;"><i class="fas fa-bullhorn" style="color:var(--primary); margin-right:8px;"></i>Post Announcement</h5>
       <button type="button" class="btn-close" onclick="closeCreateModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:var(--gray);">&times;</button>
     </div>
-    <form method="POST" action="{{ route('admin.bulletins.store') }}">
+    <form method="POST" action="{{ route('admin.bulletins.store') }}" enctype="multipart/form-data">
       @csrf
       
       <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
@@ -129,6 +129,12 @@
           <label class="form-label">Announcement Body / Content *</label>
           <textarea name="content" class="form-control" rows="6" required placeholder="Write details here..."></textarea>
         </div>
+
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" for="announcement_image">Announcement Image <small style="color:#6b7280;font-weight:400;">(optional)</small></label>
+          <input id="announcement_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
+          <small style="color:#6b7280;">PNG, JPG, or JPEG only. Maximum file size: 5 MB.</small>
+        </div>
       </div>
 
       <div style="padding:16px 24px; border-top:1px solid #f3f4f6; background:#f9fafb; display:flex; justify-content:flex-end; gap:8px;">
@@ -146,7 +152,7 @@
       <h5 style="margin:0; font-weight:600;"><i class="fas fa-edit" style="color:var(--primary); margin-right:8px;"></i>Update Announcement</h5>
       <button type="button" class="btn-close" onclick="closeEditModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:var(--gray);">&times;</button>
     </div>
-    <form method="POST" action="{{ route('admin.bulletins.update') }}">
+    <form method="POST" action="{{ route('admin.bulletins.update') }}" enctype="multipart/form-data">
       @csrf
       <input type="hidden" name="bulletin_id" id="modal_bulletin_id">
       
@@ -177,6 +183,12 @@
         <div class="form-group" style="margin:0;">
           <label class="form-label">Announcement Body / Content *</label>
           <textarea name="content" id="modal_content" class="form-control" rows="6" required></textarea>
+        </div>
+
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" for="modal_image">Replace Announcement Image <small style="color:#6b7280;font-weight:400;">(optional)</small></label>
+          <input id="modal_image" type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
+          <small style="color:#6b7280;">PNG, JPG, or JPEG only. Leave empty to keep the current image.</small>
         </div>
       </div>
 

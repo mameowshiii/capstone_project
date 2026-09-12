@@ -6,6 +6,7 @@ use App\Models\BulletinAnnouncement;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class BulletinController extends Controller
 {
@@ -41,11 +42,15 @@ class BulletinController extends Controller
             'content' => 'required|string',
             'category' => 'required|string|max:100',
             'is_pinned' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
+
+        $imagePath = $this->storeImage($request);
 
         $bulletin = BulletinAnnouncement::create([
             'title' => $request->title,
             'content' => $request->content,
+            'image_path' => $imagePath,
             'category' => $request->category,
             'is_pinned' => $request->has('is_pinned'),
             'published_at' => now(),
@@ -65,12 +70,19 @@ class BulletinController extends Controller
             'content' => 'required|string',
             'category' => 'required|string|max:100',
             'is_pinned' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         $bulletin = BulletinAnnouncement::findOrFail($request->bulletin_id);
+        $imagePath = $bulletin->image_path;
+        if ($request->hasFile('image')) {
+            $this->deleteImage($imagePath);
+            $imagePath = $this->storeImage($request);
+        }
         $bulletin->update([
             'title' => $request->title,
             'content' => $request->content,
+            'image_path' => $imagePath,
             'category' => $request->category,
             'is_pinned' => $request->has('is_pinned'),
         ]);
@@ -84,6 +96,7 @@ class BulletinController extends Controller
     {
         $bulletin = BulletinAnnouncement::findOrFail($id);
         $title = $bulletin->title;
+        $this->deleteImage($bulletin->image_path);
         $bulletin->delete();
 
         ActivityLog::log('DELETE_BULLETIN', 'Bulletins', "Deleted announcement: {$title}");
@@ -99,5 +112,27 @@ class BulletinController extends Controller
             ->paginate(8);
 
         return view('resident.bulletins', compact('bulletins'));
+    }
+
+    private function storeImage(Request $request): ?string
+    {
+        if (!$request->hasFile('image')) {
+            return null;
+        }
+
+        $directory = public_path('assets/uploads/bulletins');
+        File::ensureDirectoryExists($directory);
+        $file = $request->file('image');
+        $filename = now()->format('YmdHis') . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move($directory, $filename);
+
+        return 'bulletins/' . $filename;
+    }
+
+    private function deleteImage(?string $imagePath): void
+    {
+        if ($imagePath) {
+            File::delete(public_path('assets/uploads/' . $imagePath));
+        }
     }
 }

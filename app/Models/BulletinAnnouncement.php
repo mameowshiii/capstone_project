@@ -14,6 +14,7 @@ class BulletinAnnouncement extends Model
     protected $fillable = [
         'title',
         'content',
+        'image_path',
         'category',
         'published_at',
         'created_by',
