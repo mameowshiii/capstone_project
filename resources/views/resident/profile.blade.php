@@ -3,7 +3,7 @@
 @section('title', 'My Profile')
 
 @section('content')
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto;">
+<div class="profile-grid">
 
   <!-- Profile Card -->
   <div class="card" style="grid-column:span 2;">

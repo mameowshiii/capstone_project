@@ -2,6 +2,20 @@
 
 @section('title', 'Borrow Equipment')
 
+@section('styles')
+<style>
+@media (max-width: 640px) {
+  .borrows-table-wrap { display: none !important; }
+  .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; }
+}
+@media (min-width: 641px) {
+  .borrow-cards { display: none !important; }
+}
+.native-mobile-app .borrows-table-wrap { display: none !important; }
+.native-mobile-app .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; }
+</style>
+@endsection
+
 @section('content')
 <div class="card">
   <div class="card-header" style="flex-wrap:wrap; gap:12px;">
@@ -24,7 +38,8 @@
     </div>
   @endif
 
-  <div class="table-wrapper">
+  {{-- Desktop Table --}}
+  <div class="borrows-table-wrap table-wrapper">
     <table class="table">
       <thead>
         <tr>
@@ -97,6 +112,68 @@
         @endif
       </tbody>
     </table>
+  </div>
+
+  {{-- Mobile Cards for APK & Phones --}}
+  <div class="borrow-cards mobile-card-list">
+    @if ($borrows->isEmpty())
+      <div style="text-align:center;padding:40px 16px;">
+        <div style="font-size:40px;margin-bottom:10px;">⛺🪑</div>
+        <p class="text-muted" style="margin-bottom:16px;">You have no active borrow requests yet.</p>
+        <button type="button" class="btn btn-primary" onclick="openBorrowModal()">
+          <i class="fas fa-plus"></i> Request Borrow Equipment
+        </button>
+      </div>
+    @else
+      @foreach ($borrows as $b)
+        <div class="data-mobile-card">
+          <div class="data-mobile-card-header">
+            <div>
+              <div class="data-mobile-card-title">
+                @if($b->tent_quantity > 0)
+                  <span><i class="fas fa-campground" style="color:#d97706;"></i> {{ $b->tent_quantity }} Tents </span>
+                @endif
+                @if($b->chair_quantity > 0)
+                  <span><i class="fas fa-chair" style="color:#2563eb;"></i> {{ $b->chair_quantity }} Chairs </span>
+                @endif
+                @if($b->table_quantity > 0)
+                  <span><i class="fas fa-table" style="color:#10b981;"></i> {{ $b->table_quantity }} Tables </span>
+                @endif
+              </div>
+              <div class="data-mobile-card-subtitle">
+                <i class="fas fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($b->borrow_date)->format('M d, Y') }} &rarr; {{ \Carbon\Carbon::parse($b->return_date)->format('M d, Y') }}
+              </div>
+            </div>
+            <span class="badge bg-{{ $b->status === 'returned' ? 'success' : ($b->status === 'approved' ? 'info' : ($b->status === 'rejected' ? 'danger' : 'warning')) }}">
+              {{ ucfirst($b->status) }}
+            </span>
+          </div>
+
+          <div class="data-mobile-card-grid">
+            <div class="data-mobile-card-item" style="grid-column:span 2;">
+              <label>Purpose</label>
+              <div>{{ $b->purpose }}</div>
+            </div>
+            @if($b->verification_document)
+              <div class="data-mobile-card-item" style="grid-column:span 2;">
+                <label>Verification Document</label>
+                <div>
+                  <a href="{{ asset('assets/uploads/borrow_documents/' . $b->verification_document) }}" target="_blank" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:4px; margin-top:2px;">
+                    <i class="fas fa-file-image" style="color:var(--primary);"></i> View Attachment
+                  </a>
+                </div>
+              </div>
+            @endif
+            @if($b->remarks)
+              <div class="data-mobile-card-item" style="grid-column:span 2;">
+                <label>Feedback / Notes</label>
+                <div style="font-size:12.5px; color:#475569;">{{ $b->remarks }}</div>
+              </div>
+            @endif
+          </div>
+        </div>
+      @endforeach
+    @endif
   </div>
   @if ($borrows->hasPages())
     <div style="padding:16px 20px;border-top:1px solid #e5e7eb;display:flex;justify-content:center;">

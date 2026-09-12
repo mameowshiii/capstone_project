@@ -38,11 +38,16 @@ class MainActivity : Activity() {
         root.addView(errorView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         setContentView(root)
 
+        webView.overScrollMode = View.OVER_SCROLL_NEVER
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
         val defaultUa = webView.settings.userAgentString
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
+            allowFileAccess = true
+            allowContentAccess = true
             cacheMode = WebSettings.LOAD_DEFAULT
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             builtInZoomControls = false

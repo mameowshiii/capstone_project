@@ -49,7 +49,7 @@
         <!-- Certificate type cards -->
         <div class="form-group">
           <label class="form-label">Select Document to Request *</label>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:8px;">
+          <div class="cert-selection-grid">
             @foreach ($certs as $c)
             <label style="cursor:pointer;">
               <input type="radio" name="certificate_id" value="{{ $c->id }}"

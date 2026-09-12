@@ -14,14 +14,14 @@
 @media (max-width: 640px) {
   .requests-table-wrap { display: none; }
 
-  .request-cards { display: flex; flex-direction: column; gap: 12px; padding: 0; }
+  .request-cards { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
 
   .request-card {
     background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
   }
 
   .request-card-header {
@@ -29,43 +29,47 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .request-card-title {
     font-size: 15px;
     font-weight: 700;
-    color: #161616;
+    color: #0f172a;
     line-height: 1.3;
   }
 
   .request-card-track {
-    font-size: 10px;
-    color: #6b7280;
-    font-family: monospace;
-    margin-top: 2px;
+    font-size: 11px;
+    color: #64748b;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    margin-top: 3px;
   }
 
   .request-card-meta {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
+    gap: 10px 12px;
     margin-bottom: 12px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
   }
 
   .request-card-meta-item label {
     display: block;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .5px;
-    color: #9ca3af;
+    letter-spacing: .04em;
+    color: #64748b;
     margin-bottom: 2px;
   }
 
   .request-card-meta-item span {
     font-size: 13px;
-    color: #374151;
+    color: #1e293b;
     font-weight: 500;
   }
 
@@ -74,19 +78,22 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 10px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid #f1f5f9;
     gap: 8px;
   }
 
   .request-card-date {
     font-size: 11px;
-    color: #9ca3af;
+    color: #64748b;
   }
 }
 
 @media (min-width: 641px) {
   .request-cards { display: none; }
 }
+
+.native-mobile-app .requests-table-wrap { display: none !important; }
+.native-mobile-app .request-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px; }
 </style>
 @endsection
 
