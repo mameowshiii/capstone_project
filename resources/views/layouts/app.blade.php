@@ -183,21 +183,28 @@
           <span class="topbar-title">@yield('title', 'Dashboard')</span>
         </div>
         <div class="topbar-right">
-          <a href="{{ in_array(Auth::user()->role, ['admin', 'staff']) ? route('admin.profile') : route('resident.profile') }}" class="topbar-profile-link" title="Profile">
-            <span class="topbar-avatar">
-              @if($photo)
-                <img src="{{ asset('assets/uploads/' . $photo) }}" alt="Profile photo">
-              @else
-                {{ strtoupper(substr(Auth::user()->resident ? Auth::user()->resident->first_name : Auth::user()->username, 0, 1)) }}
-              @endif
-            </span>
-            <span class="topbar-profile-name">
-              {{ Auth::user()->resident ? Auth::user()->resident->first_name : Auth::user()->username }}
-            </span>
-          </a>
-          <a href="{{ in_array(Auth::user()->role, ['admin', 'staff']) ? route('admin.dashboard') : route('resident.my_requests') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-home"></i>
-          </a>
+          @if(str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp') && Auth::user()->role === 'resident')
+            <button type="button" class="btn btn-outline-secondary btn-sm" title="Log out"
+              onclick="document.getElementById('logoutModal').style.display='flex'">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          @else
+            <a href="{{ in_array(Auth::user()->role, ['admin', 'staff']) ? route('admin.profile') : route('resident.profile') }}" class="topbar-profile-link" title="Profile">
+              <span class="topbar-avatar">
+                @if($photo)
+                  <img src="{{ asset('assets/uploads/' . $photo) }}" alt="Profile photo">
+                @else
+                  {{ strtoupper(substr(Auth::user()->resident ? Auth::user()->resident->first_name : Auth::user()->username, 0, 1)) }}
+                @endif
+              </span>
+              <span class="topbar-profile-name">
+                {{ Auth::user()->resident ? Auth::user()->resident->first_name : Auth::user()->username }}
+              </span>
+            </a>
+            <a href="{{ in_array(Auth::user()->role, ['admin', 'staff']) ? route('admin.dashboard') : route('resident.my_requests') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-home"></i>
+            </a>
+          @endif
         </div>
       </header>
 
