@@ -122,11 +122,11 @@
         <span class="nav-section-label">General</span>
         <form method="POST" action="{{ route('logout') }}" id="logout-form" style="margin:0;">
           @csrf
-          <button type="submit" class="nav-link" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;"
-            onclick="return confirm('Log out?')">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
         </form>
+        <button type="button" class="nav-link" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;"
+          onclick="document.getElementById('logoutModal').style.display='flex'">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -241,6 +241,10 @@
         <i class="fas fa-bars"></i>
         <span>More</span>
       </button>
+      <button class="mobile-nav-item" style="color:#dc2626;" onclick="document.getElementById('logoutModal').style.display='flex'">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
     @else
       <a href="{{ route('resident.request') }}" class="mobile-nav-item {{ Route::is('resident.request') ? 'active' : '' }}">
         <i class="fas fa-plus-circle"></i>
@@ -258,14 +262,36 @@
         <i class="fas fa-user"></i>
         <span>Profile</span>
       </a>
-      <button class="mobile-nav-item" onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show');">
-        <i class="fas fa-bars"></i>
-        <span>More</span>
+      <button class="mobile-nav-item" style="color:#dc2626;" onclick="document.getElementById('logoutModal').style.display='flex'">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
       </button>
     @endif
   </nav>
 
   <script src="{{ asset('assets/js/main.js') }}"></script>
   @yield('scripts')
+
+  {{-- Logout Confirmation Modal (works in all WebViews / APK) --}}
+  <div id="logoutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; max-width:320px; width:100%; padding:28px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.25); text-align:center;">
+      <div style="width:56px; height:56px; background:#fef2f2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+        <i class="fas fa-sign-out-alt" style="font-size:22px; color:#b91c1c;"></i>
+      </div>
+      <h5 style="margin:0 0 8px; font-size:17px; font-weight:700; color:#111;">Log Out?</h5>
+      <p style="margin:0 0 24px; font-size:13.5px; color:#6b7280;">Are you sure you want to log out of your account?</p>
+      <div style="display:flex; gap:10px;">
+        <button onclick="document.getElementById('logoutModal').style.display='none'"
+          style="flex:1; padding:11px; border-radius:8px; border:1.5px solid #e5e7eb; background:#f9fafb; font-size:14px; font-weight:600; cursor:pointer; color:#374151;">
+          Cancel
+        </button>
+        <button onclick="document.getElementById('logout-form').submit()"
+          style="flex:1; padding:11px; border-radius:8px; border:none; background:#b91c1c; font-size:14px; font-weight:700; cursor:pointer; color:#fff;">
+          <i class="fas fa-sign-out-alt"></i> Log Out
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
