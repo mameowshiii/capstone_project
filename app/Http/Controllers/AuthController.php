@@ -23,14 +23,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'username' => 'required|string',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Attempt login with username or email
-        $loginField = filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
-        $user = User::where($loginField, $credentials['username'])->first();
+        $user = User::where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             // The Android application is a dedicated resident portal.  Do not
@@ -64,7 +61,7 @@ class AuthController extends Controller
             return $this->redirectUser();
         }
 
-        return back()->with('error', 'Invalid username or password. Please try again.');
+        return back()->with('error', 'Invalid email or password. Please try again.');
     }
 
     public function register(Request $request)

@@ -177,6 +177,9 @@
           <button id="sidebar-toggle" style="background:none;border:none;cursor:pointer;font-size:20px;color:#374151;">
             <i class="fas fa-bars"></i>
           </button>
+          @if(str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp') && Auth::user()->role === 'resident')
+            <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili logo" style="width:34px;height:34px;object-fit:contain;margin-right:8px;">
+          @endif
           <span class="topbar-title">@yield('title', 'Dashboard')</span>
         </div>
         <div class="topbar-right">
