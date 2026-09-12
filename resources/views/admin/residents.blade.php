@@ -38,7 +38,7 @@
     </div>
   </div>
   <div class="table-wrapper">
-    <table class="table">
+    <table class="datatable" id="residents-table">
       <thead>
         <tr>
           <th>#</th>
