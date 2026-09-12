@@ -29,6 +29,7 @@ android {
         release {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("debug")
+            isCrunchPngs = false
         }
     }
 

@@ -2,12 +2,16 @@ package com.barangaypili.residentportal
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -23,6 +27,9 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
     private lateinit var errorView: LinearLayout
+
+    private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
+    private val FILE_CHOOSER_REQUEST_CODE = 2001
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +52,6 @@ class MainActivity : Activity() {
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
-            databaseEnabled = true
             allowFileAccess = true
             allowContentAccess = true
             cacheMode = WebSettings.LOAD_DEFAULT
@@ -54,7 +60,6 @@ class MainActivity : Activity() {
             displayZoomControls = false
             loadWithOverviewMode = true
             useWideViewPort = true
-            // Custom UA so the server can detect the native WebView and hide the install banner
             userAgentString = "$defaultUa BrgyPiliApp/1.0"
         }
 
@@ -84,6 +89,40 @@ class MainActivity : Activity() {
             }
         }
 
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                progressBar.progress = newProgress
+                if (newProgress >= 100) {
+                    progressBar.visibility = View.GONE
+                } else {
+                    progressBar.visibility = View.VISIBLE
+                }
+            }
+
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                fileUploadCallback?.onReceiveValue(null)
+                fileUploadCallback = filePathCallback
+
+                val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+
+                return try {
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+                    true
+                } catch (e: Exception) {
+                    fileUploadCallback?.onReceiveValue(null)
+                    fileUploadCallback = null
+                    false
+                }
+            }
+        }
+
         if (savedInstanceState == null) {
             val startUrl = if (BuildConfig.PORTAL_URL.endsWith("/")) {
                 "${BuildConfig.PORTAL_URL}register"
@@ -93,6 +132,28 @@ class MainActivity : Activity() {
             webView.loadUrl(startUrl)
         } else {
             webView.restoreState(savedInstanceState)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (fileUploadCallback == null) return
+            val results: Array<Uri>? = if (resultCode == RESULT_OK && data != null) {
+                if (data.clipData != null) {
+                    val count = data.clipData!!.itemCount
+                    val uris = Array(count) { i -> data.clipData!!.getItemAt(i).uri }
+                    uris
+                } else if (data.data != null) {
+                    arrayOf(data.data!!)
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+            fileUploadCallback?.onReceiveValue(results)
+            fileUploadCallback = null
         }
     }
 
