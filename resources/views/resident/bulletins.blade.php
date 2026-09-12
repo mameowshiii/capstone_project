@@ -17,28 +17,29 @@
     </div>
   @else
     @foreach($bulletins as $b)
-      <div class="card" style="margin:0; padding:24px; border-left: 6px solid {{ $b->is_pinned ? '#eab308' : ($b->category === 'Advisory' ? 'var(--primary)' : ($b->category === 'Event' ? '#2563eb' : '#0d9488')) }}; position:relative; box-shadow:var(--shadow);">
+      <div class="card bulletin-card" style="margin:0; padding:20px; border-left: 5px solid {{ $b->is_pinned ? '#eab308' : ($b->category === 'Advisory' ? 'var(--primary)' : ($b->category === 'Event' ? '#2563eb' : '#0d9488')) }}; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
         
-        @if($b->is_pinned)
-          <div style="position:absolute; top:20px; right:24px; color:#eab308; font-size:12px; font-weight:700; display:flex; align-items:center; gap:4px; background:#fef9c3; padding:4px 8px; border-radius:6px;">
-            <i class="fas fa-thumbtack"></i> PINNED NOTICE
-          </div>
-        @else
-          <div style="position:absolute; top:20px; right:24px; color:var(--gray); font-size:11px;">
-            <span class="badge bg-{{ $b->category === 'Advisory' ? 'danger' : ($b->category === 'Event' ? 'primary' : ($b->category === 'Meeting' ? 'info' : 'secondary')) }}">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px; flex-wrap:wrap;">
+          <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin:0; flex:1; min-width:200px; line-height:1.35;">{{ $b->title }}</h3>
+          
+          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            @if($b->is_pinned)
+              <span style="display:inline-flex; align-items:center; gap:4px; background:#fef9c3; color:#a16207; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid #fef08a;">
+                <i class="fas fa-thumbtack"></i> PINNED
+              </span>
+            @endif
+            <span class="badge bg-{{ $b->category === 'Advisory' ? 'danger' : ($b->category === 'Event' ? 'primary' : ($b->category === 'Meeting' ? 'info' : 'secondary')) }}" style="font-size:10.5px;">
               {{ $b->category }}
             </span>
           </div>
-        @endif
-
-        <h3 style="font-size:18px; font-weight:700; color:var(--dark); margin:0 0 8px; max-width:80%;">{{ $b->title }}</h3>
+        </div>
         
-        <div style="font-size:12px; color:var(--gray); display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-          <span><i class="fas fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($b->published_at)->format('M d, Y h:i A') }}</span>
-          <span><i class="fas fa-user-edit"></i> {{ $b->creator->username ?? 'Official' }}</span>
+        <div style="font-size:12px; color:#64748b; display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #f1f5f9;">
+          <span><i class="far fa-calendar-alt" style="margin-right:4px;"></i> {{ \Carbon\Carbon::parse($b->published_at)->format('M d, Y · h:i A') }}</span>
+          <span><i class="far fa-user" style="margin-right:4px;"></i> {{ $b->creator->username ?? 'Official' }}</span>
         </div>
 
-        <div style="font-size:14px; line-height:1.7; color:#374151; white-space:pre-line;">
+        <div style="font-size:14px; line-height:1.65; color:#334155; white-space:pre-line;">
           {{ $b->content }}
         </div>
       </div>

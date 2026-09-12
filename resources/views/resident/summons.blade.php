@@ -6,13 +6,13 @@
 <style>
 @media (max-width: 640px) {
   .summons-table-wrap { display: none !important; }
-  .summon-cards { display: flex !important; flex-direction: column; gap: 12px; }
+  .summon-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px; }
 }
 @media (min-width: 641px) {
   .summon-cards { display: none !important; }
 }
 .native-mobile-app .summons-table-wrap { display: none !important; }
-.native-mobile-app .summon-cards { display: flex !important; flex-direction: column; gap: 12px; }
+.native-mobile-app .summon-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px; }
 </style>
 @endsection
 

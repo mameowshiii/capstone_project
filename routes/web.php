@@ -51,6 +51,9 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::match(['get', 'post'], '/track', [TrackingController::class, 'track'])->name('track');
+Route::get('/mobile-app', function () {
+    return view('mobile_app');
+})->name('mobile.app');
 
 Route::middleware('auth')->get('/home', function () {
     $role = auth()->user()->role;

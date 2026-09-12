@@ -6,13 +6,29 @@
 <style>
 @media (max-width: 640px) {
   .borrows-table-wrap { display: none !important; }
-  .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; }
+  .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px; }
+  
+  .modal-content-borrow {
+    margin: auto 0 0 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 88vh !important;
+    width: 100% !important;
+  }
 }
 @media (min-width: 641px) {
   .borrow-cards { display: none !important; }
 }
 .native-mobile-app .borrows-table-wrap { display: none !important; }
-.native-mobile-app .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; }
+.native-mobile-app .borrow-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width: 480px){
+  .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+}
 </style>
 @endsection
 
@@ -129,22 +145,28 @@
         <div class="data-mobile-card">
           <div class="data-mobile-card-header">
             <div>
-              <div class="data-mobile-card-title">
+              <div class="data-mobile-card-title" style="display:flex; flex-wrap:wrap; gap:6px;">
                 @if($b->tent_quantity > 0)
-                  <span><i class="fas fa-campground" style="color:#d97706;"></i> {{ $b->tent_quantity }} Tents </span>
+                  <span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">
+                    <i class="fas fa-campground"></i> {{ $b->tent_quantity }} Tents
+                  </span>
                 @endif
                 @if($b->chair_quantity > 0)
-                  <span><i class="fas fa-chair" style="color:#2563eb;"></i> {{ $b->chair_quantity }} Chairs </span>
+                  <span style="display:inline-flex; align-items:center; gap:4px; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">
+                    <i class="fas fa-chair"></i> {{ $b->chair_quantity }} Chairs
+                  </span>
                 @endif
                 @if($b->table_quantity > 0)
-                  <span><i class="fas fa-table" style="color:#10b981;"></i> {{ $b->table_quantity }} Tables </span>
+                  <span style="display:inline-flex; align-items:center; gap:4px; background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">
+                    <i class="fas fa-table"></i> {{ $b->table_quantity }} Tables
+                  </span>
                 @endif
               </div>
-              <div class="data-mobile-card-subtitle">
+              <div class="data-mobile-card-subtitle" style="margin-top:6px;">
                 <i class="fas fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($b->borrow_date)->format('M d, Y') }} &rarr; {{ \Carbon\Carbon::parse($b->return_date)->format('M d, Y') }}
               </div>
             </div>
-            <span class="badge bg-{{ $b->status === 'returned' ? 'success' : ($b->status === 'approved' ? 'info' : ($b->status === 'rejected' ? 'danger' : 'warning')) }}">
+            <span class="badge bg-{{ $b->status === 'returned' ? 'success' : ($b->status === 'approved' ? 'info' : ($b->status === 'rejected' ? 'danger' : 'warning')) }}" style="flex-shrink:0;">
               {{ ucfirst($b->status) }}
             </span>
           </div>
@@ -183,18 +205,18 @@
 </div>
 
 <!-- Borrow Equipment Modal -->
-<div class="modal" id="borrowModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
-  <div class="modal-content" style="background:#fff; border-radius:16px; max-width:520px; width:100%; overflow:hidden; box-shadow:var(--shadow-md); margin-top:40px; margin-bottom:40px;">
-    <div class="modal-header" style="padding:16px 24px; border-bottom:1px solid #f3f4f6; display:flex; justify-content:between; align-items:center;">
-      <h5 style="margin:0; font-weight:600;"><i class="fas fa-hand-holding" style="color:var(--primary); margin-right:8px;"></i>Request Borrow Equipment</h5>
-      <button type="button" class="btn-close" onclick="closeBorrowModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:var(--gray);">&times;</button>
+<div class="modal" id="borrowModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto;">
+  <div class="modal-content modal-content-borrow" style="background:#fff; border-radius:16px; max-width:520px; width:100%; overflow:hidden; box-shadow:var(--shadow-md); margin-top:20px; margin-bottom:20px;">
+    <div class="modal-header" style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; justify-content:space-between; align-items:center;">
+      <h5 style="margin:0; font-weight:700;"><i class="fas fa-hand-holding" style="color:var(--primary); margin-right:8px;"></i>Request Borrow Equipment</h5>
+      <button type="button" class="btn-close" onclick="closeBorrowModal()" style="background:none; border:none; cursor:pointer; font-size:22px; color:var(--gray);">&times;</button>
     </div>
     <form method="POST" action="{{ route('resident.borrows.store') }}" enctype="multipart/form-data">
       @csrf
       
-      <div style="padding:24px; display:flex; flex-direction:column; gap:16px; max-height:calc(100vh - 200px); overflow-y:auto;">
+      <div style="padding:20px; display:flex; flex-direction:column; gap:16px; max-height:calc(100vh - 180px); overflow-y:auto;">
         <div class="form-group" style="margin:0;">
-          <label class="form-label">Select Equipment Type *</label>
+          <label class="form-label" style="font-weight:700;">Select Equipment Type *</label>
           <select name="item_type" id="borrow_item_type" class="form-select" required onchange="toggleQuantityFields()">
             <option value="all">Multiple / All Items</option>
             <option value="tent">Tent Only</option>
@@ -204,7 +226,7 @@
           </select>
         </div>
 
-        <div style="margin:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:16px;" id="quantities_grid">
+        <div style="margin:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:12px;" id="quantities_grid">
           <div class="form-group" style="margin:0;" id="tent_group">
             <label class="form-label">Tent Qty (Max 5) *</label>
             <input type="number" name="tent_quantity" id="tent_quantity" class="form-control" value="0" min="0" max="5" required>
@@ -242,26 +264,13 @@
         </div>
       </div>
 
-      <div style="padding:16px 24px; border-top:1px solid #f3f4f6; background:#f9fafb; display:flex; justify-content:flex-end; gap:8px;">
+      <div style="padding:14px 20px; border-top:1px solid #f3f4f6; background:#f9fafb; display:flex; justify-content:flex-end; gap:8px;">
         <button type="button" class="btn btn-outline-secondary" onclick="closeBorrowModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Submit Request</button>
+        <button type="submit" class="btn btn-primary" style="font-weight:700;"><i class="fas fa-paper-plane"></i> Submit Request</button>
       </div>
     </form>
   </div>
 </div>
-
-@section('styles')
-<style>
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  @media(max-width:480px){
-    .grid-2 { grid-template-columns: 1fr; }
-  }
-</style>
-@endsection
 
 <script>
   function openBorrowModal() {

@@ -19,9 +19,14 @@
   .request-card {
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    box-shadow: 0 2px 6px rgba(0,0,0,.03);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .request-card:active {
+    transform: scale(0.99);
   }
 
   .request-card-header {
@@ -33,17 +38,43 @@
   }
 
   .request-card-title {
-    font-size: 15px;
+    font-size: 15.5px;
     font-weight: 700;
     color: #0f172a;
     line-height: 1.3;
   }
 
+  .request-card-track-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
   .request-card-track {
-    font-size: 11px;
-    color: #64748b;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #475569;
     font-family: ui-monospace, SFMono-Regular, monospace;
-    margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-copy-code {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-copy-code:hover, .btn-copy-code:active {
+    color: var(--primary);
   }
 
   .request-card-meta {
@@ -53,16 +84,16 @@
     margin-bottom: 12px;
     background: #f8fafc;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #f1f5f9;
   }
 
   .request-card-meta-item label {
     display: block;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .04em;
+    letter-spacing: .05em;
     color: #64748b;
     margin-bottom: 2px;
   }
@@ -70,7 +101,7 @@
   .request-card-meta-item span {
     font-size: 13px;
     color: #1e293b;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .request-card-footer {
@@ -83,8 +114,11 @@
   }
 
   .request-card-date {
-    font-size: 11px;
+    font-size: 11.5px;
     color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 }
 
@@ -188,7 +222,12 @@
           <div class="request-card-header">
             <div>
               <div class="request-card-title">{{ $r->certificate->name }}</div>
-              <div class="request-card-track">{{ $r->tracking_number }}</div>
+              <div class="request-card-track-row">
+                <span class="request-card-track">{{ $r->tracking_number }}</span>
+                <button type="button" class="btn-copy-code" onclick="copyTrackingCode('{{ $r->tracking_number }}', this)" title="Copy tracking number">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
             </div>
             <span class="badge bg-{{ $r->status === 'pending' ? 'warning' : ($r->status === 'processing' ? 'info' : ($r->status === 'approved' ? 'success' : ($r->status === 'rejected' ? 'danger' : 'primary'))) }}" style="flex-shrink:0;">
               {{ ucfirst($r->status) }}
@@ -206,27 +245,29 @@
                 @if ($r->certificate->fee > 0)
                   ₱{{ number_format($r->certificate->fee, 2) }}
                 @else
-                  <span class="badge bg-success">FREE</span>
+                  <span class="badge bg-success" style="font-size:10px;">FREE</span>
                 @endif
               </span>
             </div>
             <div class="request-card-meta-item">
               <label>Payment</label>
-              <span class="badge bg-{{ ($r->payment->payment_status ?? 'unpaid') === 'paid' ? 'success' : (($r->payment->payment_status ?? 'unpaid') === 'waived' ? 'secondary' : 'danger') }}">
+              <span class="badge bg-{{ ($r->payment->payment_status ?? 'unpaid') === 'paid' ? 'success' : (($r->payment->payment_status ?? 'unpaid') === 'waived' ? 'secondary' : 'danger') }}" style="font-size:10px;">
                 {{ ucfirst($r->payment->payment_status ?? 'unpaid') }}
               </span>
             </div>
             <div class="request-card-meta-item">
               <label>Filed</label>
-              <span style="font-size:11px;">{{ \Carbon\Carbon::parse($r->requested_at)->format('M d, Y') }}</span>
+              <span style="font-size:12px;">{{ \Carbon\Carbon::parse($r->requested_at)->format('M d, Y') }}</span>
             </div>
           </div>
 
           <div class="request-card-footer">
-            <span class="request-card-date">{{ \Carbon\Carbon::parse($r->requested_at)->format('h:i A') }}</span>
+            <span class="request-card-date">
+              <i class="far fa-clock"></i> {{ \Carbon\Carbon::parse($r->requested_at)->format('h:i A') }}
+            </span>
             <a href="{{ route('track', ['tracking' => $r->tracking_number]) }}"
-              class="btn btn-outline-secondary btn-sm" target="_blank">
-              <i class="fas fa-search-location"></i> Track
+              class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:5px;">
+              <i class="fas fa-search-location" style="color:var(--primary);"></i> Track Status
             </a>
           </div>
         </div>
@@ -240,4 +281,27 @@
     </div>
   @endif
 </div>
+@endsection
+
+@section('scripts')
+<script>
+function copyTrackingCode(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check" style="color:#16a34a;"></i>';
+    setTimeout(() => { btn.innerHTML = originalHtml; }, 1800);
+  }).catch(() => {
+    // Fallback
+    const input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check" style="color:#16a34a;"></i>';
+    setTimeout(() => { btn.innerHTML = originalHtml; }, 1800);
+  });
+}
+</script>
 @endsection

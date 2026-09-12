@@ -246,22 +246,26 @@
         <span>Logout</span>
       </button>
     @else
-      <a href="{{ route('resident.request') }}" class="mobile-nav-item {{ Route::is('resident.request') ? 'active' : '' }}">
-        <i class="fas fa-plus-circle"></i>
-        <span>New</span>
-      </a>
       <a href="{{ route('resident.my_requests') }}" class="mobile-nav-item {{ Route::is('resident.my_requests') ? 'active' : '' }}">
         <i class="fas fa-list"></i>
         <span>Requests</span>
       </a>
+      <a href="{{ route('resident.request') }}" class="mobile-nav-item {{ Route::is('resident.request') ? 'active' : '' }}">
+        <i class="fas fa-plus-circle"></i>
+        <span>New</span>
+      </a>
+      <a href="{{ route('resident.borrows') }}" class="mobile-nav-item {{ Route::is('resident.borrows') ? 'active' : '' }}">
+        <i class="fas fa-hand-holding"></i>
+        <span>Borrow</span>
+      </a>
       <a href="{{ route('resident.bulletins') }}" class="mobile-nav-item {{ Route::is('resident.bulletins') ? 'active' : '' }}">
         <i class="fas fa-bullhorn"></i>
-        <span>Bulletins</span>
+        <span>Notices</span>
       </a>
-      <a href="{{ route('resident.profile') }}" class="mobile-nav-item {{ Route::is('resident.profile') ? 'active' : '' }}">
-        <i class="fas fa-user"></i>
-        <span>Profile</span>
-      </a>
+      <button class="mobile-nav-item" onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show');">
+        <i class="fas fa-bars"></i>
+        <span>More</span>
+      </button>
       <button class="mobile-nav-item" style="color:#dc2626;" onclick="document.getElementById('logoutModal').style.display='flex'">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>

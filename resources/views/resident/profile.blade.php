@@ -43,10 +43,10 @@
         <button class="btn btn-primary"><i class="fas fa-upload"></i> Update Photo</button>
       </form>
       @if ($resident->photo)
-      <form method="POST" action="{{ route('resident.profile') }}" style="margin-top:10px;">
+      <form method="POST" action="{{ route('resident.profile') }}" id="remove-photo-form" style="margin-top:12px;">
         @csrf
         <input type="hidden" name="action" value="remove_photo">
-        <button class="btn btn-outline-secondary btn-sm" onclick="return confirm('Remove profile photo?')">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('removePhotoModal').style.display='flex'">
           <i class="fas fa-trash"></i> Remove Photo
         </button>
       </form>
@@ -173,7 +173,18 @@
               updateHiddenValue();
               if (hiddenInput.value.length !== 6) {
                 e.preventDefault();
-                alert('Please enter all 6 digits of the code.');
+                let err = document.getElementById('otp-error-msg');
+                if (!err) {
+                  err = document.createElement('div');
+                  err.id = 'otp-error-msg';
+                  err.style.color = '#dc2626';
+                  err.style.fontSize = '12px';
+                  err.style.fontWeight = '600';
+                  err.style.textAlign = 'center';
+                  err.style.marginTop = '6px';
+                  document.getElementById('password-otp-inputs').parentNode.appendChild(err);
+                }
+                err.textContent = 'Please enter all 6 digits of the confirmation code.';
               }
             });
           });
@@ -195,11 +206,32 @@
             <label class="form-label">Confirm New Password</label>
             <input type="password" name="confirm_password" class="form-control" required minlength="6">
           </div>
-          <button type="submit" class="btn btn-warning w-100"><i class="fas fa-key"></i> Request Password Change</button>
+          <button type="submit" class="btn btn-warning w-100" style="height:44px; font-weight:700; border-radius:10px;"><i class="fas fa-key"></i> Request Password Change</button>
         </form>
       @endif
     </div>
   </div>
 
+</div>
+
+{{-- Remove Photo Confirmation Modal (WebView-safe) --}}
+<div id="removePhotoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:16px; max-width:320px; width:100%; padding:24px 20px; box-shadow:0 20px 50px rgba(0,0,0,0.25); text-align:center;">
+    <div style="width:50px; height:50px; background:#fef2f2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+      <i class="fas fa-trash-alt" style="font-size:20px; color:#b91c1c;"></i>
+    </div>
+    <h5 style="margin:0 0 6px; font-size:16.5px; font-weight:700; color:#111;">Remove Photo?</h5>
+    <p style="margin:0 0 20px; font-size:13px; color:#6b7280;">Are you sure you want to delete your profile photo?</p>
+    <div style="display:flex; gap:10px;">
+      <button onclick="document.getElementById('removePhotoModal').style.display='none'"
+        style="flex:1; padding:10px; border-radius:8px; border:1.5px solid #e5e7eb; background:#f9fafb; font-size:13.5px; font-weight:600; cursor:pointer; color:#374151;">
+        Cancel
+      </button>
+      <button onclick="document.getElementById('remove-photo-form').submit()"
+        style="flex:1; padding:10px; border-radius:8px; border:none; background:#b91c1c; font-size:13.5px; font-weight:700; cursor:pointer; color:#fff;">
+        Remove
+      </button>
+    </div>
+  </div>
 </div>
 @endsection
