@@ -31,6 +31,22 @@
     .native-mobile-app .topbar {
       padding-top: env(safe-area-inset-top, 0px);
     }
+
+    /* The APK is a resident portal, not the desktop system. */
+    .native-mobile-app .sidebar,
+    .native-mobile-app .sidebar-overlay,
+    .native-mobile-app #sidebar-toggle {
+      display: none !important;
+    }
+
+    .native-mobile-app .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+    }
+
+    .native-mobile-app .page-content {
+      padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    }
   </style>
   @endif
 </head>
@@ -220,7 +236,24 @@
 
   <!-- Mobile Bottom Navigation -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
-    @if(in_array(Auth::user()->role, ['admin', 'staff']))
+    @if(str_contains(request()->header('User-Agent', ''), 'BrgyPiliApp') && Auth::user()->role === 'resident')
+      <a href="{{ route('resident.dashboard') }}" class="mobile-nav-item {{ Route::is('resident.dashboard') ? 'active' : '' }}">
+        <i class="fas fa-house"></i>
+        <span>Home</span>
+      </a>
+      <a href="{{ route('resident.my_requests') }}" class="mobile-nav-item {{ Route::is('resident.my_requests') || Route::is('resident.request') ? 'active' : '' }}">
+        <i class="fas fa-file-lines"></i>
+        <span>Requests</span>
+      </a>
+      <a href="{{ route('resident.bulletins') }}" class="mobile-nav-item {{ Route::is('resident.bulletins') ? 'active' : '' }}">
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+      </a>
+      <a href="{{ route('resident.profile') }}" class="mobile-nav-item {{ Route::is('resident.profile') ? 'active' : '' }}">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+    @elseif(in_array(Auth::user()->role, ['admin', 'staff']))
       <a href="{{ route('admin.dashboard') }}" class="mobile-nav-item {{ Route::is('admin.dashboard') ? 'active' : '' }}">
         <i class="fas fa-chart-pie"></i>
         <span>Dashboard</span>

@@ -54,7 +54,8 @@ class MainActivity : Activity() {
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
-            cacheMode = WebSettings.LOAD_DEFAULT
+            // Always fetch the current resident layout after the web portal is deployed.
+            cacheMode = WebSettings.LOAD_NO_CACHE
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             builtInZoomControls = false
             displayZoomControls = false

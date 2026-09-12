@@ -13,6 +13,23 @@ use Illuminate\Support\Facades\Storage;
 
 class ResidentController extends Controller
 {
+    public function home()
+    {
+        $resident = Auth::user()->resident;
+        if (!$resident) {
+            return redirect()->route('login')->with('error', 'Profile not found.');
+        }
+
+        $recentRequests = CertificateRequest::with('certificate')
+            ->where('resident_id', $resident->id)
+            ->whereNull('archived_at')
+            ->latest('requested_at')
+            ->take(3)
+            ->get();
+
+        return view('resident.home', compact('resident', 'recentRequests'));
+    }
+
     public function myRequests()
     {
         $resident = Auth::user()->resident;

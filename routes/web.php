@@ -65,9 +65,7 @@ Route::middleware('auth')->get('/home', function () {
 
 // ── Resident Routes ───────────────────────────────────────
 Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident.')->group(function () {
-    Route::get('/dashboard', function () {
-        return redirect()->route('resident.my_requests');
-    })->name('dashboard');
+    Route::get('/dashboard', [ResidentController::class, 'home'])->name('dashboard');
 
     Route::get('/my-requests', [ResidentController::class, 'myRequests'])->name('my_requests');
 
