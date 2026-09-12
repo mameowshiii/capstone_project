@@ -2,6 +2,8 @@
 
 This is a Kotlin Android WebView app for the existing Laravel resident portal. It opens the live portal, so residents keep using the same login, certificate requests, borrow requests, summons, announcements, and profile pages.
 
+The Android app identifies itself as `BrgyPiliApp`. The Laravel login endpoint rejects staff and administrator accounts for that client, and the WebView blocks `/admin` navigation. Admin and staff functions remain available only through the web application.
+
 ## Configure
 
 Before building the APK, update `PORTAL_URL` in `app/build.gradle.kts`:

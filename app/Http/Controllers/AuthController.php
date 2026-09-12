@@ -33,6 +33,11 @@ class AuthController extends Controller
         $user = User::where($loginField, $credentials['username'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            // The Android application is a dedicated resident portal.  Do not
+            // allow staff or administrator accounts to create an app session.
+            if (str_contains((string) $request->userAgent(), 'BrgyPiliApp') && $user->role !== 'resident') {
+                return back()->with('error', 'This mobile application is available to resident accounts only.');
+            }
             // Step 3 Check: Email verification check
             if ($user->role === 'resident' && $user->email_verified_at === null) {
                 if (!$user->verification_code) {

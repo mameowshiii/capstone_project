@@ -64,6 +64,19 @@ class MainActivity : Activity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val target = request?.url ?: return false
+
+                // Administrative pages are never part of the resident APK.
+                // The server also rejects non-resident app sign-ins; this client-side
+                // guard prevents accidental navigation through a stale or external link.
+                if (target.path?.startsWith("/admin") == true) {
+                    webView.loadUrl("${BuildConfig.PORTAL_URL.trimEnd('/')}/login")
+                    return true
+                }
+                return false
+            }
+
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                 progressBar.visibility = View.VISIBLE
                 errorView.visibility = View.GONE
@@ -124,11 +137,7 @@ class MainActivity : Activity() {
         }
 
         if (savedInstanceState == null) {
-            val startUrl = if (BuildConfig.PORTAL_URL.endsWith("/")) {
-                "${BuildConfig.PORTAL_URL}register"
-            } else {
-                "${BuildConfig.PORTAL_URL}/register"
-            }
+            val startUrl = "${BuildConfig.PORTAL_URL.trimEnd('/')}/login"
             webView.loadUrl(startUrl)
         } else {
             webView.restoreState(savedInstanceState)
