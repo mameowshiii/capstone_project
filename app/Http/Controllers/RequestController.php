@@ -36,7 +36,7 @@ class RequestController extends Controller
             });
         }
 
-        $requests = $query->orderBy('requested_at', 'desc')->paginate(12);
+        $requests = $query->orderBy('requested_at', 'desc')->paginate(8);
 
         $viewedRequest = null;
         if ($viewTracking) {

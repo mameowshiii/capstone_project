@@ -40,7 +40,7 @@ class ResidentManagementController extends Controller
             });
         }
 
-        $residents = $query->orderBy('last_name')->orderBy('first_name')->paginate(12);
+        $residents = $query->orderBy('last_name')->orderBy('first_name')->paginate(8);
 
         $editResident = null;
         if ($editId) {

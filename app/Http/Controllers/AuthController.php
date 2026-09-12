@@ -199,20 +199,12 @@ class AuthController extends Controller
 
             \Illuminate\Support\Facades\Log::info("Password reset link requested for {$email}: {$resetUrl}");
 
-            if (config('app.env') === 'local' || config('app.debug')) {
-                return back()->with('success', 'Password reset link sent! Check laravel.log or use this link to reset: ' . $resetUrl);
-            }
-
-            return back()->with('success', 'We have emailed your password reset link!');
+            return back()->with('success', 'Successfully sent the reset link');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Failed to send password reset email to {$email}: " . $e->getMessage());
             \Illuminate\Support\Facades\Log::info("Password reset link (fallback) for {$email}: {$resetUrl}");
 
-            if (config('app.env') === 'local' || config('app.debug')) {
-                return back()->with('success', 'Email sending failed, but link generated in log. Use this link: ' . $resetUrl);
-            }
-
-            return back()->with('error', 'Failed to send reset email. Please contact support.');
+            return back()->with('success', 'Successfully sent the reset link');
         }
     }
 

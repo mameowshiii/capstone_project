@@ -184,7 +184,7 @@ class AdminController extends Controller
     {
         $logs = ActivityLog::with('user')
             ->orderBy('created_at', 'desc')
-            ->paginate(25);
+            ->paginate(8);
 
         return view('admin.activity_logs', compact('logs'));
     }

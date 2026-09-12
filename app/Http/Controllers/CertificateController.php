@@ -22,7 +22,7 @@ class CertificateController extends Controller
                   ->orWhere('category', 'like', "%{$search}%");
         }
 
-        $certificates = $query->orderBy('name')->paginate(10);
+        $certificates = $query->orderBy('name')->paginate(8);
 
         $editCertificate = null;
         if ($editId) {

@@ -24,7 +24,7 @@ class ResidentController extends Controller
             ->where('resident_id', $resident->id)
             ->whereNull('archived_at')
             ->orderBy('requested_at', 'desc')
-            ->paginate(10);
+            ->paginate(8);
 
         return view('resident.my_requests', compact('requests'));
     }

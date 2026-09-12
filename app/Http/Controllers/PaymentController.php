@@ -43,7 +43,7 @@ class PaymentController extends Controller
         }
 
         // Paginated payments
-        $payments = $query->orderBy('updated_at', 'desc')->paginate(12);
+        $payments = $query->orderBy('updated_at', 'desc')->paginate(8);
 
         // Stats calculations
         $statsQuery = Payment::query();

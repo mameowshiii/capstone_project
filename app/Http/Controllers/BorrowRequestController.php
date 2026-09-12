@@ -27,7 +27,7 @@ class BorrowRequestController extends Controller
             });
         }
 
-        $borrows = $query->orderBy('created_at', 'desc')->paginate(12);
+        $borrows = $query->orderBy('created_at', 'desc')->paginate(8);
 
         return view('admin.borrows', compact('borrows', 'status', 'search'));
     }
@@ -41,7 +41,7 @@ class BorrowRequestController extends Controller
 
         $borrows = BorrowRequest::where('resident_id', $resident->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(8);
 
         return view('resident.borrows', compact('borrows', 'resident'));
     }

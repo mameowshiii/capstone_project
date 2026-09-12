@@ -29,7 +29,7 @@ class BulletinController extends Controller
 
         $bulletins = $query->orderBy('is_pinned', 'desc')
             ->orderBy('published_at', 'desc')
-            ->paginate(10);
+            ->paginate(8);
 
         return view('admin.bulletins', compact('bulletins', 'search', 'category'));
     }

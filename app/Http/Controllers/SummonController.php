@@ -38,7 +38,7 @@ class SummonController extends Controller
         }
 
         // Order by latest schedule, or latest updated
-        $summons = $query->orderBy('created_at', 'desc')->paginate(10);
+        $summons = $query->orderBy('created_at', 'desc')->paginate(8);
         $residents = Resident::where('status', 'active')->orderBy('last_name')->get();
 
         return view('admin.summons', compact('summons', 'residents', 'search', 'status', 'type'));
@@ -265,7 +265,7 @@ class SummonController extends Controller
                     ->orWhere('respondent_resident_id', $resident->id);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(8);
 
         return view('resident.summons', compact('summons'));
     }
