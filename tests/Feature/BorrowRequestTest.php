@@ -192,7 +192,7 @@ class BorrowRequestTest extends TestCase
         ])->assertSessionHas('success');
 
         Http::assertSent(function ($request) use ($borrow) {
-            return $request['recipient'] === '09123456789'
+            return $request['recipient'] === '639123456789'
                 && str_contains($request['message'], "borrow request #{$borrow->id}")
                 && str_contains($request['message'], 'APPROVED');
         });

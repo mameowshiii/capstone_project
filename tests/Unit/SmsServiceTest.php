@@ -32,7 +32,7 @@ class SmsServiceTest extends TestCase
         Http::assertSent(function ($request) {
             return $request->url() === 'https://sms.test/api/send'
                 && $request->hasHeader('Authorization', 'Bearer test-token')
-                && $request['recipient'] === '09123456789'
+                && $request['recipient'] === '639123456789'
                 && $request['sender_id'] === 'BarangayPili'
                 && $request['type'] === 'plain'
                 && $request['message'] === 'Status updated.';
@@ -54,5 +54,18 @@ class SmsServiceTest extends TestCase
 
         $this->assertFalse(SmsService::send('09123456789', 'Status updated.'));
         Http::assertNothingSent();
+    }
+
+    public function test_it_treats_a_200_api_error_response_as_failed()
+    {
+        Http::fake([
+            'sms.test/*' => Http::response([
+                'status' => 'error',
+                'message' => 'Unauthenticated.',
+            ], 200),
+        ]);
+
+        $this->assertFalse(SmsService::send('09123456789', 'Status updated.'));
+        Http::assertSentCount(1);
     }
 }

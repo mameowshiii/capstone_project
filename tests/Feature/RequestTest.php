@@ -167,7 +167,7 @@ class RequestTest extends TestCase
         ])->assertSessionHas('success');
 
         Http::assertSent(function ($request) {
-            return $request['recipient'] === '09123456789'
+            return $request['recipient'] === '639123456789'
                 && str_contains($request['message'], 'PILI-2026-SMS')
                 && str_contains($request['message'], 'APPROVED');
         });
@@ -206,7 +206,7 @@ class RequestTest extends TestCase
 
         $this->assertEquals('approved', $certReq->fresh()->status);
         Http::assertSent(function ($request) {
-            return $request['recipient'] === '09123456789'
+            return $request['recipient'] === '639123456789'
                 && str_contains($request['message'], 'PILI-2026-PAYMENT-SMS')
                 && str_contains($request['message'], 'PAID')
                 && str_contains($request['message'], 'APPROVED');
