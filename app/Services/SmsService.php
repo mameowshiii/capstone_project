@@ -15,11 +15,18 @@ class SmsService
      */
     public static function send(string $number, string $message): bool
     {
-        $apiToken  = config('services.philsms.token');
+        $enabled   = config('services.philsms.enabled', true);
+        $apiToken  = config('services.philsms.api_token');
         $senderId  = config('services.philsms.sender_id', 'PhilSMS');
+        $apiUrl    = config('services.philsms.api_url', 'https://dashboard.philsms.com/api/v3/sms/send');
+
+        if (!filter_var($enabled, FILTER_VALIDATE_BOOLEAN)) {
+            Log::info('SmsService: PHILSMS_ENABLED is false. SMS not sent.');
+            return false;
+        }
 
         if (empty($apiToken)) {
-            Log::warning('SmsService: PHILSMS_TOKEN is not configured. SMS not sent.');
+            Log::warning('SmsService: PHILSMS_API_TOKEN is not configured. SMS not sent.');
             return false;
         }
 
@@ -34,7 +41,10 @@ class SmsService
         try {
             $client = new \GuzzleHttp\Client(['timeout' => 15]);
 
-            $response = $client->post('https://dashboard.philsms.com/api/v3/sms/send', [
+            // Strip tracking query params from FB click links if present in the URL
+            $apiUrl = strtok($apiUrl, '?'); 
+
+            $response = $client->post($apiUrl, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $apiToken,
                     'Accept'        => 'application/json',
