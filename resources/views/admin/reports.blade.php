@@ -147,7 +147,7 @@
       </div>
       <div style="text-align:right;">
         <span style="font-size:11px; color:#6b7280; display:block; margin-bottom:30px;">Certified Correct:</span>
-        <strong style="font-size:13px; border-bottom:1px solid #333; padding-bottom:2px; display:inline-block;">HON. JERRY S. CARANZO</strong>
+        <strong style="font-size:13px; border-bottom:1px solid #333; padding-bottom:2px; display:inline-block;">{{ $captainName ?? 'PUNONG BARANGAY' }}</strong>
         <small style="display:block; font-size:11px; color:#6b7280; margin-top:4px;">Punong Barangay</small>
       </div>
     </div>

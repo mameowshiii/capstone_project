@@ -26,18 +26,18 @@ class PrintController extends Controller
         }
 
         // Fetch active officials for sidebar list
-        $officials = Official::where('status', 'active')
-            ->orderBy('sort_order')
-            ->get();
+        $officials = Official::getActiveOfficials();
 
-        // Find Punong Barangay
-        $captain = Official::where('status', 'active')
-            ->where(function ($q) {
-                $q->where('position', 'like', '%Captain%')
-                  ->orWhere('position', 'like', '%Punong%');
-            })->first();
-        
-        $captainName = $captain ? $captain->name : 'HON. JERRY S. CARANZO';
+        // Resolve real officials from officers list
+        $captain = Official::getCaptain();
+        $captainName = $captain ? $captain->name : 'PUNONG BARANGAY';
+        $secretary = Official::getSecretary();
+        $secName = $secretary ? $secretary->name : 'BARANGAY SECRETARY';
+        $treasurer = Official::getTreasurer();
+        $treasName = $treasurer ? $treasurer->name : 'BARANGAY TREASURER';
+        $skChairman = Official::getSkChairman();
+        $skName = $skChairman ? $skChairman->name : 'SK CHAIRPERSON';
+        $kagawads = Official::getKagawads();
 
         // Auto print check
         $autoPrint = $request->has('print');
@@ -56,7 +56,20 @@ class PrintController extends Controller
             $viewName = 'print.clearance';
         }
 
-        return view($viewName, compact('certReq', 'officials', 'captainName', 'autoPrint'));
+        return view($viewName, compact(
+            'certReq',
+            'officials',
+            'captain',
+            'captainName',
+            'secretary',
+            'secName',
+            'treasurer',
+            'treasName',
+            'skChairman',
+            'skName',
+            'kagawads',
+            'autoPrint'
+        ));
     }
 
     public function printSummon($id, $formType, Request $request)
@@ -72,14 +85,9 @@ class PrintController extends Controller
             }
         }
 
-        // Find Punong Barangay
-        $captain = Official::where('status', 'active')
-            ->where(function ($q) {
-                $q->where('position', 'like', '%Captain%')
-                  ->orWhere('position', 'like', '%Punong%');
-            })->first();
-        
-        $captainName = $captain ? $captain->name : 'HON. JERRY S. CARANZO';
+        // Find Punong Barangay from real officers list
+        $captain = Official::getCaptain();
+        $captainName = $captain ? $captain->name : 'PUNONG BARANGAY';
 
         // Auto print check
         $autoPrint = $request->has('print');

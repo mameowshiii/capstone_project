@@ -93,6 +93,13 @@ class SummonController extends Controller
 
         ActivityLog::log('CREATE_SUMMON', 'Summons', "Created " . ucfirst($request->case_type) . " case {$caseNumber}");
 
+        $caseType = $summon->case_type === 'blotter' ? 'blotter report' : 'summons case';
+        $scheduleText = $summon->case_type === 'summon' && $summon->schedule_date
+            ? ' Hearing schedule: ' . $summon->schedule_date->format('M d, Y h:i A') . '.'
+            : '';
+        $smsText = "Barangay Pili: Your {$caseType} {$summon->case_number} has been recorded. Status: Pending.{$scheduleText} Keep this case number and contact the Barangay Hall for assistance.";
+        $this->sendCaseSms($summon, $smsText);
+
         // ── Dispatch Email Notifications ─────────────────────────────────
         $adminEmail = 'admin@brgy-pili.gov.ph';
         
@@ -208,14 +215,7 @@ class SummonController extends Controller
                 : '';
             $smsText = "Barangay Pili case {$summon->case_number} was updated to {$statusLabel}.{$scheduleText} Please check the resident portal or contact the Barangay Hall.";
 
-            $contacts = [
-                $summon->complainant_contact ?: optional($summon->complainantResident)->contact_number,
-                $summon->respondent_contact ?: optional($summon->respondentResident)->contact_number,
-            ];
-
-            foreach (array_unique(array_filter($contacts)) as $contact) {
-                SmsService::send($contact, $smsText);
-            }
+            $this->sendCaseSms($summon, $smsText);
         }
 
         // ── Dispatch Rescheduling Email Notifications ─────────────────────
@@ -287,5 +287,29 @@ class SummonController extends Controller
             ->paginate(8);
 
         return view('resident.summons', compact('summons'));
+    }
+
+    /**
+     * Send a case notification to both parties without texting the same number twice.
+     */
+    private function sendCaseSms(Summon $summon, string $message): void
+    {
+        $summon->loadMissing(['complainantResident', 'respondentResident']);
+
+        $contacts = [
+            $summon->complainant_contact ?: optional($summon->complainantResident)->contact_number,
+            $summon->respondent_contact ?: optional($summon->respondentResident)->contact_number,
+        ];
+
+        $sentTo = [];
+        foreach (array_filter($contacts) as $contact) {
+            $contactKey = preg_replace('/\D/', '', $contact);
+            if (isset($sentTo[$contactKey])) {
+                continue;
+            }
+
+            $sentTo[$contactKey] = true;
+            SmsService::send($contact, $message);
+        }
     }
 }

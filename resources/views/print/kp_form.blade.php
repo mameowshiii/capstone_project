@@ -216,7 +216,7 @@
     </div>
     <div class="sig-block">
       <div class="sig-line"></div>
-      <div class="sig-name">{{ $captainName }}</div>
+      <div class="sig-name">{{ $captainName ?? 'PUNONG BARANGAY' }}</div>
       <div class="sig-title">Punong Barangay / Lupon Chairman</div>
     </div>
   </div>

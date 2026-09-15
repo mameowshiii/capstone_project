@@ -8,6 +8,7 @@ use App\Models\Request as CertificateRequest;
 use App\Models\Payment;
 use App\Models\Certificate;
 use App\Models\ActivityLog;
+use App\Models\Official;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -177,7 +178,10 @@ class AdminController extends Controller
             return response()->stream($callback, 200, $headers);
         }
 
-        return view('admin.reports', compact('transactions', 'byCert', 'totalAmount', 'month', 'start'));
+        $captain = Official::getCaptain();
+        $captainName = $captain ? $captain->name : 'PUNONG BARANGAY';
+
+        return view('admin.reports', compact('transactions', 'byCert', 'totalAmount', 'month', 'start', 'captainName'));
     }
 
     public function activityLogs()

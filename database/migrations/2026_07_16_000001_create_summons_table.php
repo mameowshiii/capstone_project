@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('respondent_name', 255);
             $table->string('respondent_contact', 100)->nullable();
             $table->text('complain_details');
-            $table->dateTime('schedule_date');
-            $table->enum('status', ['pending', 'scheduled', 'resolved', 'cancelled'])->default('pending');
+            // Blotter records do not require a hearing schedule.
+            $table->dateTime('schedule_date')->nullable();
+            // A string supports the complete KP workflow statuses used by the admin UI.
+            $table->string('status', 50)->default('pending');
             $table->text('hearing_remarks')->nullable();
             $table->foreignId('complainant_resident_id')->nullable()->constrained('residents')->onDelete('set null');
             $table->foreignId('respondent_resident_id')->nullable()->constrained('residents')->onDelete('set null');

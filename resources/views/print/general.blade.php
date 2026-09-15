@@ -365,59 +365,74 @@
       <h3>SANGGUNIANG<br>BARANGAY</h3>
       <div class="officials-list">
         @php
-          $captainOfficial = $officials->first(function($o) {
-            return str_contains(strtolower($o->position), 'captain') || str_contains(strtolower($o->position), 'punong');
+          $captainOfficial = $captain ?? ($officials->first(function($o) {
+            $pos = strtolower($o->position ?? '');
+            return str_contains($pos, 'captain') || str_contains($pos, 'punong') || str_contains($pos, 'chairman') || str_contains($pos, 'chairperson') || str_contains($pos, 'kapitan');
+          }) ?? $officials->first());
+
+          $kagawadsList = $kagawads ?? $officials->filter(function($o) {
+            $pos = strtolower($o->position ?? '');
+            return str_contains($pos, 'kagawad') || str_contains($pos, 'councilor') || str_contains($pos, 'konsehal') || str_contains($pos, 'member');
           });
-          $kagawads = $officials->filter(function($o) {
-            return str_contains(strtolower($o->position), 'kagawad') || str_contains(strtolower($o->position), 'councilor');
+
+          $skOfficial = $skChairman ?? $officials->first(function($o) {
+            $pos = strtolower($o->position ?? '');
+            return str_contains($pos, 'sk') || str_contains($pos, 'kabataan');
           });
-          $sk = $officials->first(function($o) {
-            return str_contains(strtolower($o->position), 'sk');
+
+          $secOfficial = $secretary ?? $officials->first(function($o) {
+            $pos = strtolower($o->position ?? '');
+            return str_contains($pos, 'sec') || str_contains($pos, 'kalihim');
           });
-          $sec = $officials->first(function($o) {
-            return str_contains(strtolower($o->position), 'secretary');
+
+          $treasOfficial = $treasurer ?? $officials->first(function($o) {
+            $pos = strtolower($o->position ?? '');
+            return str_contains($pos, 'treas') || str_contains($pos, 'ingat-yaman');
           });
-          $treas = $officials->first(function($o) {
-            return str_contains(strtolower($o->position), 'treasurer');
+
+          $otherOfficials = $officials->reject(function($o) use ($captainOfficial, $secOfficial, $treasOfficial, $skOfficial, $kagawadsList) {
+            return ($captainOfficial && $o->id === $captainOfficial->id)
+                || ($secOfficial && $o->id === $secOfficial->id)
+                || ($treasOfficial && $o->id === $treasOfficial->id)
+                || ($skOfficial && $o->id === $skOfficial->id)
+                || $kagawadsList->contains('id', $o->id);
           });
         @endphp
 
         <div class="official-group">
-          <strong>{{ $captainOfficial ? $captainOfficial->name : 'HON. JERRY CARANZO' }}</strong>
+          <strong>{{ $captainOfficial ? $captainOfficial->name : ($captainName ?? 'PUNONG BARANGAY') }}</strong>
           <div class="official-name">Punong barangay</div>
         </div>
 
+        @if($kagawadsList->isNotEmpty() || $otherOfficials->isNotEmpty())
         <div class="official-group">
           <strong>KAGAWAD:</strong>
-          @if($kagawads->isEmpty())
-            <div class="official-name">HON. SOHO GIDO</div>
-            <div class="official-name">HON. JIMMY CAHUTAY</div>
-            <div class="official-name">HON. BERNARDO OPLAS</div>
-            <div class="official-name">HON. GEMMA GILIBUELA</div>
-            <div class="official-name">HON. ERWIN CORRIDOR</div>
-            <div class="official-name">HON. CRISTINA CARANZO</div>
-            <div class="official-name">HON. MARIA LEZEL HYER</div>
-          @else
-            @foreach($kagawads as $k)
-              <div class="official-name">{{ $k->name }}</div>
-            @endforeach
-          @endif
+          @foreach($kagawadsList->isNotEmpty() ? $kagawadsList : $otherOfficials as $k)
+            <div class="official-name">{{ $k->name }}</div>
+          @endforeach
         </div>
+        @endif
 
+        @if($skOfficial)
         <div class="official-group">
           <strong>SK CHAIRMAN:</strong>
-          <div class="official-name">{{ $sk ? $sk->name : 'HON. RITCHIE SINDAY' }}</div>
+          <div class="official-name">{{ $skOfficial->name }}</div>
         </div>
+        @endif
 
+        @if($secOfficial)
         <div class="official-group">
           <strong>SECRETARY:</strong>
-          <div class="official-name">{{ $sec ? $sec->name : 'RANDY B. DESPI' }}</div>
+          <div class="official-name">{{ $secOfficial->name }}</div>
         </div>
+        @endif
 
+        @if($treasOfficial)
         <div class="official-group">
           <strong>TREASURER:</strong>
-          <div class="official-name">{{ $treas ? $treas->name : 'MARILYN IUSTRISIMO' }}</div>
+          <div class="official-name">{{ $treasOfficial->name }}</div>
         </div>
+        @endif
       </div>
     </div>
 
@@ -475,7 +490,12 @@
             <div style="margin-top: 8px; border-top: 1px solid #333; padding-top: 2px;"></div>
             <p style="font-size: 8px;">Date</p>
           </div>
-          <div></div>
+          <div style="text-align: center;">
+            <p style="margin-bottom: 14px; font-size: 8.5px; text-align: left;"><strong>Approved by:</strong></p>
+            <div style="border-top: 1px solid #333; margin-top: 28px; margin-bottom: 2px;"></div>
+            <p style="font-size: 8.5px; font-weight: bold;">{{ $captainName ?? ($captainOfficial ? $captainOfficial->name : 'PUNONG BARANGAY') }}</p>
+            <p style="font-size: 8px;">Punong Barangay</p>
+          </div>
         </div>
 
         <div style="margin-top: 16px; font-size: 8px; text-align: center; padding-top: 8px; border-top: 1px solid #ddd;">

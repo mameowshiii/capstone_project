@@ -123,59 +123,74 @@
           <h3>SANGGUNIANG<br>BARANGAY</h3>
 
           @php
-            $captainOfficial = $officials->first(function($o) {
-              return str_contains(strtolower($o->position), 'captain') || str_contains(strtolower($o->position), 'punong');
+            $captainOfficial = $captain ?? ($officials->first(function($o) {
+              $pos = strtolower($o->position ?? '');
+              return str_contains($pos, 'captain') || str_contains($pos, 'punong') || str_contains($pos, 'chairman') || str_contains($pos, 'chairperson') || str_contains($pos, 'kapitan');
+            }) ?? $officials->first());
+
+            $kagawadsList = $kagawads ?? $officials->filter(function($o) {
+              $pos = strtolower($o->position ?? '');
+              return str_contains($pos, 'kagawad') || str_contains($pos, 'councilor') || str_contains($pos, 'konsehal') || str_contains($pos, 'member');
             });
-            $kagawads = $officials->filter(function($o) {
-              return str_contains(strtolower($o->position), 'kagawad') || str_contains(strtolower($o->position), 'councilor');
+
+            $skOfficial = $skChairman ?? $officials->first(function($o) {
+              $pos = strtolower($o->position ?? '');
+              return str_contains($pos, 'sk') || str_contains($pos, 'kabataan');
             });
-            $sk = $officials->first(function($o) {
-              return str_contains(strtolower($o->position), 'sk');
+
+            $secOfficial = $secretary ?? $officials->first(function($o) {
+              $pos = strtolower($o->position ?? '');
+              return str_contains($pos, 'sec') || str_contains($pos, 'kalihim');
             });
-            $sec = $officials->first(function($o) {
-              return str_contains(strtolower($o->position), 'secretary');
+
+            $treasOfficial = $treasurer ?? $officials->first(function($o) {
+              $pos = strtolower($o->position ?? '');
+              return str_contains($pos, 'treas') || str_contains($pos, 'ingat-yaman');
             });
-            $treas = $officials->first(function($o) {
-              return str_contains(strtolower($o->position), 'treasurer');
+
+            $otherOfficials = $officials->reject(function($o) use ($captainOfficial, $secOfficial, $treasOfficial, $skOfficial, $kagawadsList) {
+              return ($captainOfficial && $o->id === $captainOfficial->id)
+                  || ($secOfficial && $o->id === $secOfficial->id)
+                  || ($treasOfficial && $o->id === $treasOfficial->id)
+                  || ($skOfficial && $o->id === $skOfficial->id)
+                  || $kagawadsList->contains('id', $o->id);
             });
           @endphp
 
           <div class="official-group">
-            <div class="punong-name">{{ $captainOfficial ? $captainOfficial->name : 'HON. JERRY CARANZO' }}</div>
+            <div class="punong-name">{{ $captainOfficial ? $captainOfficial->name : ($captainName ?? 'PUNONG BARANGAY') }}</div>
             <div class="punong-title">Punong Barangay</div>
           </div>
 
+          @if($kagawadsList->isNotEmpty() || $otherOfficials->isNotEmpty())
           <div class="official-group" style="margin-top:10px;">
             <span class="official-label">KAGAWAD:</span>
-            @if($kagawads->isEmpty())
-              <div class="official-name">HON. SOFIO GIDO</div>
-              <div class="official-name">HON. JIMMY CAHUTAY</div>
-              <div class="official-name">HON. BERNARDO OFLAS</div>
-              <div class="official-name">HON. GEMMA GILBUELA</div>
-              <div class="official-name">HON. ERWIN CORRIDOR</div>
-              <div class="official-name">HON. CRISTINA CARANZO</div>
-              <div class="official-name">HON. MARIA LEZEL HYER</div>
-            @else
-              @foreach($kagawads as $k)
-                <div class="official-name">{{ $k->name }}</div>
-              @endforeach
-            @endif
+            @foreach($kagawadsList->isNotEmpty() ? $kagawadsList : $otherOfficials as $k)
+              <div class="official-name">{{ $k->name }}</div>
+            @endforeach
           </div>
+          @endif
 
+          @if($skOfficial)
           <div class="official-group" style="margin-top:10px;">
             <span class="official-label">SK CHAIRMAN:</span>
-            <div class="official-name">{{ $sk ? $sk->name : 'HON. RITCHIE SINDAY' }}</div>
+            <div class="official-name">{{ $skOfficial->name }}</div>
           </div>
+          @endif
 
+          @if($secOfficial)
           <div class="official-group" style="margin-top:10px;">
             <span class="official-label">SECRETARY:</span>
-            <div class="official-name">{{ $sec ? $sec->name : 'RANDY B. DESPI' }}</div>
+            <div class="official-name">{{ $secOfficial->name }}</div>
           </div>
+          @endif
 
+          @if($treasOfficial)
           <div class="official-group" style="margin-top:10px;">
             <span class="official-label">TREASURER:</span>
-            <div class="official-name">{{ $treas ? $treas->name : 'MARILYN C. ILUSTRISIMO' }}</div>
+            <div class="official-name">{{ $treasOfficial->name }}</div>
           </div>
+          @endif
         </div>
       </div>
 
@@ -245,7 +260,7 @@
           <div style="margin-top: 20px;">
             <div class="sig-approved-label">Approved by:</div>
             <div style="margin-top: 15px; margin-left: 50px;">
-              <div class="sig-name"><u style="text-underline-offset: 2px;">{{ $sec ? $sec->name : 'RANDY B. DESPI' }}</u></div>
+              <div class="sig-name"><u style="text-underline-offset: 2px;">{{ $secOfficial ? $secOfficial->name : ($secName ?? 'BARANGAY SECRETARY') }}</u></div>
               <div class="sig-title">Barangay Secretary</div>
             </div>
           </div>
@@ -264,7 +279,7 @@
             <div style="width: 250px; text-align: center;">
               <div class="sig-approved-label" style="text-align: left; margin-bottom: 25px;">Approved by:</div>
               <div style="border-top: 1.5px solid #333; margin-bottom: 4px;"></div>
-              <div class="sig-name">{{ $captainName }}</div>
+              <div class="sig-name">{{ $captainName ?? ($captainOfficial ? $captainOfficial->name : 'PUNONG BARANGAY') }}</div>
               <div class="sig-title">PUNONG BARANGAY</div>
             </div>
           </div>
