@@ -6,6 +6,7 @@ use App\Models\Summon;
 use App\Models\SummonHearing;
 use App\Models\Resident;
 use App\Models\ActivityLog;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -153,7 +154,8 @@ class SummonController extends Controller
             'new_conducted_by' => 'nullable|string|max:150',
         ]);
 
-        $summon = Summon::findOrFail($request->summon_id);
+        $summon = Summon::with(['complainantResident', 'respondentResident'])->findOrFail($request->summon_id);
+        $previousStatus = $summon->status;
         
         $updateData = [
             'status' => $request->status,
@@ -198,6 +200,23 @@ class SummonController extends Controller
         }
 
         ActivityLog::log('UPDATE_SUMMON', 'Summons', "Updated case {$summon->case_number}");
+
+        if ($previousStatus !== $summon->status || $rescheduled) {
+            $statusLabel = ucwords(str_replace('_', ' ', $summon->status));
+            $scheduleText = $rescheduled && $summon->schedule_date
+                ? ' New hearing schedule: ' . $summon->schedule_date->format('M d, Y h:i A') . '.'
+                : '';
+            $smsText = "Barangay Pili case {$summon->case_number} was updated to {$statusLabel}.{$scheduleText} Please check the resident portal or contact the Barangay Hall.";
+
+            $contacts = [
+                $summon->complainant_contact ?: optional($summon->complainantResident)->contact_number,
+                $summon->respondent_contact ?: optional($summon->respondentResident)->contact_number,
+            ];
+
+            foreach (array_unique(array_filter($contacts)) as $contact) {
+                SmsService::send($contact, $smsText);
+            }
+        }
 
         // ── Dispatch Rescheduling Email Notifications ─────────────────────
         if ($rescheduled) {

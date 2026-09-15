@@ -8,6 +8,7 @@ use App\Models\ActivityLog;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class RequestController extends Controller
 {
@@ -62,6 +63,8 @@ class RequestController extends Controller
         $userId  = Auth::id();
         $msg     = '';
         $smsText = null;
+        $previousStatus = $certReq->status;
+        $firstName = $certReq->resident ? $certReq->resident->first_name : 'Resident';
 
         if ($action === 'process') {
             $certReq->update([
@@ -70,7 +73,7 @@ class RequestController extends Controller
                 'processed_at' => now(),
             ]);
             $msg = 'Request marked as processing.';
-            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) is now being processed by Barangay Pili. We will notify you once it is ready.";
+            $smsText = "Hi {$firstName}, your document request ({$certReq->tracking_number}) is now being processed by Barangay Pili. We will notify you once it is ready.";
 
         } elseif ($action === 'reject') {
             $certReq->update([
@@ -80,8 +83,8 @@ class RequestController extends Controller
                 'processed_at' => now(),
             ]);
             $msg = 'Request rejected.';
-            $reasonText = $request->remarks ? " Reason: {$request->remarks}" : '';
-            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) has been rejected.{$reasonText} For inquiries, please visit the Barangay Hall.";
+            $reasonText = $request->remarks ? ' Reason: ' . Str::limit($request->remarks, 100) : '';
+            $smsText = "Hi {$firstName}, your document request ({$certReq->tracking_number}) has been rejected.{$reasonText} For inquiries, please visit the Barangay Hall.";
 
         } elseif ($action === 'approve') {
             $certReq->update([
@@ -104,7 +107,7 @@ class RequestController extends Controller
                 ]);
             }
             $msg = 'Request approved successfully.';
-            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) has been APPROVED and is ready for pickup at the Barangay Hall. Please bring a valid ID.";
+            $smsText = "Hi {$firstName}, your document request ({$certReq->tracking_number}) has been APPROVED and is ready for pickup at the Barangay Hall. Please bring a valid ID.";
 
         } elseif ($action === 'release') {
             $certReq->update([
@@ -119,7 +122,7 @@ class RequestController extends Controller
                 ]);
             }
             $msg = 'Request released and marked as paid.';
-            $smsText = "Hi {$certReq->resident->first_name}, your document ({$certReq->tracking_number}) has been successfully released. Thank you! - Barangay Pili";
+            $smsText = "Hi {$firstName}, your document ({$certReq->tracking_number}) has been successfully released. Thank you! - Barangay Pili";
 
         } elseif ($action === 'archive') {
             $certReq->update([
@@ -130,12 +133,12 @@ class RequestController extends Controller
         }
 
         // ── Send SMS Notification ─────────────────────────────────────────────
-        if ($smsText && $certReq->resident && !empty($certReq->resident->contact_number)) {
-            try {
-                SmsService::send($certReq->resident->contact_number, $smsText);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("SMS notification failed for request {$certReq->tracking_number}: " . $e->getMessage());
-            }
+        if ($smsText && $previousStatus !== $certReq->status) {
+            SmsService::notifyResident(
+                $certReq->resident,
+                $smsText,
+                "certificate request {$certReq->tracking_number}"
+            );
         }
 
         ActivityLog::log(
@@ -158,6 +161,7 @@ class RequestController extends Controller
         ]);
 
         $certReq = CertificateRequest::findOrFail($request->request_id);
+        $previousPaymentStatus = $certReq->payment ? $certReq->payment->payment_status : null;
 
         if (!$certReq->payment) {
             Payment::create([
@@ -178,6 +182,25 @@ class RequestController extends Controller
                 'paid_at'        => ($request->payment_status === 'paid') ? now() : null,
                 'received_by'    => Auth::id(),
             ]);
+        }
+
+        if ($previousPaymentStatus !== $request->payment_status) {
+            $firstName = $certReq->resident ? $certReq->resident->first_name : 'Resident';
+            $amount = number_format((float) $request->amount, 2);
+
+            if ($request->payment_status === 'paid') {
+                $smsText = "Hi {$firstName}, payment of PHP {$amount} for document request ({$certReq->tracking_number}) has been recorded as PAID. - Barangay Pili";
+            } elseif ($request->payment_status === 'waived') {
+                $smsText = "Hi {$firstName}, the payment for document request ({$certReq->tracking_number}) has been WAIVED. No payment is required. - Barangay Pili";
+            } else {
+                $smsText = "Hi {$firstName}, the payment for document request ({$certReq->tracking_number}) is marked UNPAID. Please visit the Barangay Hall for assistance.";
+            }
+
+            SmsService::notifyResident(
+                $certReq->resident,
+                $smsText,
+                "payment for certificate request {$certReq->tracking_number}"
+            );
         }
 
         ActivityLog::log(

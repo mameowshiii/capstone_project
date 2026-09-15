@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\ActivityLog;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,7 +69,8 @@ class PaymentController extends Controller
             'receipt_number' => 'nullable|string|max:100',
         ]);
 
-        $payment = Payment::findOrFail($request->payment_id);
+        $payment = Payment::with('request.resident')->findOrFail($request->payment_id);
+        $previousPaymentStatus = $payment->payment_status;
         $payment->update([
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
@@ -80,12 +82,36 @@ class PaymentController extends Controller
 
         // Also update request status if it is marked as paid and was pending/processing
         $certReq = $payment->request;
-        if ($certReq && $request->payment_status === 'paid' && $certReq->status === 'pending') {
+        $autoApproved = false;
+        if ($certReq && $request->payment_status === 'paid' && in_array($certReq->status, ['pending', 'processing'], true)) {
             $certReq->update([
                 'status' => 'approved',
                 'approved_by' => Auth::id(),
                 'approved_at' => now(),
             ]);
+            $autoApproved = true;
+        }
+
+        if ($certReq && ($previousPaymentStatus !== $payment->payment_status || $autoApproved)) {
+            $resident = $certReq->resident;
+            $firstName = $resident ? $resident->first_name : 'Resident';
+            $amount = number_format((float) $payment->amount, 2);
+
+            if ($autoApproved) {
+                $smsText = "Hi {$firstName}, payment of PHP {$amount} for document request ({$certReq->tracking_number}) is PAID. Your request is APPROVED and ready for pickup at the Barangay Hall. Bring a valid ID.";
+            } elseif ($payment->payment_status === 'paid') {
+                $smsText = "Hi {$firstName}, payment of PHP {$amount} for document request ({$certReq->tracking_number}) has been recorded as PAID. - Barangay Pili";
+            } elseif ($payment->payment_status === 'waived') {
+                $smsText = "Hi {$firstName}, the payment for document request ({$certReq->tracking_number}) has been WAIVED. No payment is required. - Barangay Pili";
+            } else {
+                $smsText = "Hi {$firstName}, the payment for document request ({$certReq->tracking_number}) is marked UNPAID. Please visit the Barangay Hall for assistance.";
+            }
+
+            SmsService::notifyResident(
+                $resident,
+                $smsText,
+                "payment for certificate request {$certReq->tracking_number}"
+            );
         }
 
         ActivityLog::log(

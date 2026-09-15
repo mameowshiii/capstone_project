@@ -7,12 +7,13 @@ use App\Models\Resident;
 use App\Models\Certificate;
 use App\Models\Request as CertificateRequest;
 use App\Models\Payment;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class RequestTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected $residentUser;
     protected $residentProfile;
@@ -31,6 +32,7 @@ class RequestTest extends TestCase
             'birthdate' => '2000-01-01',
             'civil_status' => 'Single',
             'email' => 'clara@santos.com',
+            'contact_number' => '09123456789',
             'address' => 'Barangay Pili, Madridejos, Cebu',
             'status' => 'active'
         ]);
@@ -140,5 +142,74 @@ class RequestTest extends TestCase
         $freshReq = $certReq->fresh();
         $this->assertEquals('approved', $freshReq->status);
         $this->assertEquals('Approved after review', $freshReq->remarks);
+    }
+
+    public function test_certificate_approval_sends_an_sms_to_the_resident()
+    {
+        config([
+            'services.philsms.enabled' => true,
+            'services.philsms.api_token' => 'test-token',
+            'services.philsms.api_url' => 'https://sms.test/api/send',
+        ]);
+        Http::fake(['sms.test/*' => Http::response([], 200)]);
+
+        $certReq = CertificateRequest::create([
+            'tracking_number' => 'PILI-2026-SMS',
+            'resident_id' => $this->residentProfile->id,
+            'certificate_id' => $this->certificate->id,
+            'purpose' => 'Employment',
+            'status' => 'processing',
+        ]);
+
+        $this->actingAs($this->adminUser)->post('/admin/requests/update-status', [
+            'request_id' => $certReq->id,
+            'action' => 'approve',
+        ])->assertSessionHas('success');
+
+        Http::assertSent(function ($request) {
+            return $request['recipient'] === '09123456789'
+                && str_contains($request['message'], 'PILI-2026-SMS')
+                && str_contains($request['message'], 'APPROVED');
+        });
+    }
+
+    public function test_paid_payment_auto_approval_sends_a_combined_sms()
+    {
+        config([
+            'services.philsms.enabled' => true,
+            'services.philsms.api_token' => 'test-token',
+            'services.philsms.api_url' => 'https://sms.test/api/send',
+        ]);
+        Http::fake(['sms.test/*' => Http::response([], 200)]);
+
+        $certReq = CertificateRequest::create([
+            'tracking_number' => 'PILI-2026-PAYMENT-SMS',
+            'resident_id' => $this->residentProfile->id,
+            'certificate_id' => $this->certificate->id,
+            'purpose' => 'Employment',
+            'status' => 'processing',
+        ]);
+        $payment = Payment::create([
+            'request_id' => $certReq->id,
+            'amount' => 50,
+            'payment_method' => 'cash',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->actingAs($this->adminUser)->post('/admin/payments/update', [
+            'payment_id' => $payment->id,
+            'amount' => 50,
+            'payment_method' => 'cash',
+            'payment_status' => 'paid',
+            'receipt_number' => 'OR-1001',
+        ])->assertSessionHas('success');
+
+        $this->assertEquals('approved', $certReq->fresh()->status);
+        Http::assertSent(function ($request) {
+            return $request['recipient'] === '09123456789'
+                && str_contains($request['message'], 'PILI-2026-PAYMENT-SMS')
+                && str_contains($request['message'], 'PAID')
+                && str_contains($request['message'], 'APPROVED');
+        });
     }
 }

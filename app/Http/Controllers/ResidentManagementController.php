@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Resident;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -105,7 +106,17 @@ class ResidentManagementController extends Controller
     {
         $resident = Resident::findOrFail($id);
         if ($resident->user) {
+            $previousStatus = $resident->user->status;
             $resident->user->update(['status' => 'active']);
+
+            if ($previousStatus !== 'active') {
+                SmsService::notifyResident(
+                    $resident,
+                    "Hi {$resident->first_name}, your Barangay Pili resident account has been APPROVED. You may now log in to the resident portal.",
+                    "resident account approval {$resident->id}"
+                );
+            }
+
             ActivityLog::log('APPROVE_RESIDENT', 'Residents', "Approved resident user linked to resident ID $id");
             return redirect()->route('admin.residents', ['status' => 'pending'])->with('success', 'Resident registry approved successfully.');
         }
@@ -116,6 +127,7 @@ class ResidentManagementController extends Controller
     {
         $resident = Resident::findOrFail($id);
         $userId = Auth::id();
+        $wasAlreadyRejected = $resident->archived_at !== null;
 
         $resident->update([
             'status' => 'inactive',
@@ -129,6 +141,14 @@ class ResidentManagementController extends Controller
                 'archived_at' => now(),
                 'archived_by' => $userId
             ]);
+        }
+
+        if (!$wasAlreadyRejected) {
+            SmsService::notifyResident(
+                $resident,
+                "Hi {$resident->first_name}, your Barangay Pili resident registration was not approved. Please visit the Barangay Hall for verification or assistance.",
+                "resident registration rejection {$resident->id}"
+            );
         }
 
         ActivityLog::log('REJECT_RESIDENT', 'Residents', "Rejected resident ID $id");

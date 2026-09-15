@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\BorrowRequest;
 use App\Models\ActivityLog;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class BorrowRequestController extends Controller
 {
@@ -122,7 +124,8 @@ class BorrowRequestController extends Controller
             'remarks' => 'nullable|string|max:1000',
         ]);
 
-        $borrow = BorrowRequest::findOrFail($request->borrow_id);
+        $borrow = BorrowRequest::with('resident')->findOrFail($request->borrow_id);
+        $previousStatus = $borrow->status;
         
         $updateData = [
             'status' => $request->status,
@@ -135,6 +138,26 @@ class BorrowRequestController extends Controller
         }
 
         $borrow->update($updateData);
+
+        if ($previousStatus !== $borrow->status) {
+            $firstName = $borrow->resident ? $borrow->resident->first_name : 'Resident';
+
+            if ($borrow->status === 'approved') {
+                $borrowDate = $borrow->borrow_date->format('M d, Y');
+                $smsText = "Hi {$firstName}, your equipment borrow request #{$borrow->id} for {$borrowDate} has been APPROVED. Please coordinate pickup with the Barangay Hall and bring a valid ID.";
+            } elseif ($borrow->status === 'rejected') {
+                $reasonText = $borrow->remarks ? ' Reason: ' . Str::limit($borrow->remarks, 100) : '';
+                $smsText = "Hi {$firstName}, your equipment borrow request #{$borrow->id} has been REJECTED.{$reasonText} Please contact the Barangay Hall for assistance.";
+            } else {
+                $smsText = "Hi {$firstName}, your equipment borrow request #{$borrow->id} has been marked RETURNED and completed. Thank you! - Barangay Pili";
+            }
+
+            SmsService::notifyResident(
+                $borrow->resident,
+                $smsText,
+                "borrow request {$borrow->id}"
+            );
+        }
 
         ActivityLog::log(
             strtoupper($request->status) . '_BORROW',

@@ -5,17 +5,19 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Resident;
 use App\Models\BorrowRequest;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class BorrowRequestTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected $residentUser;
     protected $residentProfile;
     protected $adminUser;
+    protected $createdUploadFiles = [];
 
     protected function setUp(): void
     {
@@ -29,6 +31,7 @@ class BorrowRequestTest extends TestCase
             'birthdate' => '2000-01-01',
             'civil_status' => 'Single',
             'email' => 'clara@santos.com',
+            'contact_number' => '09123456789',
             'address' => 'Barangay Pili, Madridejos, Cebu',
             'status' => 'active'
         ]);
@@ -50,6 +53,17 @@ class BorrowRequestTest extends TestCase
             'role' => 'admin',
             'status' => 'active',
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->createdUploadFiles as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+
+        parent::tearDown();
     }
 
     public function test_resident_can_view_borrows_page()
@@ -79,6 +93,7 @@ class BorrowRequestTest extends TestCase
 
         $borrow = BorrowRequest::where('resident_id', $this->residentProfile->id)->first();
         $this->assertNotNull($borrow);
+        $this->createdUploadFiles[] = public_path('assets/uploads/borrow_documents/' . $borrow->verification_document);
         $this->assertEquals(5, $borrow->tent_quantity);
         $this->assertEquals(50, $borrow->chair_quantity);
         $this->assertEquals(25, $borrow->table_quantity);
@@ -147,5 +162,39 @@ class BorrowRequestTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors(['item_type']);
+    }
+
+    public function test_admin_status_update_sends_a_borrow_sms_to_the_resident()
+    {
+        config([
+            'services.philsms.enabled' => true,
+            'services.philsms.api_token' => 'test-token',
+            'services.philsms.api_url' => 'https://sms.test/api/send',
+        ]);
+        Http::fake(['sms.test/*' => Http::response([], 200)]);
+
+        $borrow = BorrowRequest::create([
+            'resident_id' => $this->residentProfile->id,
+            'item_type' => 'chair',
+            'tent_quantity' => 0,
+            'chair_quantity' => 10,
+            'table_quantity' => 0,
+            'borrow_date' => now()->addDay()->format('Y-m-d'),
+            'return_date' => now()->addDays(2)->format('Y-m-d'),
+            'purpose' => 'Community meeting',
+            'verification_document' => 'verification.pdf',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($this->adminUser)->post('/admin/borrows/update-status', [
+            'borrow_id' => $borrow->id,
+            'status' => 'approved',
+        ])->assertSessionHas('success');
+
+        Http::assertSent(function ($request) use ($borrow) {
+            return $request['recipient'] === '09123456789'
+                && str_contains($request['message'], "borrow request #{$borrow->id}")
+                && str_contains($request['message'], 'APPROVED');
+        });
     }
 }
