@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Request as CertificateRequest;
 use App\Models\Payment;
 use App\Models\ActivityLog;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,36 +53,42 @@ class RequestController extends Controller
     {
         $request->validate([
             'request_id' => 'required|exists:requests,id',
-            'action' => 'required|in:process,reject,approve,release,archive',
-            'remarks' => 'nullable|string|max:1000',
+            'action'     => 'required|in:process,reject,approve,release,archive',
+            'remarks'    => 'nullable|string|max:1000',
         ]);
 
         $certReq = CertificateRequest::findOrFail($request->request_id);
-        $action = $request->action;
-        $userId = Auth::id();
-        $msg = '';
+        $action  = $request->action;
+        $userId  = Auth::id();
+        $msg     = '';
+        $smsText = null;
 
         if ($action === 'process') {
             $certReq->update([
-                'status' => 'processing',
+                'status'       => 'processing',
                 'processed_by' => $userId,
                 'processed_at' => now(),
             ]);
             $msg = 'Request marked as processing.';
+            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) is now being processed by Barangay Pili. We will notify you once it is ready.";
+
         } elseif ($action === 'reject') {
             $certReq->update([
-                'status' => 'rejected',
-                'remarks' => $request->remarks,
+                'status'       => 'rejected',
+                'remarks'      => $request->remarks,
                 'processed_by' => $userId,
                 'processed_at' => now(),
             ]);
             $msg = 'Request rejected.';
+            $reasonText = $request->remarks ? " Reason: {$request->remarks}" : '';
+            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) has been rejected.{$reasonText} For inquiries, please visit the Barangay Hall.";
+
         } elseif ($action === 'approve') {
             $certReq->update([
-                'status' => 'approved',
+                'status'      => 'approved',
                 'approved_by' => $userId,
                 'approved_at' => now(),
-                'remarks' => $request->remarks,
+                'remarks'     => $request->remarks,
             ]);
             if (!$certReq->processed_by) {
                 $certReq->update([
@@ -92,24 +99,28 @@ class RequestController extends Controller
             if ($certReq->payment && $certReq->payment->payment_method === 'gcash') {
                 $certReq->payment->update([
                     'payment_status' => 'paid',
-                    'paid_at' => now(),
-                    'received_by' => $userId,
+                    'paid_at'        => now(),
+                    'received_by'    => $userId,
                 ]);
             }
             $msg = 'Request approved successfully.';
+            $smsText = "Hi {$certReq->resident->first_name}, your document request ({$certReq->tracking_number}) has been APPROVED and is ready for pickup at the Barangay Hall. Please bring a valid ID.";
+
         } elseif ($action === 'release') {
             $certReq->update([
-                'status' => 'released',
+                'status'      => 'released',
                 'released_at' => now(),
             ]);
             if ($certReq->payment) {
                 $certReq->payment->update([
                     'payment_status' => 'paid',
-                    'paid_at' => now(),
-                    'received_by' => $userId,
+                    'paid_at'        => now(),
+                    'received_by'    => $userId,
                 ]);
             }
             $msg = 'Request released and marked as paid.';
+            $smsText = "Hi {$certReq->resident->first_name}, your document ({$certReq->tracking_number}) has been successfully released. Thank you! - Barangay Pili";
+
         } elseif ($action === 'archive') {
             $certReq->update([
                 'archived_at' => now(),
@@ -118,9 +129,18 @@ class RequestController extends Controller
             $msg = 'Request archived safely. You can restore it from Archive.';
         }
 
+        // ── Send SMS Notification ─────────────────────────────────────────────
+        if ($smsText && $certReq->resident && !empty($certReq->resident->contact_number)) {
+            try {
+                SmsService::send($certReq->resident->contact_number, $smsText);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("SMS notification failed for request {$certReq->tracking_number}: " . $e->getMessage());
+            }
+        }
+
         ActivityLog::log(
-            strtoupper($action) . '_REQUEST', 
-            'Requests', 
+            strtoupper($action) . '_REQUEST',
+            'Requests',
             "Performed action '{$action}' on request {$certReq->tracking_number}"
         );
 
@@ -130,8 +150,8 @@ class RequestController extends Controller
     public function processPayment(Request $request)
     {
         $request->validate([
-            'request_id' => 'required|exists:requests,id',
-            'amount' => 'required|numeric|min:0',
+            'request_id'     => 'required|exists:requests,id',
+            'amount'         => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,gcash,maya',
             'payment_status' => 'required|in:paid,unpaid,waived',
             'receipt_number' => 'nullable|string|max:100',
@@ -141,28 +161,28 @@ class RequestController extends Controller
 
         if (!$certReq->payment) {
             Payment::create([
-                'request_id' => $certReq->id,
-                'amount' => $request->amount,
+                'request_id'     => $certReq->id,
+                'amount'         => $request->amount,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
                 'receipt_number' => $request->receipt_number,
-                'paid_at' => ($request->payment_status === 'paid') ? now() : null,
-                'received_by' => Auth::id(),
+                'paid_at'        => ($request->payment_status === 'paid') ? now() : null,
+                'received_by'    => Auth::id(),
             ]);
         } else {
             $certReq->payment->update([
-                'amount' => $request->amount,
+                'amount'         => $request->amount,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
                 'receipt_number' => $request->receipt_number,
-                'paid_at' => ($request->payment_status === 'paid') ? now() : null,
-                'received_by' => Auth::id(),
+                'paid_at'        => ($request->payment_status === 'paid') ? now() : null,
+                'received_by'    => Auth::id(),
             ]);
         }
 
         ActivityLog::log(
-            'PROCESS_PAYMENT', 
-            'Payments', 
+            'PROCESS_PAYMENT',
+            'Payments',
             "Processed payment for request {$certReq->tracking_number}. Status: {$request->payment_status}"
         );
 
