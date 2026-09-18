@@ -36,17 +36,19 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Google reCAPTCHA verification (for web logins, exempts Android APK)
+        $isMobileApp = str_contains((string) $request->userAgent(), 'BrgyPiliApp');
+        if (!$isMobileApp && !$this->verifyRecaptcha($request)) {
+            return back()->with('error', 'Please complete the Google reCAPTCHA security verification to proceed.')
+                ->withInput($request->only('email'));
+        }
+
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             // Check if account is admin or staff — redirect to secure Admin Portal
             if (in_array($user->role, ['admin', 'staff'])) {
-                $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
-                $targetUrl = (app()->environment('local') || str_contains(request()->getHost(), 'localhost'))
-                    ? route('admin.login')
-                    : 'https://' . $adminDomain . '/login';
-
-                return redirect()->away($targetUrl)->with('info', 'Barangay Officials and Staff must log in via the Admin Portal with reCAPTCHA and Email OTP verification.');
+                return redirect()->route('admin.login')->with('info', 'Barangay Officials and Staff must log in via the Admin Portal with reCAPTCHA and Email OTP verification.');
             }
 
             // The Android application is a dedicated resident portal. Do not
@@ -84,7 +86,7 @@ class AuthController extends Controller
         return back()->with('error', 'Invalid email address or password. Please try again.');
     }
 
-    // ── Dedicated Admin Auth (admin.brgypilieclearance.com) ────
+    // ── Dedicated Admin Auth (admin.brgypilieclearance.com or /admin/login) ────
     public function showAdminLogin()
     {
         if (Auth::check()) {
@@ -92,12 +94,6 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             }
             return redirect()->route('resident.my_requests');
-        }
-
-        $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
-        // If accessed via another domain in non-local environment, redirect to canonical admin domain
-        if (!app()->environment('local') && !str_contains(request()->getHost(), 'localhost') && request()->getHost() !== $adminDomain) {
-            return redirect()->away('https://' . $adminDomain . '/login');
         }
 
         return view('auth.admin-login');

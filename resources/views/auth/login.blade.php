@@ -9,6 +9,7 @@
   <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div class="auth-page">
@@ -90,10 +91,21 @@
                 </button>
               </div>
             </div>
+
+            <!-- Google reCAPTCHA v2 -->
+            <div style="margin: 16px 0; display: flex; justify-content: center;">
+              <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100" style="margin-top:8px;">
               <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
-            <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+              <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
+              <a href="{{ route('admin.login') }}" style="font-size: 12.5px; font-weight: 600; color: #1e3a8a; text-decoration: none;">
+                <i class="fas fa-user-shield"></i> Admin Portal
+              </a>
+            </div>
           </form>
           <div style="margin-top: 16px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
             <a href="{{ route('track') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width: 100%; max-width: 220px; justify-content: center;">
