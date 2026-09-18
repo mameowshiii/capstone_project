@@ -60,6 +60,8 @@ return [
 
     'admin_domain' => env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'),
 
+    'jwt_secret' => env('JWT_SECRET', null),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

@@ -16,7 +16,8 @@ class ActivityLog extends Model
         'action',
         'module',
         'description',
-        'ip_address'
+        'ip_address',
+        'location',
     ];
 
     public function user()
@@ -24,14 +25,15 @@ class ActivityLog extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public static function log($action, $module = '', $description = '')
+    public static function log($action, $module = '', $description = '', $location = null)
     {
         self::create([
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'module' => $module,
+            'user_id'     => Auth::id(),
+            'action'      => $action,
+            'module'      => $module,
             'description' => $description,
-            'ip_address' => Request::ip() ?? 'unknown'
+            'ip_address'  => Request::ip() ?? 'unknown',
+            'location'    => $location,
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Resident;
 use App\Models\ActivityLog;
+use App\Helpers\JwtHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -131,15 +132,24 @@ class AuthController extends Controller
         $user->admin_otp_expires_at = now()->addMinutes(10);
         $user->save();
 
-        // 6. Set Pending 2FA Session
+        // 6. Capture submitted geolocation (populated by browser Geolocation API)
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+        $location = null;
+        if ($lat && $lng && is_numeric($lat) && is_numeric($lng)) {
+            $location = "{$lat},{$lng}";
+        }
+
+        // 7. Set Pending 2FA Session
         $request->session()->put('admin_otp_user_id', $user->id);
         $request->session()->put('admin_remember', $request->boolean('remember'));
         $request->session()->put('admin_otp_last_sent', now()->timestamp);
+        $request->session()->put('admin_otp_location', $location);
 
-        // 7. Dispatch OTP Email
+        // 8. Dispatch OTP Email
         $this->sendAdminOtpEmail($user, $otp);
 
-        ActivityLog::log('ADMIN_OTP_SENT', 'Auth', "Admin login OTP dispatched to {$user->email}");
+        ActivityLog::log('ADMIN_OTP_SENT', 'Auth', "Admin login OTP dispatched to {$user->email}", $location);
 
         return redirect()->route('admin.otp.notice')
             ->with('success', 'A 6-digit verification code has been dispatched to your registered email address.');
@@ -203,13 +213,14 @@ class AuthController extends Controller
         $user->save();
 
         $remember = $request->session()->get('admin_remember', false);
-        $request->session()->forget(['admin_otp_user_id', 'admin_remember', 'admin_otp_last_sent']);
+        $location = $request->session()->get('admin_otp_location');
+        $request->session()->forget(['admin_otp_user_id', 'admin_remember', 'admin_otp_last_sent', 'admin_otp_location']);
 
         // Authenticate the user
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        ActivityLog::log('ADMIN_LOGIN_SUCCESS', 'Auth', "User {$user->username} successfully authenticated via 2FA Email OTP");
+        ActivityLog::log('ADMIN_LOGIN_SUCCESS', 'Auth', "User {$user->username} successfully authenticated via 2FA Email OTP", $location);
 
         return redirect()->route('admin.dashboard')->with('success', "Welcome back, {$user->username}!");
     }
@@ -284,6 +295,68 @@ class AuthController extends Controller
             }
             return false;
         }
+    }
+
+    // ── API Login — Issues JWT for Mobile App ─────────────────
+    public function apiLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email|string',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid email or password.',
+            ], 401);
+        }
+
+        if ($user->role !== 'resident') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This API endpoint is for resident accounts only.',
+            ], 403);
+        }
+
+        if ($user->status === 'inactive') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is pending approval by the administrator.',
+            ], 403);
+        }
+
+        if ($user->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been suspended.',
+            ], 403);
+        }
+
+        if ($user->email_verified_at === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please verify your email address before logging in.',
+            ], 403);
+        }
+
+        $token = JwtHelper::generate($user->id, $user->role);
+
+        ActivityLog::log('API_LOGIN', 'Auth', "Resident {$user->username} authenticated via API (JWT)");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful.',
+            'token'   => $token,
+            'user'    => [
+                'id'       => $user->id,
+                'username' => $user->username,
+                'email'    => $user->email,
+                'role'     => $user->role,
+            ],
+        ]);
     }
 
     // ── Helper: Send Admin OTP Email ──────────────────────────

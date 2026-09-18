@@ -82,8 +82,12 @@
           </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.login.submit') }}">
+        <form method="POST" action="{{ route('admin.login.submit') }}" id="adminLoginForm">
           @csrf
+
+          {{-- Hidden geolocation fields (populated by JS on page load) --}}
+          <input type="hidden" name="lat" id="adminLat">
+          <input type="hidden" name="lng" id="adminLng">
 
           <div class="form-group">
             <label class="form-label" for="email">Official Email Address</label>
@@ -119,6 +123,13 @@
             </label>
           </div>
 
+          <!-- Location Access Notice -->
+          <div id="locationNotice"
+            style="display:flex;align-items:center;gap:8px;font-size:12px;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;margin-bottom:14px;">
+            <i class="fas fa-location-crosshairs" style="color:#b91c1c;"></i>
+            <span id="locationStatus">Requesting location access for security audit logging…</span>
+          </div>
+
           <button type="submit" class="btn btn-primary w-100" style="margin-top:4px;">
             <i class="fas fa-key"></i> Proceed to Security OTP Verification
           </button>
@@ -147,6 +158,35 @@
         icon.className = 'fas fa-eye';
       }
     }
+
+    // ── Geolocation capture for security audit logging ──
+    (function () {
+      const latField  = document.getElementById('adminLat');
+      const lngField  = document.getElementById('adminLng');
+      const statusEl  = document.getElementById('locationStatus');
+      const noticeEl  = document.getElementById('locationNotice');
+
+      if (!navigator.geolocation) {
+        statusEl.textContent = 'Geolocation not supported by your browser.';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          latField.value = pos.coords.latitude.toFixed(6);
+          lngField.value = pos.coords.longitude.toFixed(6);
+          noticeEl.style.borderColor = '#bbf7d0';
+          noticeEl.style.background  = '#f0fdf4';
+          statusEl.innerHTML = '<span style="color:#16a34a">&#10003; Location captured for security audit log.</span>';
+        },
+        function (err) {
+          noticeEl.style.borderColor = '#fde68a';
+          noticeEl.style.background  = '#fffbeb';
+          statusEl.innerHTML = '<span style="color:#92400e">&#9888; Location permission denied — audit log will record IP address only.</span>';
+        },
+        { timeout: 8000, maximumAge: 0, enableHighAccuracy: false }
+      );
+    })();
   </script>
 </body>
 
