@@ -45,45 +45,36 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
-        if ($user && Hash::check($credentials['password'], $user->password)) {
-            // Check if account is admin or staff — redirect to secure Admin Portal
-            if (in_array($user->role, ['admin', 'staff'])) {
-                return redirect()->route('admin.login')->with('info', 'Barangay Officials and Staff must log in via the Admin Portal with reCAPTCHA and Email OTP verification.');
-            }
-
-            // The Android application is a dedicated resident portal. Do not
-            // allow staff or administrator accounts to create an app session.
-            if (str_contains((string) $request->userAgent(), 'BrgyPiliApp') && $user->role !== 'resident') {
-                return back()->with('error', 'This mobile application is available to resident accounts only.');
-            }
-
-            // Step 3 Check: Email verification check
-            if ($user->role === 'resident' && $user->email_verified_at === null) {
-                if (!$user->verification_code) {
-                    $user->verification_code = sprintf("%06d", mt_rand(100000, 999999));
-                    $user->save();
-                    $this->sendVerificationEmail($user);
-                }
-                $request->session()->put('verify_email', $user->email);
-                return redirect()->route('verification.notice')->with('error', 'Please verify your email address first.');
-            }
-
-            if ($user->status === 'inactive') {
-                return back()->with('error', 'Your account is pending approval by the administrator.');
-            }
-            if ($user->status === 'suspended') {
-                return back()->with('error', 'Your account has been suspended.');
-            }
-
-            Auth::login($user, $request->has('remember'));
-            $request->session()->regenerate();
-
-            ActivityLog::log('LOGIN', 'Auth', 'User logged in');
-
-            return $this->redirectUser();
+        // If credentials mismatch or account is not a resident (e.g. admin/staff trying resident portal)
+        if (!$user || !Hash::check($credentials['password'], $user->password) || $user->role !== 'resident') {
+            return back()->with('error', 'User not found or invalid credentials. Please try again.')
+                ->withInput($request->only('email'));
         }
 
-        return back()->with('error', 'Invalid email address or password. Please try again.');
+        // Email verification check
+        if ($user->email_verified_at === null) {
+            if (!$user->verification_code) {
+                $user->verification_code = sprintf("%06d", mt_rand(100000, 999999));
+                $user->save();
+                $this->sendVerificationEmail($user);
+            }
+            $request->session()->put('verify_email', $user->email);
+            return redirect()->route('verification.notice')->with('error', 'Please verify your email address first.');
+        }
+
+        if ($user->status === 'inactive') {
+            return back()->with('error', 'Your account is pending approval by the administrator.');
+        }
+        if ($user->status === 'suspended') {
+            return back()->with('error', 'Your account has been suspended.');
+        }
+
+        Auth::login($user, $request->has('remember'));
+        $request->session()->regenerate();
+
+        ActivityLog::log('LOGIN', 'Auth', 'User logged in');
+
+        return $this->redirectUser();
     }
 
     // ── Dedicated Admin Auth (admin.brgypilieclearance.com or /admin/login) ────

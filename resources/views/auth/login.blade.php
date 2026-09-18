@@ -100,11 +100,8 @@
             <button type="submit" class="btn btn-primary w-100" style="margin-top:8px;">
               <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div style="margin-top: 10px;">
               <a href="{{ route('password.request') }}" style="font-size: 13px;">Forgot Password?</a>
-              <a href="{{ route('admin.login') }}" style="font-size: 12.5px; font-weight: 600; color: #1e3a8a; text-decoration: none;">
-                <i class="fas fa-user-shield"></i> Admin Portal
-              </a>
             </div>
           </form>
           <div style="margin-top: 16px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
