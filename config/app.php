@@ -58,6 +58,8 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'admin_domain' => env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

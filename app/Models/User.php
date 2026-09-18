@@ -21,13 +21,21 @@ class User extends Authenticatable
         'photo',
         'verification_code',
         'email_verified_at',
+        'admin_otp_code',
+        'admin_otp_expires_at',
         'archived_at',
         'archived_by'
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'admin_otp_expires_at' => 'datetime',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'admin_otp_code',
     ];
 
     public function resident()

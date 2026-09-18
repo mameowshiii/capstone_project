@@ -10,8 +10,11 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+        $adminLoginRoute = ($request->is('admin*') || $request->getHost() === $adminDomain) ? 'admin.login' : 'login';
+
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route($adminLoginRoute);
         }
 
         $user = Auth::user();
@@ -24,7 +27,7 @@ class RoleMiddleware
         // If the user's status is not active, force logout
         if ($user->status !== 'active') {
             Auth::logout();
-            return redirect()->route('login')->with('error', 'Your account status is: ' . $user->status . '.');
+            return redirect()->route($adminLoginRoute)->with('error', 'Your account status is: ' . $user->status . '.');
         }
 
         // Check if user has any of the required roles
@@ -32,6 +35,6 @@ class RoleMiddleware
             return $next($request);
         }
 
-        return redirect()->route('login')->with('error', 'Unauthorized access.');
+        return redirect()->route($adminLoginRoute)->with('error', 'Unauthorized access.');
     }
 }

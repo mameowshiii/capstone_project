@@ -9,11 +9,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+    // ── Standard (Resident) Login ─────────────────────────────
     public function showLogin()
     {
+        $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+        if (request()->getHost() === $adminDomain) {
+            return $this->showAdminLogin();
+        }
+
         if (Auth::check()) {
             return $this->redirectUser();
         }
@@ -30,11 +39,22 @@ class AuthController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
-            // The Android application is a dedicated resident portal.  Do not
+            // Check if account is admin or staff — redirect to secure Admin Portal
+            if (in_array($user->role, ['admin', 'staff'])) {
+                $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+                $targetUrl = (app()->environment('local') || str_contains(request()->getHost(), 'localhost'))
+                    ? route('admin.login')
+                    : 'https://' . $adminDomain . '/login';
+
+                return redirect()->away($targetUrl)->with('info', 'Barangay Officials and Staff must log in via the Admin Portal with reCAPTCHA and Email OTP verification.');
+            }
+
+            // The Android application is a dedicated resident portal. Do not
             // allow staff or administrator accounts to create an app session.
             if (str_contains((string) $request->userAgent(), 'BrgyPiliApp') && $user->role !== 'resident') {
                 return back()->with('error', 'This mobile application is available to resident accounts only.');
             }
+
             // Step 3 Check: Email verification check
             if ($user->role === 'resident' && $user->email_verified_at === null) {
                 if (!$user->verification_code) {
@@ -64,6 +84,242 @@ class AuthController extends Controller
         return back()->with('error', 'Invalid email address or password. Please try again.');
     }
 
+    // ── Dedicated Admin Auth (admin.brgypilieclearance.com) ────
+    public function showAdminLogin()
+    {
+        if (Auth::check()) {
+            if (in_array(Auth::user()->role, ['admin', 'staff'])) {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('resident.my_requests');
+        }
+
+        $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+        // If accessed via another domain in non-local environment, redirect to canonical admin domain
+        if (!app()->environment('local') && !str_contains(request()->getHost(), 'localhost') && request()->getHost() !== $adminDomain) {
+            return redirect()->away('https://' . $adminDomain . '/login');
+        }
+
+        return view('auth.admin-login');
+    }
+
+    public function adminLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email|string',
+            'password' => 'required|string',
+        ]);
+
+        // 1. Google reCAPTCHA Verification
+        if (!$this->verifyRecaptcha($request)) {
+            return back()->with('error', 'Please complete the Google reCAPTCHA security verification to proceed.')
+                ->withInput($request->only('email'));
+        }
+
+        // 2. Validate User Credentials
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return back()->with('error', 'Invalid administrative email address or password. Please try again.')
+                ->withInput($request->only('email'));
+        }
+
+        // 3. Ensure role is admin or staff (restrict residents)
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            return back()->with('error', 'Access restricted: This portal is reserved for Barangay Officials and Staff only. Residents please sign in via the resident portal.')
+                ->withInput($request->only('email'));
+        }
+
+        // 4. Status Checks
+        if ($user->status === 'inactive') {
+            return back()->with('error', 'Your administrative account is inactive. Please contact the lead administrator.');
+        }
+        if ($user->status === 'suspended') {
+            return back()->with('error', 'Your account has been suspended. Please contact the administrator.');
+        }
+
+        // 5. Generate Secure 6-digit Email OTP (Valid for 10 minutes)
+        $otp = sprintf("%06d", random_int(100000, 999999));
+        $user->admin_otp_code = $otp;
+        $user->admin_otp_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        // 6. Set Pending 2FA Session
+        $request->session()->put('admin_otp_user_id', $user->id);
+        $request->session()->put('admin_remember', $request->boolean('remember'));
+        $request->session()->put('admin_otp_last_sent', now()->timestamp);
+
+        // 7. Dispatch OTP Email
+        $this->sendAdminOtpEmail($user, $otp);
+
+        ActivityLog::log('ADMIN_OTP_SENT', 'Auth', "Admin login OTP dispatched to {$user->email}");
+
+        return redirect()->route('admin.otp.notice')
+            ->with('success', 'A 6-digit verification code has been dispatched to your registered email address.');
+    }
+
+    public function showAdminOtp(Request $request)
+    {
+        $userId = $request->session()->get('admin_otp_user_id');
+        if (!$userId) {
+            return redirect()->route('admin.login')->with('error', 'Your verification session expired. Please sign in again.');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            $request->session()->forget(['admin_otp_user_id', 'admin_remember', 'admin_otp_last_sent']);
+            return redirect()->route('admin.login');
+        }
+
+        // Mask email: e.g., d***a@example.com
+        $parts = explode('@', $user->email);
+        $name = $parts[0];
+        $domain = $parts[1] ?? '';
+        $maskedName = strlen($name) <= 2 ? $name . '***' : substr($name, 0, 1) . '***' . substr($name, -1);
+        $maskedEmail = $maskedName . '@' . $domain;
+
+        $expiresTimestamp = $user->admin_otp_expires_at ? $user->admin_otp_expires_at->timestamp : (time() + 600);
+        $resendCooldownEnd = $request->session()->get('admin_otp_last_sent', time()) + 60;
+
+        return view('auth.admin-verify-otp', compact('maskedEmail', 'expiresTimestamp', 'resendCooldownEnd'));
+    }
+
+    public function verifyAdminOtp(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ]);
+
+        $userId = $request->session()->get('admin_otp_user_id');
+        if (!$userId) {
+            return redirect()->route('admin.login')->with('error', 'Your verification session expired. Please sign in again.');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return redirect()->route('admin.login');
+        }
+
+        // Check expiration
+        if (!$user->admin_otp_expires_at || now()->gt($user->admin_otp_expires_at)) {
+            return back()->with('error', 'The verification code has expired. Please request a new code.');
+        }
+
+        // Constant-time comparison
+        if (!hash_equals((string) $user->admin_otp_code, (string) $request->code)) {
+            return back()->with('error', 'Invalid verification code. Please check your email and try again.');
+        }
+
+        // Clear OTP fields
+        $user->admin_otp_code = null;
+        $user->admin_otp_expires_at = null;
+        $user->save();
+
+        $remember = $request->session()->get('admin_remember', false);
+        $request->session()->forget(['admin_otp_user_id', 'admin_remember', 'admin_otp_last_sent']);
+
+        // Authenticate the user
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+
+        ActivityLog::log('ADMIN_LOGIN_SUCCESS', 'Auth', "User {$user->username} successfully authenticated via 2FA Email OTP");
+
+        return redirect()->route('admin.dashboard')->with('success', "Welcome back, {$user->username}!");
+    }
+
+    public function resendAdminOtp(Request $request)
+    {
+        $userId = $request->session()->get('admin_otp_user_id');
+        if (!$userId) {
+            return redirect()->route('admin.login')->with('error', 'Your verification session expired. Please sign in again.');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return redirect()->route('admin.login');
+        }
+
+        // Cooldown enforcement (60 seconds)
+        $lastSent = $request->session()->get('admin_otp_last_sent', 0);
+        if (time() - $lastSent < 60) {
+            $remaining = 60 - (time() - $lastSent);
+            return back()->with('error', "Please wait {$remaining} seconds before requesting a new code.");
+        }
+
+        $otp = sprintf("%06d", random_int(100000, 999999));
+        $user->admin_otp_code = $otp;
+        $user->admin_otp_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        $request->session()->put('admin_otp_last_sent', now()->timestamp);
+
+        $this->sendAdminOtpEmail($user, $otp);
+
+        ActivityLog::log('ADMIN_OTP_RESENT', 'Auth', "Fresh OTP code dispatched to {$user->email}");
+
+        return back()->with('success', 'A fresh 6-digit verification code has been dispatched to your email.');
+    }
+
+    public function cancelAdminOtp(Request $request)
+    {
+        $request->session()->forget(['admin_otp_user_id', 'admin_remember', 'admin_otp_last_sent']);
+        return redirect()->route('admin.login');
+    }
+
+    // ── Helper: Verify Google reCAPTCHA ──────────────────────
+    private function verifyRecaptcha(Request $request): bool
+    {
+        $secretKey = config('services.recaptcha.secret_key');
+        $recaptchaResponse = $request->input('g-recaptcha-response');
+
+        // If no secret key configured or running in local test without key, allow fallback
+        if (empty($secretKey)) {
+            return true;
+        }
+
+        if (empty($recaptchaResponse)) {
+            return false;
+        }
+
+        try {
+            $response = Http::asForm()->timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret'   => $secretKey,
+                'response' => $recaptchaResponse,
+                'remoteip' => $request->ip(),
+            ]);
+
+            return (bool) $response->json('success');
+        } catch (\Exception $e) {
+            Log::error("reCAPTCHA validation request failed: " . $e->getMessage());
+            // In local development, don't block if there is a network glitch with Google servers
+            if (app()->environment('local')) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // ── Helper: Send Admin OTP Email ──────────────────────────
+    private function sendAdminOtpEmail($user, $otp)
+    {
+        $email = $user->email;
+        try {
+            Mail::send('emails.admin-login-otp', ['code' => $otp, 'user' => $user], function ($message) use ($email) {
+                $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
+                $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
+                $message->from($fromAddress, $fromName);
+                $message->to($email);
+                $message->subject('Admin Portal Verification Code - Barangay Pili');
+            });
+            Log::info("Admin 2FA OTP sent to {$email}: {$otp}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send admin OTP email to {$email}: " . $e->getMessage());
+            // Also log OTP code for local debugging fallback
+            Log::info("Admin 2FA OTP (local fallback log) for {$email}: {$otp}");
+        }
+    }
+
+    // ── Resident Registration ─────────────────────────────────
     public function register(Request $request)
     {
         $request->validate([
@@ -128,7 +384,7 @@ class AuthController extends Controller
             return redirect()->route('verification.notice')->with('success', 'Registration Step 2 complete! Please verify your email address (Step 3) to complete registration.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Illuminate\Support\Facades\Log::error("Registration failed exception: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error("Registration failed exception: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             
             $msg = 'Registration failed. Please try again.';
             if (config('app.debug')) {
@@ -140,6 +396,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $wasAdmin = Auth::check() && in_array(Auth::user()->role, ['admin', 'staff']);
+        $adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+        $isOnAdminDomain = request()->getHost() === $adminDomain;
+
         if (Auth::check()) {
             ActivityLog::log('LOGOUT', 'Auth', 'User logged out');
         }
@@ -149,10 +409,14 @@ class AuthController extends Controller
         $request->session()->flush();
         $request->session()->regenerate(true);
 
-        return redirect()->route('login')
-            ->withCookie(\Cookie::forget(config('session.cookie', 'laravel_session')));
-    }
+        $cookie = \Cookie::forget(config('session.cookie', 'laravel_session'));
 
+        if ($wasAdmin || $isOnAdminDomain) {
+            return redirect()->route('admin.login')->withCookie($cookie);
+        }
+
+        return redirect()->route('login')->withCookie($cookie);
+    }
 
     private function redirectUser()
     {
@@ -179,7 +443,7 @@ class AuthController extends Controller
         $token = \Illuminate\Support\Str::random(60);
         $hashedToken = hash('sha256', $token);
 
-        \Illuminate\Support\Facades\DB::table('password_resets')->updateOrInsert(
+        DB::table('password_resets')->updateOrInsert(
             ['email' => $request->email],
             [
                 'token' => $hashedToken,
@@ -191,7 +455,7 @@ class AuthController extends Controller
 
         $email = $request->email;
         try {
-            \Illuminate\Support\Facades\Mail::send('emails.forgot-password', ['resetUrl' => $resetUrl], function ($message) use ($email) {
+            Mail::send('emails.forgot-password', ['resetUrl' => $resetUrl], function ($message) use ($email) {
                 $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
                 $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
                 $message->from($fromAddress, $fromName);
@@ -199,12 +463,12 @@ class AuthController extends Controller
                 $message->subject('Reset Password - Barangay Pili Clearance & Certificate System');
             });
 
-            \Illuminate\Support\Facades\Log::info("Password reset link requested for {$email}: {$resetUrl}");
+            Log::info("Password reset link requested for {$email}: {$resetUrl}");
 
             return back()->with('success', 'Successfully sent the reset link');
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send password reset email to {$email}: " . $e->getMessage());
-            \Illuminate\Support\Facades\Log::info("Password reset link (fallback) for {$email}: {$resetUrl}");
+            Log::error("Failed to send password reset email to {$email}: " . $e->getMessage());
+            Log::info("Password reset link (fallback) for {$email}: {$resetUrl}");
 
             return back()->with('success', 'Successfully sent the reset link');
         }
@@ -226,7 +490,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $record = \Illuminate\Support\Facades\DB::table('password_resets')
+        $record = DB::table('password_resets')
             ->where('email', $request->email)
             ->first();
 
@@ -236,7 +500,7 @@ class AuthController extends Controller
 
         $expiresAt = \Carbon\Carbon::parse($record->created_at)->addMinutes(60);
         if ($expiresAt->isPast()) {
-            \Illuminate\Support\Facades\DB::table('password_resets')->where('email', $request->email)->delete();
+            DB::table('password_resets')->where('email', $request->email)->delete();
             return back()->withErrors(['email' => 'This password reset token has expired.']);
         }
 
@@ -244,7 +508,7 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        \Illuminate\Support\Facades\DB::table('password_resets')->where('email', $request->email)->delete();
+        DB::table('password_resets')->where('email', $request->email)->delete();
 
         ActivityLog::log('PASSWORD_RESET', 'Auth', "User {$user->username} reset their password");
 
@@ -317,16 +581,16 @@ class AuthController extends Controller
         $code = $user->verification_code;
         $email = $user->email;
         try {
-            \Illuminate\Support\Facades\Mail::send('emails.verify-email', ['code' => $code], function ($message) use ($email) {
+            Mail::send('emails.verify-email', ['code' => $code], function ($message) use ($email) {
                 $fromAddress = config('mail.from.address') ?: 'no-reply@brgypilieclearance.com';
                 $fromName = config('mail.from.name') ?: 'Barangay Pili Clearance';
                 $message->from($fromAddress, $fromName);
                 $message->to($email);
                 $message->subject('Verify Your Email Address - Barangay Pili Clearance & Certificate System');
             });
-            \Illuminate\Support\Facades\Log::info("Verification code sent to {$email}: {$code}");
+            Log::info("Verification code sent to {$email}: {$code}");
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send verification email to {$email}: " . $e->getMessage());
+            Log::error("Failed to send verification email to {$email}: " . $e->getMessage());
         }
     }
 }

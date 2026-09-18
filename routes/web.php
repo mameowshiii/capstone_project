@@ -17,7 +17,38 @@ use App\Http\Controllers\SummonController;
 use App\Http\Controllers\BulletinController;
 use App\Http\Controllers\BorrowRequestController;
 
-// ── Public Routes ─────────────────────────────────────────
+$adminDomain = config('app.admin_domain', env('ADMIN_DOMAIN', 'admin.brgypilieclearance.com'));
+
+// ── Admin Subdomain Routes (admin.brgypilieclearance.com) ──
+Route::domain($adminDomain)->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/', [AuthController::class, 'showAdminLogin'])->name('admin.subdomain.root');
+        Route::get('/login', [AuthController::class, 'showAdminLogin'])->name('admin.subdomain.login');
+        Route::post('/login', [AuthController::class, 'adminLogin'])->name('admin.subdomain.login.submit');
+        Route::get('/verify-otp', [AuthController::class, 'showAdminOtp'])->name('admin.subdomain.otp.notice');
+        Route::post('/verify-otp', [AuthController::class, 'verifyAdminOtp'])->name('admin.subdomain.otp.verify');
+        Route::post('/resend-otp', [AuthController::class, 'resendAdminOtp'])->name('admin.subdomain.otp.resend');
+        Route::get('/cancel-otp', [AuthController::class, 'cancelAdminOtp'])->name('admin.subdomain.otp.cancel');
+    });
+
+    Route::middleware(['auth', 'role:staff,admin'])->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.subdomain.dashboard');
+    });
+});
+
+// ── Admin Authentication Routes (Path-based & Local Dev) ──
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AuthController::class, 'showAdminLogin'])->name('login');
+        Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit');
+        Route::get('/verify-otp', [AuthController::class, 'showAdminOtp'])->name('otp.notice');
+        Route::post('/verify-otp', [AuthController::class, 'verifyAdminOtp'])->name('otp.verify');
+        Route::post('/resend-otp', [AuthController::class, 'resendAdminOtp'])->name('otp.resend');
+        Route::get('/cancel-otp', [AuthController::class, 'cancelAdminOtp'])->name('otp.cancel');
+    });
+});
+
+// ── Public Routes (Resident & General) ────────────────────
 Route::get('/', function () {
     if (str_contains(request()->header('User-Agent'), 'BrgyPiliApp')) {
         return redirect()->route('login');
