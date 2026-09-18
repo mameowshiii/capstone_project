@@ -2,7 +2,11 @@
     RewriteEngine On
     DirectoryIndex index.php
 
-    # Redirect directly to index.php if file/dir does not exist
+    # Forward asset and static file requests to main domain so all assets load seamlessly
+    RewriteRule ^assets/(.*)$ https://brgypilieclearance.com/assets/$1 [R=301,L]
+    RewriteRule ^favicon\.ico$ https://brgypilieclearance.com/favicon.ico [R=301,L]
+
+    # Handle all application routes through index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [L,QSA]

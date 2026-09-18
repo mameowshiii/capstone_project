@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal Login &mdash; Barangay Pili</title>
   <meta name="description" content="Official administrative login portal for Barangay Pili clearance and certificate system.">
-  <link rel="icon" type="image/png" href="{{ asset('assets/images/pili_logo.png') }}">
-  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  @php
+    $assetBase = (str_contains(request()->getHost(), 'admin.') && !str_contains(request()->getHost(), 'localhost')) 
+      ? 'https://brgypilieclearance.com' 
+      : '';
+  @endphp
+  <link rel="icon" type="image/png" href="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}">
+  <link rel="shortcut icon" href="{{ $assetBase ? $assetBase . '/favicon.ico' : asset('favicon.ico') }}">
+  <link rel="stylesheet" href="{{ $assetBase ? $assetBase . '/assets/css/style.css' : asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
@@ -18,7 +23,7 @@
       <!-- Left panel -->
       <div class="auth-left">
         <div class="brgy-seal" style="text-align: left; margin-bottom: 24px;">
-          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Logo"
+          <img src="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}" alt="Barangay Logo"
             style="width: 120px; height: auto; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
         </div>
 
@@ -123,7 +128,7 @@
     </div><!-- /.auth-container -->
   </div><!-- /.auth-page -->
 
-  <script src="{{ asset('assets/js/main.js') }}"></script>
+  <script src="{{ $assetBase ? $assetBase . '/assets/js/main.js' : asset('assets/js/main.js') }}"></script>
   <script>
     function togglePw(id) {
       const el = document.getElementById(id);
