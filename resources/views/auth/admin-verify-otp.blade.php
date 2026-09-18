@@ -10,318 +10,129 @@
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    :root {
-      --admin-bg: #0b1329;
-      --admin-surface: #131f3f;
-      --admin-surface-light: #1a2952;
-      --admin-primary: #2563eb;
-      --admin-accent: #f59e0b;
-      --admin-border: rgba(255, 255, 255, 0.12);
-      --admin-text-main: #f8fafc;
-      --admin-text-muted: #94a3b8;
-    }
-
-    body.admin-auth-body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b1329 100%);
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--admin-text-main);
-      padding: 24px;
-      box-sizing: border-box;
-    }
-
-    .admin-auth-card {
-      width: 100%;
-      max-width: 480px;
-      background: rgba(19, 31, 63, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--admin-border);
-      border-radius: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .admin-card-header {
-      padding: 36px 32px 20px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
-    }
-
-    .icon-shield-wrap {
-      width: 76px;
-      height: 76px;
-      margin: 0 auto 16px;
-      background: rgba(37, 99, 235, 0.15);
-      border: 2px solid rgba(37, 99, 235, 0.4);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #60a5fa;
-      font-size: 32px;
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
-      animation: pulse-border 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse-border {
-      0%, 100% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.3); transform: scale(1); }
-      50% { box-shadow: 0 0 25px rgba(37, 99, 235, 0.6); transform: scale(1.03); }
-    }
-
-    .admin-card-header h1 {
-      margin: 0;
-      font-size: 21px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-
-    .admin-card-header p {
-      margin: 8px 0 0;
-      font-size: 13.5px;
-      color: var(--admin-text-muted);
-      line-height: 1.5;
-    }
-
-    .masked-email {
-      color: #fbbf24;
-      font-weight: 600;
-      word-break: break-all;
-    }
-
-    .admin-card-body {
-      padding: 28px 32px 32px;
-    }
-
-    /* OTP Segmented Inputs */
-    .otp-input-group {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 24px 0;
-    }
-
     .otp-digit {
-      width: 50px;
-      height: 56px;
+      width: 48px;
+      height: 52px;
       text-align: center;
-      font-size: 24px;
-      font-weight: 800;
-      font-family: 'Courier New', monospace;
-      color: #ffffff;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1.5px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
+      font-size: 22px;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+      color: #1e293b;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
       outline: none;
       transition: all 0.2s;
     }
-
     .otp-digit:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-      background: rgba(15, 23, 42, 1);
-      transform: translateY(-2px);
+      border-color: #b91c1c;
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
+      background: #ffffff;
     }
-
     .otp-digit.filled {
-      border-color: #60a5fa;
-      background: rgba(30, 58, 138, 0.3);
+      border-color: #b91c1c;
+      background: #fef2f2;
     }
-
-    .timer-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #cbd5e1;
-      margin-bottom: 24px;
-    }
-
     .timer-badge {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
       font-weight: 700;
       padding: 3px 10px;
       border-radius: 12px;
       font-family: monospace;
       font-size: 13px;
     }
-
-    .admin-btn-submit {
-      width: 100%;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      padding: 13px 20px;
-      font-size: 14.5px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-      transition: all 0.2s;
-    }
-
-    .admin-btn-submit:hover {
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
-      transform: translateY(-1px);
-    }
-
-    .resend-section {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-    }
-
-    .btn-resend {
-      background: none;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cbd5e1;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-resend:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: #60a5fa;
-      color: #ffffff;
-    }
-
-    .btn-resend:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-cancel {
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 12.5px;
-      transition: color 0.2s;
-    }
-
-    .btn-cancel:hover {
-      color: #f87171;
-    }
-
-    .alert-custom {
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .alert-danger-custom {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
-    }
-
-    .alert-success-custom {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #6ee7b7;
-    }
   </style>
 </head>
-<body class="admin-auth-body">
+<body>
+  <div class="auth-page">
+    <div class="auth-container">
 
-  <div class="admin-auth-card">
-    <div class="admin-card-header">
-      <div class="icon-shield-wrap">
-        <i class="fas fa-lock"></i>
+      <!-- Left panel -->
+      <div class="auth-left">
+        <div class="brgy-seal" style="text-align: left; margin-bottom: 24px;">
+          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Logo"
+            style="width: 120px; height: auto; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+        </div>
+
+        <h1>Barangay Pili<br>Two-Factor Security</h1>
+        <p>Protecting official administrative systems with multi-factor authentication.</p>
+
+        <div class="feature-list">
+          <div class="feature-item"><i class="fas fa-shield-check"></i> High Security Clearance Protection</div>
+          <div class="feature-item"><i class="fas fa-envelope-circle-check"></i> One-Time Security Code Verification</div>
+          <div class="feature-item"><i class="fas fa-clock"></i> 10-Minute Expiry Limit</div>
+          <div class="feature-item"><i class="fas fa-user-lock"></i> Session Encryption</div>
+        </div>
+
+        <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2);font-size:12px;opacity:.8;">
+          <i class="fas fa-shield-halved"></i> admin.brgypilieclearance.com &bull; Two-Factor Authentication
+        </div>
       </div>
-      <h1>Two-Factor Verification</h1>
-      <p>
-        A 6-digit security code has been dispatched to your email:<br>
-        <span class="masked-email">{{ $maskedEmail }}</span>
-      </p>
-    </div>
 
-    <div class="admin-card-body">
-
-      @if (session('error'))
-        <div class="alert-custom alert-danger-custom">
-          <i class="fas fa-circle-exclamation" style="margin-top: 2px;"></i>
-          <div>{{ session('error') }}</div>
+      <!-- Right panel -->
+      <div class="auth-right">
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+          <i class="fas fa-shield-halved"></i> Step 2 of 2
         </div>
-      @endif
+        <h2>Verify Your Identity</h2>
+        <p class="subtitle" style="margin-bottom: 16px;">
+          A 6-digit security code was dispatched to:<br>
+          <strong style="color: #0f172a;">{{ $maskedEmail }}</strong>
+        </p>
 
-      @if (session('success'))
-        <div class="alert-custom alert-success-custom">
-          <i class="fas fa-circle-check" style="margin-top: 2px;"></i>
-          <div>{{ session('success') }}</div>
-        </div>
-      @endif
+        @if (session('error'))
+          <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+          <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+        @endif
 
-      <form method="POST" action="{{ route('admin.otp.verify') }}" id="otp-form">
-        @csrf
-
-        <!-- Consolidated hidden code input -->
-        <input type="hidden" name="code" id="consolidated-code" required>
-
-        <div class="otp-input-group">
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" autofocus>
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
-          <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
-        </div>
-
-        <div class="timer-container">
-          <i class="fas fa-stopwatch" style="color: #f59e0b;"></i>
-          <span>Code expires in:</span>
-          <span class="timer-badge" id="otp-countdown">10:00</span>
-        </div>
-
-        <button type="submit" class="admin-btn-submit" id="btn-verify">
-          <i class="fas fa-shield-check"></i> Authorize &amp; Access Dashboard
-        </button>
-      </form>
-
-      <div class="resend-section">
-        <form method="POST" action="{{ route('admin.otp.resend') }}" id="resend-form">
+        <form method="POST" action="{{ route('admin.otp.verify') }}" id="otp-form">
           @csrf
-          <button type="submit" class="btn-resend" id="btn-resend">
-            <i class="fas fa-rotate-right"></i> <span id="resend-text">Resend Code</span>
+          <input type="hidden" name="code" id="consolidated-code" required>
+
+          <div style="display: flex; justify-content: center; gap: 8px; margin: 20px 0;">
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" autofocus>
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: #64748b; margin-bottom: 20px;">
+            <i class="fas fa-stopwatch" style="color: #d97706;"></i>
+            <span>Code expires in:</span>
+            <span class="timer-badge" id="otp-countdown">10:00</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100" id="btn-verify">
+            <i class="fas fa-check-circle"></i> Authorize &amp; Access Dashboard
           </button>
         </form>
 
-        <a href="{{ route('admin.otp.cancel') }}" class="btn-cancel">
-          <i class="fas fa-arrow-left"></i> Cancel and return to Admin Login
-        </a>
-      </div>
+        <div style="margin-top: 24px; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+          <form method="POST" action="{{ route('admin.otp.resend') }}" id="resend-form">
+            @csrf
+            <button type="submit" class="btn btn-outline-secondary btn-sm" id="btn-resend" style="min-width: 180px;">
+              <i class="fas fa-rotate-right"></i> <span id="resend-text">Resend Code</span>
+            </button>
+          </form>
 
-    </div>
-  </div>
+          <a href="{{ route('admin.otp.cancel') }}" style="font-size: 13px; color: #64748b; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Cancel and return to login
+          </a>
+        </div>
+
+      </div><!-- /.auth-right -->
+
+    </div><!-- /.auth-container -->
+  </div><!-- /.auth-page -->
 
   <script>
-    // 1. Segmented OTP Input Handling
+    // Segmented input auto-advance
     const digits = document.querySelectorAll('.otp-digit');
     const consolidatedInput = document.getElementById('consolidated-code');
     const form = document.getElementById('otp-form');
@@ -386,16 +197,7 @@
       });
     });
 
-    form.addEventListener('submit', (e) => {
-      const code = updateConsolidatedCode();
-      if (code.length !== 6) {
-        e.preventDefault();
-        alert('Please enter the complete 6-digit verification code.');
-        digits[0].focus();
-      }
-    });
-
-    // 2. OTP Expiry Countdown (10 minutes)
+    // Countdown logic
     const expiresTimestamp = {{ $expiresTimestamp ?? (time() + 600) }} * 1000;
     const countdownEl = document.getElementById('otp-countdown');
 
@@ -405,7 +207,7 @@
 
       if (diff <= 0) {
         countdownEl.innerText = 'EXPIRED';
-        countdownEl.style.backgroundColor = 'rgba(239, 68, 68, 0.4)';
+        countdownEl.style.backgroundColor = '#fecaca';
         return;
       }
 
@@ -416,7 +218,7 @@
     updateExpiryCountdown();
     setInterval(updateExpiryCountdown, 1000);
 
-    // 3. Resend Button Cooldown (60 seconds)
+    // Resend cooldown
     const resendCooldownEnd = {{ $resendCooldownEnd ?? (time() + 60) }} * 1000;
     const btnResend = document.getElementById('btn-resend');
     const resendText = document.getElementById('resend-text');
