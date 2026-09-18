@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal Login &mdash; Barangay Pili</title>
-  <meta name="description" content="Official administrative login portal for Barangay Pili clearance and certificate system.">
+  <meta name="description"
+    content="Official administrative login portal for Barangay Pili clearance and certificate system.">
   @php
-    $assetBase = (str_contains(request()->getHost(), 'admin.') && !str_contains(request()->getHost(), 'localhost')) 
-      ? 'https://brgypilieclearance.com' 
+    $assetBase = (str_contains(request()->getHost(), 'admin.') && !str_contains(request()->getHost(), 'localhost'))
+      ? 'https://brgypilieclearance.com'
       : '';
   @endphp
-  <link rel="icon" type="image/png" href="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}">
+  <link rel="icon" type="image/png"
+    href="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}">
   <link rel="shortcut icon" href="{{ $assetBase ? $assetBase . '/favicon.ico' : asset('favicon.ico') }}">
   <link rel="stylesheet" href="{{ $assetBase ? $assetBase . '/assets/css/style.css' : asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
+
 <body>
   <div class="auth-page">
     <div class="auth-container">
@@ -23,7 +27,9 @@
       <!-- Left panel -->
       <div class="auth-left">
         <div class="brgy-seal" style="text-align: left; margin-bottom: 24px;">
-          <img src="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}" alt="Barangay Logo"
+          <img
+            src="{{ $assetBase ? $assetBase . '/assets/images/pili_logo.png' : asset('assets/images/pili_logo.png') }}"
+            alt="Barangay Logo"
             style="width: 120px; height: auto; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
         </div>
 
@@ -38,14 +44,16 @@
           <div class="feature-item"><i class="fas fa-key"></i> Two-Factor Security (2FA OTP)</div>
         </div>
 
-        <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2);font-size:12px;opacity:.8;">
+        <div
+          style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2);font-size:12px;opacity:.8;">
           <i class="fas fa-shield-halved"></i> admin.brgypilieclearance.com &bull; Secure Portal
         </div>
       </div>
 
       <!-- Right panel -->
       <div class="auth-right">
-        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+        <div
+          style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
           <i class="fas fa-lock"></i> Official Access
         </div>
         <h2>Admin Sign In</h2>
@@ -58,7 +66,8 @@
           <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
         @endif
         @if (session('info'))
-          <div class="alert alert-info" style="background-color:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 16px;border-radius:8px;font-size:13.5px;margin-bottom:16px;">
+          <div class="alert alert-info"
+            style="background-color:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 16px;border-radius:8px;font-size:13.5px;margin-bottom:16px;">
             <i class="fas fa-info-circle"></i> {{ session('info') }}
           </div>
         @endif
@@ -78,8 +87,8 @@
 
           <div class="form-group">
             <label class="form-label" for="email">Official Email Address</label>
-            <input type="email" id="email" name="email" class="form-control"
-              placeholder="admin@brgypilieclearance.com" required autocomplete="email" value="{{ old('email') }}" autofocus>
+            <input type="email" id="email" name="email" class="form-control" placeholder="admin@brgypilieclearance.com"
+              required autocomplete="email" value="{{ old('email') }}" autofocus>
           </div>
 
           <div class="form-group">
@@ -102,7 +111,8 @@
             <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
           </div>
 
-          <div style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #4b5563;">
+          <div
+            style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #4b5563;">
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
               <input type="checkbox" name="remember" style="accent-color: #b91c1c;">
               <span>Keep me signed in</span>
@@ -114,13 +124,9 @@
           </button>
         </form>
 
-        <div style="margin-top: 20px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
-          <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width: 100%; max-width: 240px; justify-content: center;">
-            <i class="fas fa-users"></i> Go to Resident Portal
-          </a>
-          <a href="{{ route('index') }}" class="btn btn-outline-secondary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width: 100%; max-width: 240px; justify-content: center;">
-            <i class="fas fa-home"></i> Back to Homepage
-          </a>
+        <div
+          style="margin-top: 20px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+
         </div>
 
       </div><!-- /.auth-right -->
@@ -133,14 +139,15 @@
     function togglePw(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById('pw-icon');
-      if (el.type === 'password') { 
-        el.type = 'text'; 
-        icon.className = 'fas fa-eye-slash'; 
-      } else { 
-        el.type = 'password'; 
-        icon.className = 'fas fa-eye'; 
+      if (el.type === 'password') {
+        el.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+      } else {
+        el.type = 'password';
+        icon.className = 'fas fa-eye';
       }
     }
   </script>
 </body>
+
 </html>
