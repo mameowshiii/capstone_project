@@ -91,8 +91,9 @@
 
           <div class="form-group">
             <label class="form-label" for="email">Official Email Address</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="admin@brgypilieclearance.com"
-              required autocomplete="email" value="{{ old('email') }}" autofocus>
+            <input type="email" id="email" name="email" class="form-control"
+              placeholder="Enter your official email address" required autocomplete="email" value="{{ old('email') }}"
+              autofocus>
           </div>
 
           <div class="form-group">
@@ -161,10 +162,10 @@
 
     // ── Geolocation capture for security audit logging ──
     (function () {
-      const latField  = document.getElementById('adminLat');
-      const lngField  = document.getElementById('adminLng');
-      const statusEl  = document.getElementById('locationStatus');
-      const noticeEl  = document.getElementById('locationNotice');
+      const latField = document.getElementById('adminLat');
+      const lngField = document.getElementById('adminLng');
+      const statusEl = document.getElementById('locationStatus');
+      const noticeEl = document.getElementById('locationNotice');
 
       if (!navigator.geolocation) {
         statusEl.textContent = 'Geolocation not supported by your browser.';
@@ -176,12 +177,12 @@
           latField.value = pos.coords.latitude.toFixed(6);
           lngField.value = pos.coords.longitude.toFixed(6);
           noticeEl.style.borderColor = '#bbf7d0';
-          noticeEl.style.background  = '#f0fdf4';
+          noticeEl.style.background = '#f0fdf4';
           statusEl.innerHTML = '<span style="color:#16a34a">&#10003; Location captured for security audit log.</span>';
         },
         function (err) {
           noticeEl.style.borderColor = '#fde68a';
-          noticeEl.style.background  = '#fffbeb';
+          noticeEl.style.background = '#fffbeb';
           statusEl.innerHTML = '<span style="color:#92400e">&#9888; Location permission denied — audit log will record IP address only.</span>';
         },
         { timeout: 8000, maximumAge: 0, enableHighAccuracy: false }
