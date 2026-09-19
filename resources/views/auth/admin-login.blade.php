@@ -124,15 +124,21 @@
             </label>
           </div>
 
-          <!-- Location Access Notice -->
+          <!-- Location Access Notice (Mandatory for Admin Portal) -->
           <div id="locationNotice"
-            style="display:flex;align-items:center;gap:8px;font-size:12px;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;margin-bottom:14px;">
-            <i class="fas fa-location-crosshairs" style="color:#b91c1c;"></i>
-            <span id="locationStatus">Requesting location access for security audit logging…</span>
+            style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;transition:all 0.3s ease;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i id="locationIcon" class="fas fa-spinner fa-spin" style="color:#2563eb;font-size:14px;"></i>
+              <span id="locationStatus">Checking location permission (Required for Admin login)...</span>
+            </div>
+            <button type="button" id="retryLocationBtn" onclick="requestAdminLocation()"
+              style="display:none;background:#fee2e2;color:#991b1b;border:1px solid #f87171;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">
+              <i class="fas fa-rotate-right"></i> Retry
+            </button>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100" style="margin-top:4px;">
-            <i class="fas fa-key"></i> Proceed to Security OTP Verification
+          <button type="submit" id="adminSubmitBtn" class="btn btn-primary w-100" style="margin-top:4px;opacity:0.65;cursor:not-allowed;" disabled>
+            <i class="fas fa-lock"></i> Waiting for Location Permission...
           </button>
         </form>
 
@@ -160,34 +166,99 @@
       }
     }
 
-    // ── Geolocation capture for security audit logging ──
-    (function () {
-      const latField = document.getElementById('adminLat');
-      const lngField = document.getElementById('adminLng');
-      const statusEl = document.getElementById('locationStatus');
-      const noticeEl = document.getElementById('locationNotice');
+    // ── Geolocation capture for mandatory admin login access ──
+    const latField = document.getElementById('adminLat');
+    const lngField = document.getElementById('adminLng');
+    const statusEl = document.getElementById('locationStatus');
+    const noticeEl = document.getElementById('locationNotice');
+    const iconEl = document.getElementById('locationIcon');
+    const submitBtn = document.getElementById('adminSubmitBtn');
+    const retryBtn = document.getElementById('retryLocationBtn');
 
+    function setLocationPrompting() {
+      noticeEl.style.borderColor = '#bfdbfe';
+      noticeEl.style.background = '#eff6ff';
+      noticeEl.style.color = '#1e40af';
+      iconEl.className = 'fas fa-spinner fa-spin';
+      iconEl.style.color = '#2563eb';
+      statusEl.textContent = 'Requesting location access (Required for Admin login)...';
+      retryBtn.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking Location Permission...';
+      submitBtn.style.opacity = '0.65';
+      submitBtn.style.cursor = 'not-allowed';
+    }
+
+    function setLocationSuccess(pos) {
+      latField.value = pos.coords.latitude.toFixed(6);
+      lngField.value = pos.coords.longitude.toFixed(6);
+      noticeEl.style.borderColor = '#bbf7d0';
+      noticeEl.style.background = '#f0fdf4';
+      noticeEl.style.color = '#166534';
+      iconEl.className = 'fas fa-circle-check';
+      iconEl.style.color = '#16a34a';
+      statusEl.innerHTML = '<strong>Location verified.</strong> You may now proceed to log in.';
+      retryBtn.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-key"></i> Proceed to Security OTP Verification';
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+    }
+
+    function setLocationError(msg) {
+      latField.value = '';
+      lngField.value = '';
+      noticeEl.style.borderColor = '#fca5a5';
+      noticeEl.style.background = '#fef2f2';
+      noticeEl.style.color = '#991b1b';
+      iconEl.className = 'fas fa-triangle-exclamation';
+      iconEl.style.color = '#dc2626';
+      statusEl.innerHTML = '<strong>Access Blocked:</strong> ' + msg;
+      retryBtn.style.display = 'inline-block';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-ban"></i> Location Permission Required';
+      submitBtn.style.opacity = '0.65';
+      submitBtn.style.cursor = 'not-allowed';
+    }
+
+    function requestAdminLocation() {
       if (!navigator.geolocation) {
-        statusEl.textContent = 'Geolocation not supported by your browser.';
+        setLocationError('Geolocation is not supported by your browser.');
         return;
       }
 
+      setLocationPrompting();
+
       navigator.geolocation.getCurrentPosition(
         function (pos) {
-          latField.value = pos.coords.latitude.toFixed(6);
-          lngField.value = pos.coords.longitude.toFixed(6);
-          noticeEl.style.borderColor = '#bbf7d0';
-          noticeEl.style.background = '#f0fdf4';
-          statusEl.innerHTML = '<span style="color:#16a34a">&#10003; Location captured for security audit log.</span>';
+          setLocationSuccess(pos);
         },
         function (err) {
-          noticeEl.style.borderColor = '#fde68a';
-          noticeEl.style.background = '#fffbeb';
-          statusEl.innerHTML = '<span style="color:#92400e">&#9888; Location permission denied — audit log will record IP address only.</span>';
+          let reason = 'Please allow location permission in your browser to log in.';
+          if (err.code === err.PERMISSION_DENIED) {
+            reason = 'Location permission denied. You cannot log in without granting location access.';
+          } else if (err.code === err.POSITION_UNAVAILABLE) {
+            reason = 'Location unavailable. Please check your device location settings.';
+          } else if (err.code === err.TIMEOUT) {
+            reason = 'Location request timed out. Please click Retry.';
+          }
+          setLocationError(reason);
         },
-        { timeout: 8000, maximumAge: 0, enableHighAccuracy: false }
+        { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
       );
-    })();
+    }
+
+    // Initialize location check on load
+    requestAdminLocation();
+
+    // Prevent submission if location not set
+    document.getElementById('adminLoginForm').addEventListener('submit', function (e) {
+      if (!latField.value || !lngField.value) {
+        e.preventDefault();
+        alert('Location access is strictly mandatory for administrative access. Please grant location permissions in your browser.');
+        requestAdminLocation();
+      }
+    });
   </script>
 </body>
 

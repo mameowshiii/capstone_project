@@ -98,13 +98,25 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // 1. Google reCAPTCHA Verification
+        // 1. Mandatory Geolocation Verification for Admin Security
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+
+        if (empty($lat) || empty($lng) || !is_numeric($lat) || !is_numeric($lng) ||
+            $lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+            return back()->with('error', 'Location access is strictly required to log in to the administrative portal. Please enable location permissions in your browser and try again.')
+                ->withInput($request->only('email'));
+        }
+
+        $location = "{$lat},{$lng}";
+
+        // 2. Google reCAPTCHA Verification
         if (!$this->verifyRecaptcha($request)) {
             return back()->with('error', 'Please complete the Google reCAPTCHA security verification to proceed.')
                 ->withInput($request->only('email'));
         }
 
-        // 2. Validate User Credentials
+        // 3. Validate User Credentials
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
@@ -112,13 +124,13 @@ class AuthController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        // 3. Ensure role is admin or staff (restrict residents)
+        // 4. Ensure role is admin or staff (restrict residents)
         if (!in_array($user->role, ['admin', 'staff'])) {
             return back()->with('error', 'Access restricted: This portal is reserved for Barangay Officials and Staff only. Residents please sign in via the resident portal.')
                 ->withInput($request->only('email'));
         }
 
-        // 4. Status Checks
+        // 5. Status Checks
         if ($user->status === 'inactive') {
             return back()->with('error', 'Your administrative account is inactive. Please contact the lead administrator.');
         }
@@ -126,19 +138,11 @@ class AuthController extends Controller
             return back()->with('error', 'Your account has been suspended. Please contact the administrator.');
         }
 
-        // 5. Generate Secure 6-digit Email OTP (Valid for 10 minutes)
+        // 6. Generate Secure 6-digit Email OTP (Valid for 10 minutes)
         $otp = sprintf("%06d", random_int(100000, 999999));
         $user->admin_otp_code = $otp;
         $user->admin_otp_expires_at = now()->addMinutes(10);
         $user->save();
-
-        // 6. Capture submitted geolocation (populated by browser Geolocation API)
-        $lat = $request->input('lat');
-        $lng = $request->input('lng');
-        $location = null;
-        if ($lat && $lng && is_numeric($lat) && is_numeric($lng)) {
-            $location = "{$lat},{$lng}";
-        }
 
         // 7. Set Pending 2FA Session
         $request->session()->put('admin_otp_user_id', $user->id);
