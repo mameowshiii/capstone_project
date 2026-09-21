@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#f1f5f9;">
 
 <head>
   <meta charset="UTF-8">
@@ -13,7 +13,7 @@
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
-<body>
+<body style="background:#f1f5f9;">
   <div class="auth-page">
     <div class="auth-container">
 
