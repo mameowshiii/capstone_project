@@ -5,7 +5,7 @@
   <title>Welcome — Barangay Pili Digital Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Official online services portal for Barangay Pili. Request certificates, track status, and view announcements.">
-  <link rel="icon" type="image/png" href="{{ asset('assets/images/pili_logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ asset('assets/images/pili_logo.png?v=2') }}">
   <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -55,11 +55,10 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .navbar.scrolled {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      background: #7a0c0c;
+      border-bottom: 1px solid #5c0707;
       padding: 12px 40px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
     }
     .logo-container {
       display: flex;
@@ -80,14 +79,8 @@
       font-size: 14px;
       transition: color 0.2s ease;
     }
-    .navbar.scrolled .nav-links a {
-      color: #475569;
-    }
     .nav-links a:hover {
       color: #fca5a5;
-    }
-    .navbar.scrolled .nav-links a:hover {
-      color: var(--primary-color);
     }
     .nav-actions {
       display: flex;
@@ -104,16 +97,9 @@
       text-decoration: none;
       transition: transform 0.2s ease, background 0.2s ease;
     }
-    .navbar.scrolled .btn-nav-primary {
-      background: var(--primary-color);
-      color: white !important;
-    }
     .btn-nav-primary:hover {
       background: #f8fafc;
       transform: translateY(-1px);
-    }
-    .navbar.scrolled .btn-nav-primary:hover {
-      background: var(--primary-dark);
     }
     .btn-nav-secondary {
       border: 1px solid rgba(255, 255, 255, 0.4);
@@ -125,15 +111,8 @@
       text-decoration: none;
       transition: background 0.2s ease;
     }
-    .navbar.scrolled .btn-nav-secondary {
-      border: 1px solid #cbd5e1;
-      color: #334155;
-    }
     .btn-nav-secondary:hover {
       background: rgba(255, 255, 255, 0.1);
-    }
-    .navbar.scrolled .btn-nav-secondary:hover {
-      background: var(--bg-light);
     }
 
     /* Hero Section - SaaS Dual Column Layout */
@@ -782,14 +761,8 @@
       z-index: 1010;
       transition: color 0.2s ease;
     }
-    .navbar.scrolled .mobile-menu-toggle {
-      color: var(--text-main);
-    }
     .mobile-menu-toggle:hover {
       color: #fca5a5;
-    }
-    .navbar.scrolled .mobile-menu-toggle:hover {
-      color: var(--primary-color);
     }
     .mobile-drawer {
       position: fixed;
@@ -940,7 +913,7 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="logo-container">
-      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 48px; width: auto; object-fit: contain;">
+      <img src="{{ asset('assets/images/pili_logo.png?v=2') }}" alt="Barangay Pili Logo" style="height: 48px; width: auto; object-fit: contain;">
     </div>
     <ul class="nav-links">
       <li><a href="#">HOME</a></li>
@@ -964,7 +937,7 @@
       <i class="fas fa-times"></i>
     </button>
     <div class="drawer-logo-container">
-      <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 54px; width: auto; object-fit: contain;">
+      <img src="{{ asset('assets/images/pili_logo.png?v=2') }}" alt="Barangay Pili Logo" style="height: 54px; width: auto; object-fit: contain;">
     </div>
     <ul class="drawer-links">
       <li><a href="#">HOME</a></li>
@@ -1003,12 +976,7 @@
       </div>
     </div>
     
-    <!-- Wave -->
-    <div class="hero-wave">
-      <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
-      </svg>
-    </div>
+    
   </header>
 
   <!-- Services Grid -->
@@ -1117,7 +1085,7 @@
     <div class="footer-grid">
       <div class="footer-col" style="padding-right:40px;">
         <div style="margin-bottom:16px;">
-          <img src="{{ asset('assets/images/pili_logo.png') }}" alt="Barangay Pili Logo" style="height: 60px; width: auto; object-fit: contain;">
+          <img src="{{ asset('assets/images/pili_logo.png?v=2') }}" alt="Barangay Pili Logo" style="height: 60px; width: auto; object-fit: contain;">
         </div>
         <p style="color:#94a3b8; font-size:14px; line-height:1.6;">Our mission is to establish a transparent, digital, and streamlined administrative portal empowering residents with reliable public service document deliveries and complaint conciliation facilities.</p>
       </div>
@@ -1133,7 +1101,7 @@
         <h3>Contact Info</h3>
         <ul style="color:#94a3b8; font-size:14px; gap:8px;">
           <li><i class="fas fa-map-marker-alt" style="margin-right:6px; color:#10b981;"></i> Barangay Pili, Madridejos, Cebu, Philippines</li>
-          <li><i class="fas fa-envelope" style="margin-right:6px; color:#10b981;"></i> admin@brgy-pili.gov.ph</li>
+          <li><i class="fas fa-envelope" style="margin-right:6px; color:#10b981;"></i> adminbrgypilieclearance@gmail.com</li>
           <li><i class="fas fa-phone-alt" style="margin-right:6px; color:#10b981;"></i> +63 917 123 4567</li>
         </ul>
       </div>
