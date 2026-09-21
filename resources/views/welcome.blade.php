@@ -659,6 +659,10 @@
       box-shadow: var(--card-shadow);
       padding: 28px;
       transition: border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
     }
     .bulletin-item:hover {
       border-color: #cbd5e1;
@@ -686,6 +690,7 @@
       font-size: 14px;
       line-height: 1.6;
       margin: 0 0 20px 0;
+      flex-grow: 1;
     }
     .bulletin-meta {
       font-size: 12px;
@@ -1074,7 +1079,7 @@
         <div class="bulletin-item" style="border-top: 4px solid {{ $colors['border'] }};">
           @if($bulletin->image_path)
             <div style="margin-bottom: 20px; border-radius: 12px; overflow: hidden; height: 160px;">
-              <img src="{{ asset('assets/uploads/' . $bulletin->image_path) }}" alt="{{ $bulletin->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+              <img src="{{ asset('assets/uploads/' . $bulletin->image_path) }}" alt="{{ $bulletin->title }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.style.display='none'">
             </div>
           @endif
           @if($bulletin->is_pinned)
