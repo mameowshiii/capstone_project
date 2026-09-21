@@ -1126,10 +1126,19 @@
       </div>
       <div class="footer-col">
         <h3>Contact Info</h3>
-        <ul style="color:#94a3b8; font-size:14px; gap:8px;">
-          <li><i class="fas fa-map-marker-alt" style="margin-right:6px; color:#10b981;"></i> Barangay Pili, Madridejos, Cebu, Philippines</li>
-          <li><i class="fas fa-envelope" style="margin-right:6px; color:#10b981;"></i> adminbrgypilieclearance@gmail.com</li>
-          <li><i class="fas fa-phone-alt" style="margin-right:6px; color:#10b981;"></i> +63 917 123 4567</li>
+        <ul style="color:#94a3b8; font-size:14px; gap:12px; display:flex; flex-direction:column; list-style:none; padding:0; margin:0;">
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <i class="fas fa-map-marker-alt" style="color:#10b981; margin-top:3px;"></i> 
+            <span style="line-height:1.4;">Barangay Pili, Madridejos, Cebu, Philippines</span>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <i class="fas fa-envelope" style="color:#10b981; margin-top:3px;"></i> 
+            <span style="line-height:1.4; word-break:break-all;">adminbrgypilieclearance@gmail.com</span>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <i class="fas fa-phone-alt" style="color:#10b981; margin-top:3px;"></i> 
+            <span style="line-height:1.4;">+63 917 123 4567</span>
+          </li>
         </ul>
       </div>
     </div>
