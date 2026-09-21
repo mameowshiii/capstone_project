@@ -73,14 +73,20 @@
       margin: 0;
       padding: 0;
     }
-    .nav-links a {
+        .nav-links a {
       text-decoration: none;
-      color: #475569;
+      color: #ffffff;
       font-weight: 600;
       font-size: 14px;
       transition: color 0.2s ease;
     }
+    .navbar.scrolled .nav-links a {
+      color: #475569;
+    }
     .nav-links a:hover {
+      color: #fca5a5;
+    }
+    .navbar.scrolled .nav-links a:hover {
       color: var(--primary-color);
     }
     .nav-actions {
@@ -89,8 +95,8 @@
       align-items: center;
     }
     .btn-nav-primary {
-      background: var(--primary-color);
-      color: white !important;
+      background: #ffffff;
+      color: var(--primary-color) !important;
       padding: 10px 20px;
       border-radius: 8px;
       font-weight: 700;
@@ -98,13 +104,20 @@
       text-decoration: none;
       transition: transform 0.2s ease, background 0.2s ease;
     }
+    .navbar.scrolled .btn-nav-primary {
+      background: var(--primary-color);
+      color: white !important;
+    }
     .btn-nav-primary:hover {
-      background: var(--primary-dark);
+      background: #f8fafc;
       transform: translateY(-1px);
     }
+    .navbar.scrolled .btn-nav-primary:hover {
+      background: var(--primary-dark);
+    }
     .btn-nav-secondary {
-      border: 1px solid #cbd5e1;
-      color: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
       padding: 10px 18px;
       border-radius: 8px;
       font-weight: 700;
@@ -112,16 +125,119 @@
       text-decoration: none;
       transition: background 0.2s ease;
     }
+    .navbar.scrolled .btn-nav-secondary {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+    }
     .btn-nav-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .navbar.scrolled .btn-nav-secondary:hover {
       background: var(--bg-light);
     }
 
     /* Hero Section - SaaS Dual Column Layout */
-    .hero {
-      background: radial-gradient(at 0% 0%, rgba(243, 244, 246, 1) 0, transparent 50%), radial-gradient(at 50% 0%, rgba(219, 234, 254, 0.4) 0, transparent 50%), #ffffff;
+        .hero {
+      background: #fcf6f6;
       padding: 160px 40px 100px 40px;
       position: relative;
+      overflow: hidden;
     }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(to bottom, #7a0c0c 0%, #7a0c0c 80px, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-shape {
+      position: absolute;
+      z-index: 0;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+    .bg-circle-1 {
+      width: 350px;
+      height: 350px;
+      background: #b91c1c;
+      border-radius: 50%;
+      top: -50px;
+      left: -100px;
+      animation: floatCircle 22s infinite ease-in-out alternate;
+    }
+    .bg-circle-2 {
+      width: 450px;
+      height: 450px;
+      background: #450a0a;
+      border-radius: 50%;
+      bottom: -150px;
+      right: -100px;
+      animation: floatCircle2 28s infinite ease-in-out alternate;
+      opacity: 0.05;
+    }
+    .bg-triangle-1 {
+      width: 0;
+      height: 0;
+      border-left: 60px solid transparent;
+      border-right: 60px solid transparent;
+      border-bottom: 104px solid #b91c1c;
+      top: 30%;
+      right: 20%;
+      animation: driftRotate 20s infinite linear;
+      opacity: 0.08;
+    }
+    .bg-triangle-2 {
+      width: 0;
+      height: 0;
+      border-left: 40px solid transparent;
+      border-right: 40px solid transparent;
+      border-bottom: 69px solid #b91c1c;
+      bottom: 25%;
+      left: 15%;
+      animation: driftRotate2 25s infinite linear reverse;
+      opacity: 0.08;
+    }
+    .bg-outline-1 {
+      width: 250px;
+      height: 250px;
+      border: 2px solid #b91c1c;
+      border-radius: 50%;
+      top: 50%;
+      left: 45%;
+      animation: floatRotate 35s infinite linear;
+      opacity: 0.15;
+    }
+    
+    @keyframes floatCircle {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(60px, 90px) scale(1.15); }
+    }
+    @keyframes floatCircle2 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-90px, -60px) scale(1.1); }
+    }
+    @keyframes driftRotate {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(30px, 40px) rotate(90deg); }
+      50% { transform: translate(50px, 0px) rotate(180deg); }
+      75% { transform: translate(30px, -40px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+    @keyframes driftRotate2 {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(-40px, 50px) rotate(120deg); }
+      66% { transform: translate(40px, 30px) rotate(240deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+    @keyframes floatRotate {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
     .hero-grid-container {
       max-width: 800px;
       margin: 0 auto;
@@ -129,6 +245,8 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
     .hero-content {
       text-align: center;
@@ -653,18 +771,24 @@
     }
 
     /* Mobile Drawer & Hamburger Styles */
-    .mobile-menu-toggle {
+        .mobile-menu-toggle {
       display: none;
       background: none;
       border: none;
-      color: var(--text-main);
+      color: #ffffff;
       font-size: 24px;
       cursor: pointer;
       padding: 6px;
       z-index: 1010;
       transition: color 0.2s ease;
     }
+    .navbar.scrolled .mobile-menu-toggle {
+      color: var(--text-main);
+    }
     .mobile-menu-toggle:hover {
+      color: #fca5a5;
+    }
+    .navbar.scrolled .mobile-menu-toggle:hover {
       color: var(--primary-color);
     }
     .mobile-drawer {
@@ -857,11 +981,18 @@
   <div class="drawer-overlay"></div>
 
   <!-- Hero Section -->
-  <header class="hero">
+    <header class="hero">
+    <!-- Animated Shapes -->
+    <div class="bg-shape bg-circle-1"></div>
+    <div class="bg-shape bg-circle-2"></div>
+    <div class="bg-shape bg-triangle-1"></div>
+    <div class="bg-shape bg-triangle-2"></div>
+    <div class="bg-shape bg-outline-1"></div>
+
     <div class="hero-grid-container">
       <div class="hero-content">
-        <div class="hero-badge">
-          Barangay Pili
+        <div style="font-weight: 700; color: var(--primary-color); letter-spacing: 2px; margin-bottom: 16px; font-size: 14px; text-transform: uppercase;">
+          BARANGAY PILI
         </div>
         <h1>Modern Digital Services for Residents</h1>
         <p>Request certificates, submit applications, track requests, and receive announcements online.</p>
