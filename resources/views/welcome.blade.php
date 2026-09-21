@@ -1055,27 +1055,45 @@
       <p>Stay up to date with official programs, schedules, and alerts from the Barangay Pili administration.</p>
     </div>
     <div class="bulletins-row">
-      
-      <div class="bulletin-item" style="border-top: 4px solid var(--primary-color);">
-        <span class="bulletin-badge">Health</span>
-        <h4>Monthly Medical Mission</h4>
-        <p>Free check-ups, pediatric consultations, and generic vitamin distribution at the Barangay Pili Session Hall starting this weekend.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 05, 2026</div>
-      </div>
 
-      <div class="bulletin-item" style="border-top: 4px solid #10b981;">
-        <span class="bulletin-badge" style="background:#ecfdf5; color:#059669;">Environment</span>
-        <h4>Oplan Linis Barangay</h4>
-        <p>Join our youth and barangay tanods for the weekly community-wide clean-up drive. Meet up at Purok 2 crossroads at 6:00 AM.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 08, 2026</div>
-      </div>
-
-      <div class="bulletin-item" style="border-top: 4px solid #ef4444;">
-        <span class="bulletin-badge" style="background:#fee2e2; color:#b91c1c;">Alert</span>
-        <h4>Typhoon Preparation Advisory</h4>
-        <p>All purok leaders are advised to conduct canal clearing and ensure evacuation routes are mapped out ahead of incoming weather systems.</p>
-        <div class="bulletin-meta"><i class="fas fa-calendar-alt"></i> August 12, 2026</div>
-      </div>
+      @forelse($bulletins as $bulletin)
+        @php
+          $cat = strtolower($bulletin->category ?? 'general');
+          $colorMap = [
+            'health'      => ['border' => '#b91c1c', 'bg' => '#fef2f2',   'text' => '#b91c1c'],
+            'environment' => ['border' => '#10b981', 'bg' => '#ecfdf5',   'text' => '#059669'],
+            'alert'       => ['border' => '#ef4444', 'bg' => '#fee2e2',   'text' => '#b91c1c'],
+            'education'   => ['border' => '#3b82f6', 'bg' => '#eff6ff',   'text' => '#1d4ed8'],
+            'livelihood'  => ['border' => '#f59e0b', 'bg' => '#fffbeb',   'text' => '#d97706'],
+            'sports'      => ['border' => '#8b5cf6', 'bg' => '#f5f3ff',   'text' => '#7c3aed'],
+            'safety'      => ['border' => '#ef4444', 'bg' => '#fee2e2',   'text' => '#b91c1c'],
+            'general'     => ['border' => 'var(--primary-color)', 'bg' => '#fef2f2', 'text' => 'var(--primary-color)'],
+          ];
+          $colors = $colorMap[$cat] ?? $colorMap['general'];
+        @endphp
+        <div class="bulletin-item" style="border-top: 4px solid {{ $colors['border'] }};">
+          @if($bulletin->is_pinned)
+            <span style="font-size:11px; color:#f59e0b; font-weight:700; margin-bottom:4px; display:block;">
+              <i class="fas fa-thumbtack"></i> PINNED
+            </span>
+          @endif
+          <span class="bulletin-badge" style="background:{{ $colors['bg'] }}; color:{{ $colors['text'] }};">
+            {{ ucfirst($bulletin->category) }}
+          </span>
+          <h4>{{ $bulletin->title }}</h4>
+          <p>{{ Str::limit($bulletin->content, 160) }}</p>
+          <div class="bulletin-meta">
+            <i class="fas fa-calendar-alt"></i>
+            {{ optional($bulletin->published_at)->format('F d, Y') ?? $bulletin->created_at->format('F d, Y') }}
+          </div>
+        </div>
+      @empty
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <i class="fas fa-bullhorn" style="font-size: 40px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
+          <p style="font-size: 16px; font-weight: 600;">No announcements yet.</p>
+          <p style="font-size: 14px;">Check back soon for updates from Barangay Pili.</p>
+        </div>
+      @endforelse
 
     </div>
   </section>

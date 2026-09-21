@@ -53,7 +53,11 @@ Route::get('/', function () {
     if (str_contains(request()->header('User-Agent'), 'BrgyPiliApp')) {
         return redirect()->route('login');
     }
-    return view('welcome');
+    $bulletins = \App\Models\BulletinAnnouncement::orderBy('is_pinned', 'desc')
+        ->orderBy('published_at', 'desc')
+        ->limit(3)
+        ->get();
+    return view('welcome', compact('bulletins'));
 })->name('index');
 
 Route::middleware('guest')->group(function () {
