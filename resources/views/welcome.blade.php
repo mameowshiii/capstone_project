@@ -1077,7 +1077,7 @@
           $colors = $colorMap[$cat] ?? $colorMap['general'];
         @endphp
         <div class="bulletin-item" style="border-top: 4px solid {{ $colors['border'] }};">
-          @if($bulletin->image_path)
+          @if($bulletin->image_path && file_exists(public_path('assets/uploads/' . $bulletin->image_path)))
             <div style="margin-bottom: 20px; border-radius: 12px; height: 160px; background-color: #f1f5f9; background-image: url('{{ asset('assets/uploads/' . $bulletin->image_path) }}'); background-size: cover; background-position: center;">
             </div>
           @endif

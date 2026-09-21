@@ -39,7 +39,7 @@
           <span><i class="far fa-user" style="margin-right:4px;"></i> {{ $b->creator->username ?? 'Official' }}</span>
         </div>
 
-        @if($b->image_path)
+        @if($b->image_path && file_exists(public_path('assets/uploads/' . $b->image_path)))
           <img src="{{ asset('assets/uploads/' . $b->image_path) }}" alt="Image for {{ $b->title }}" style="display:block;width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin:0 0 14px;">
         @endif
 
