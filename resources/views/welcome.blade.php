@@ -1077,9 +1077,9 @@
           $colors = $colorMap[$cat] ?? $colorMap['general'];
         @endphp
         <div class="bulletin-item" style="border-top: 4px solid {{ $colors['border'] }};">
-          @if($bulletin->image_path)
+          @if($bulletin->image_path && file_exists(public_path('assets/uploads/' . $bulletin->image_path)))
             <div style="margin-bottom: 20px; border-radius: 12px; overflow: hidden; height: 160px;">
-              <img src="{{ asset('assets/uploads/' . $bulletin->image_path) }}" alt="{{ $bulletin->title }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.style.display='none'">
+              <img src="{{ asset('assets/uploads/' . $bulletin->image_path) }}" alt="{{ $bulletin->title }}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
           @endif
           @if($bulletin->is_pinned)
