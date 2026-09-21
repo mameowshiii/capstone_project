@@ -248,24 +248,24 @@
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background-color: #10b981;
+      background-color: #b91c1c;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.7);
       animation: pulse 1.6s infinite;
     }
     @keyframes pulse {
       0% {
         transform: scale(0.9);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.7);
       }
       70% {
         transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        box-shadow: 0 0 0 6px rgba(185, 28, 28, 0);
       }
       100% {
         transform: scale(0.9);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        box-shadow: 0 0 0 0 rgba(185, 28, 28, 0);
       }
     }
     .hero h1 {
@@ -292,7 +292,7 @@
     }
     .btn-hero-primary {
       background: var(--primary-color);
-      color: white;
+      color: white !important;
       padding: 16px 32px;
       border-radius: 10px;
       font-weight: 700;
@@ -303,6 +303,7 @@
     }
     .btn-hero-primary:hover {
       background: var(--primary-dark);
+      color: white !important;
       transform: translateY(-2px);
     }
     .btn-hero-secondary {
@@ -592,7 +593,7 @@
       font-size: 14.5px;
     }
     .feature-list i {
-      color: #10b981;
+      color: #b91c1c;
     }
     .track-box-widget {
       background: white;
@@ -1128,23 +1129,22 @@
         <h3>Contact Info</h3>
         <ul style="color:#94a3b8; font-size:14px; gap:12px; display:flex; flex-direction:column; list-style:none; padding:0; margin:0;">
           <li style="display:flex; align-items:flex-start; gap:10px;">
-            <i class="fas fa-map-marker-alt" style="color:#10b981; margin-top:3px;"></i> 
+            <i class="fas fa-map-marker-alt" style="color:#b91c1c; margin-top:3px;"></i> 
             <span style="line-height:1.4;">Barangay Pili, Madridejos, Cebu, Philippines</span>
           </li>
           <li style="display:flex; align-items:flex-start; gap:10px;">
-            <i class="fas fa-envelope" style="color:#10b981; margin-top:3px;"></i> 
+            <i class="fas fa-envelope" style="color:#b91c1c; margin-top:3px;"></i> 
             <span style="line-height:1.4; word-break:break-all;">adminbrgypilieclearance@gmail.com</span>
           </li>
           <li style="display:flex; align-items:flex-start; gap:10px;">
-            <i class="fas fa-phone-alt" style="color:#10b981; margin-top:3px;"></i> 
+            <i class="fas fa-phone-alt" style="color:#b91c1c; margin-top:3px;"></i> 
             <span style="line-height:1.4;">+63 917 123 4567</span>
           </li>
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">
+    <div class="footer-bottom" style="justify-content:center;">
       <div>&copy; 2026 Barangay Pili Online Services Portal. All Rights Reserved.</div>
-      <div>Designed with <i class="fas fa-heart" style="color:#ef4444;"></i> for our community</div>
     </div>
   </footer>
 
