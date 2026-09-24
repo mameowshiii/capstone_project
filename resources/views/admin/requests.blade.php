@@ -157,9 +157,7 @@
               <span class="badge bg-{{ ($viewedRequest->payment->payment_status ?? 'unpaid') === 'paid' ? 'success' : (($viewedRequest->payment->payment_status ?? 'unpaid') === 'waived' ? 'secondary' : 'danger') }}">
                   {{ ucfirst($viewedRequest->payment->payment_status ?? 'unpaid') }}
               </span>
-              @if (($viewedRequest->payment->payment_method ?? '') === 'gcash')
-                <span class="badge bg-info" style="font-size:10px;text-transform:uppercase;">GCash</span>
-              @endif
+              <span class="badge" style="font-size:10px;background:#e0f2fe;color:#0369a1;">Walk-in</span>
             </div>
           </div>
           <div style="grid-column:span 2;">
@@ -174,7 +172,7 @@
           @endif
           @if (!empty($viewedRequest->payment->proof_of_payment))
             <div style="grid-column:span 2;margin-top:10px;">
-              <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Proof of Payment (GCash Receipt)</div>
+              <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Proof of Payment</div>
               @php
                 $proof_ext = strtolower(pathinfo($viewedRequest->payment->proof_of_payment, PATHINFO_EXTENSION));
                 $proof_url = asset('assets/uploads/' . $viewedRequest->payment->proof_of_payment);
@@ -265,10 +263,7 @@
                 <label class="form-label">Amount Collected (₱) *</label>
                 <input type="number" name="amount" step="0.01" class="form-control" required value="{{ old('amount', $viewedRequest->payment->amount ?? $viewedRequest->certificate->fee) }}">
               </div>
-              <div class="form-group">
-                <label class="form-label">O.R. / Receipt Number</label>
-                <input type="text" name="receipt_number" class="form-control" placeholder="e.g. OR-987654" value="{{ old('receipt_number', $viewedRequest->payment->receipt_number ?? '') }}">
-              </div>
+
               <div class="form-group">
                 <label class="form-label">Payment Method *</label>
                 <select name="payment_method" class="form-select" required>

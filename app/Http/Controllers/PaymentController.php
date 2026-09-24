@@ -22,8 +22,7 @@ class PaymentController extends Controller
         // Search filter
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('receipt_number', 'like', "%{$search}%")
-                  ->orWhereHas('request', function ($qr) use ($search) {
+                $q->whereHas('request', function ($qr) use ($search) {
                       $qr->where('tracking_number', 'like', "%{$search}%")
                         ->orWhereHas('resident', function ($qres) use ($search) {
                             $qres->where('first_name', 'like', "%{$search}%")
@@ -49,8 +48,6 @@ class PaymentController extends Controller
         // Stats calculations
         $statsQuery = Payment::query();
         $stats = [
-            'total_gcash' => (clone $statsQuery)->where('payment_method', 'gcash')->where('payment_status', 'paid')->sum('amount'),
-            'total_maya' => (clone $statsQuery)->where('payment_method', 'maya')->where('payment_status', 'paid')->sum('amount'),
             'total_cash' => (clone $statsQuery)->where('payment_method', 'cash')->where('payment_status', 'paid')->sum('amount'),
             'total_paid' => (clone $statsQuery)->where('payment_status', 'paid')->sum('amount'),
             'total_pending' => (clone $statsQuery)->where('payment_status', 'unpaid')->sum('amount'),
@@ -64,9 +61,8 @@ class PaymentController extends Controller
         $request->validate([
             'payment_id' => 'required|exists:payments,id',
             'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,gcash,maya',
+            'payment_method' => 'required|in:cash',
             'payment_status' => 'required|in:paid,unpaid,waived',
-            'receipt_number' => 'nullable|string|max:100',
         ]);
 
         $payment = Payment::with('request.resident')->findOrFail($request->payment_id);
@@ -75,7 +71,6 @@ class PaymentController extends Controller
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
             'payment_status' => $request->payment_status,
-            'receipt_number' => $request->receipt_number,
             'paid_at' => ($request->payment_status === 'paid') ? now() : null,
             'received_by' => Auth::id(),
         ]);
@@ -117,7 +112,7 @@ class PaymentController extends Controller
         ActivityLog::log(
             'UPDATE_PAYMENT',
             'Payments',
-            "Updated payment details for receipt {$request->receipt_number}. Status: {$request->payment_status}"
+            "Updated payment details. Status: {$request->payment_status}"
         );
 
         return back()->with('success', 'Payment details updated successfully.');

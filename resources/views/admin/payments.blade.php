@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Payments & OR Monitoring')
+@section('title', 'Payments Monitoring')
 
 @section('content')
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
@@ -10,30 +10,11 @@
       <i class="fas fa-money-bill-wave"></i>
     </div>
     <div>
-      <div style="font-size:12px; color:var(--gray);">Cash Revenue</div>
+      <div style="font-size:12px; color:var(--gray);">Walk-in Revenue (Cash)</div>
       <h3 style="margin:0; font-size:20px; font-weight:700;">₱{{ number_format($stats['total_cash'], 2) }}</h3>
     </div>
   </div>
-  <!-- GCash Card -->
-  <div class="card" style="margin:0; padding:20px; display:flex; align-items:center; gap:16px;">
-    <div style="background:#f0fdf4; color:#16a34a; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px;">
-      <i class="fas fa-mobile-alt"></i>
-    </div>
-    <div>
-      <div style="font-size:12px; color:var(--gray);">GCash Revenue</div>
-      <h3 style="margin:0; font-size:20px; font-weight:700;">₱{{ number_format($stats['total_gcash'], 2) }}</h3>
-    </div>
-  </div>
-  <!-- Maya Card -->
-  <div class="card" style="margin:0; padding:20px; display:flex; align-items:center; gap:16px;">
-    <div style="background:#faf5ff; color:#9333ea; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px;">
-      <i class="fas fa-wallet"></i>
-    </div>
-    <div>
-      <div style="font-size:12px; color:var(--gray);">Maya Revenue</div>
-      <h3 style="margin:0; font-size:20px; font-weight:700;">₱{{ number_format($stats['total_maya'], 2) }}</h3>
-    </div>
-  </div>
+
   <!-- Total Revenue Card -->
   <div class="card" style="margin:0; padding:20px; display:flex; align-items:center; gap:16px; background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color:#fff;">
     <div style="background:rgba(255,255,255,0.2); color:#fff; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px;">
@@ -68,11 +49,9 @@
       </select>
       <select name="method" class="form-select" style="width:130px;" onchange="this.form.submit()">
         <option value="all" {{ $method === 'all' ? 'selected' : '' }}>All Methods</option>
-        <option value="cash" {{ $method === 'cash' ? 'selected' : '' }}>Cash</option>
-        <option value="gcash" {{ $method === 'gcash' ? 'selected' : '' }}>GCash</option>
-        <option value="maya" {{ $method === 'maya' ? 'selected' : '' }}>Maya</option>
+        <option value="cash" {{ $method === 'cash' ? 'selected' : '' }}>Walk-in (Cash)</option>
       </select>
-      <input type="text" name="search" class="form-control" placeholder="Search OR # / Tracking #" value="{{ $search }}" style="width:200px;">
+      <input type="text" name="search" class="form-control" placeholder="Search by Tracking # or Resident" value="{{ $search }}" style="width:220px;">
       <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
       @if($search || $status !== 'all' || $method !== 'all')
         <a href="{{ route('admin.payments') }}" class="btn btn-outline-secondary"><i class="fas fa-sync"></i></a>
@@ -84,7 +63,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th>OR Number</th>
+
           <th>Tracking #</th>
           <th>Resident</th>
           <th>Document Type</th>
@@ -104,13 +83,6 @@
         @else
           @foreach ($payments as $p)
             <tr>
-              <td>
-                @if($p->receipt_number)
-                  <strong style="color:var(--primary);">{{ $p->receipt_number }}</strong>
-                @else
-                  <span class="text-muted" style="font-size:12px; font-style:italic;">None Assigned</span>
-                @endif
-              </td>
               <td><code style="font-size:11px;">{{ $p->request->tracking_number ?? 'N/A' }}</code></td>
               <td>{{ $p->request->resident->full_name ?? 'N/A' }}</td>
               <td>{{ $p->request->certificate->name ?? 'N/A' }}</td>
@@ -119,10 +91,6 @@
                 <span style="display:inline-flex; align-items:center; gap:6px;">
                   @if($p->payment_method === 'cash')
                     <i class="fas fa-money-bill-wave" style="color:#2563eb;"></i> Cash
-                  @elseif($p->payment_method === 'gcash')
-                    <i class="fas fa-mobile-alt" style="color:#16a34a;"></i> GCash
-                  @else
-                    <i class="fas fa-wallet" style="color:#9333ea;"></i> Maya
                   @endif
                 </span>
               </td>
@@ -177,10 +145,7 @@
           <input type="text" id="modal_tracking" class="form-control" readonly style="background:#f9fafb;">
         </div>
 
-        <div class="form-group" style="margin:0;">
-          <label class="form-label">Official Receipt (OR) Number</label>
-          <input type="text" name="receipt_number" id="modal_receipt" class="form-control" placeholder="e.g. OR-998877">
-        </div>
+
 
         <div class="grid-2" style="margin:0;">
           <div class="form-group" style="margin:0;">
@@ -191,8 +156,6 @@
             <label class="form-label">Payment Method *</label>
             <select name="payment_method" id="modal_method" class="form-select" required>
               <option value="cash">Cash</option>
-              <option value="gcash">GCash</option>
-              <option value="maya">Maya</option>
             </select>
           </div>
         </div>
@@ -233,7 +196,7 @@
     document.getElementById('modal_payment_id').value = payment.id;
     document.getElementById('modal_resident').value = payment.request && payment.request.resident ? payment.request.resident.full_name : 'N/A';
     document.getElementById('modal_tracking').value = payment.request ? payment.request.tracking_number : 'N/A';
-    document.getElementById('modal_receipt').value = payment.receipt_number || '';
+
     document.getElementById('modal_amount').value = payment.amount;
     document.getElementById('modal_method').value = payment.payment_method;
     document.getElementById('modal_status').value = payment.payment_status;

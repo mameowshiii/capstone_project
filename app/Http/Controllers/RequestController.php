@@ -165,7 +165,6 @@ class RequestController extends Controller
             'amount'         => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash',
             'payment_status' => 'required|in:paid,unpaid,waived',
-            'receipt_number' => 'nullable|string|max:100',
         ]);
 
         $certReq = CertificateRequest::findOrFail($request->request_id);
@@ -177,7 +176,6 @@ class RequestController extends Controller
                 'amount'         => $request->amount,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
-                'receipt_number' => $request->receipt_number,
                 'paid_at'        => ($request->payment_status === 'paid') ? now() : null,
                 'received_by'    => Auth::id(),
             ]);
@@ -186,7 +184,6 @@ class RequestController extends Controller
                 'amount'         => $request->amount,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $request->payment_status,
-                'receipt_number' => $request->receipt_number,
                 'paid_at'        => ($request->payment_status === 'paid') ? now() : null,
                 'received_by'    => Auth::id(),
             ]);
