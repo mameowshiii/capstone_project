@@ -37,7 +37,100 @@
   </div>
 </div>
 
+<!-- Document Inventory / Revenue by Type -->
+<div class="card" style="margin-bottom:24px; padding:0; overflow:hidden;">
+  <div class="card-header" style="background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%); border:none;">
+    <h5 style="color:#fff; margin:0;">
+      <i class="fas fa-chart-bar" style="margin-right:8px; color:#60a5fa;"></i>
+      Document Revenue Inventory
+    </h5>
+    <span style="font-size:12px; color:rgba(255,255,255,0.6);">Breakdown of requests and collections per document type</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table" style="margin:0;">
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em;">#</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em;">Document Type</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Unit Fee</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Total Requests</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Paid</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Unpaid</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Waived</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:right;">Revenue Collected</th>
+          <th style="font-size:12px; text-transform:uppercase; color:#64748b; letter-spacing:.05em; text-align:center;">Collection Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        @forelse ($inventory as $i => $item)
+          @php
+            $rate = $item->total_requests > 0 ? round(($item->total_paid_count / $item->total_requests) * 100) : 0;
+            $rateColor = $rate >= 75 ? '#16a34a' : ($rate >= 40 ? '#d97706' : '#dc2626');
+          @endphp
+          <tr>
+            <td style="color:#94a3b8; font-size:13px;">{{ $i + 1 }}</td>
+            <td>
+              <div style="font-weight:600; font-size:14px; color:#1e293b;">{{ $item->cert_name }}</div>
+            </td>
+            <td style="text-align:center;">
+              @if ($item->unit_fee > 0)
+                <span style="font-size:13px; font-weight:600; color:#0369a1;">₱{{ number_format($item->unit_fee, 2) }}</span>
+              @else
+                <span class="badge" style="background:#dcfce7; color:#15803d; font-size:11px;">FREE</span>
+              @endif
+            </td>
+            <td style="text-align:center;">
+              <span style="font-size:15px; font-weight:700; color:#1e293b;">{{ $item->total_requests }}</span>
+            </td>
+            <td style="text-align:center;">
+              <span class="badge" style="background:#dcfce7; color:#15803d; font-size:12px; padding:4px 10px;">{{ $item->total_paid_count }}</span>
+            </td>
+            <td style="text-align:center;">
+              <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:12px; padding:4px 10px;">{{ $item->total_unpaid_count }}</span>
+            </td>
+            <td style="text-align:center;">
+              <span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:12px; padding:4px 10px;">{{ $item->total_waived_count }}</span>
+            </td>
+            <td style="text-align:right; font-weight:700; font-size:15px; color:var(--primary);">
+              ₱{{ number_format($item->total_revenue, 2) }}
+            </td>
+            <td style="text-align:center;">
+              <div style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                <div style="width:60px; height:6px; background:#e5e7eb; border-radius:9999px; overflow:hidden;">
+                  <div style="width:{{ $rate }}%; height:100%; background:{{ $rateColor }}; border-radius:9999px;"></div>
+                </div>
+                <span style="font-size:12px; font-weight:700; color:{{ $rateColor }};">{{ $rate }}%</span>
+              </div>
+            </td>
+          </tr>
+        @empty
+          <tr>
+            <td colspan="9" style="text-align:center; padding:32px; color:#94a3b8;">
+              <i class="fas fa-inbox" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+              No payment data available yet.
+            </td>
+          </tr>
+        @endforelse
+      </tbody>
+      @if ($inventory->isNotEmpty())
+      <tfoot>
+        <tr style="background:#f8fafc; font-weight:700;">
+          <td colspan="3" style="font-size:13px; color:#374151;">Totals</td>
+          <td style="text-align:center; font-size:15px;">{{ $inventory->sum('total_requests') }}</td>
+          <td style="text-align:center;"><span class="badge" style="background:#dcfce7; color:#15803d; font-size:12px; padding:4px 10px;">{{ $inventory->sum('total_paid_count') }}</span></td>
+          <td style="text-align:center;"><span class="badge" style="background:#fee2e2; color:#dc2626; font-size:12px; padding:4px 10px;">{{ $inventory->sum('total_unpaid_count') }}</span></td>
+          <td style="text-align:center;"><span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:12px; padding:4px 10px;">{{ $inventory->sum('total_waived_count') }}</span></td>
+          <td style="text-align:right; font-size:16px; color:var(--primary);">₱{{ number_format($inventory->sum('total_revenue'), 2) }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+      @endif
+    </table>
+  </div>
+</div>
+
 <div class="card">
+
   <div class="card-header" style="flex-wrap: wrap; gap:12px;">
     <h5><i class="fas fa-money-bill-wave" style="color:var(--primary);margin-right:8px;"></i>Transactions &amp; OR Log</h5>
     <form method="GET" action="{{ route('admin.payments') }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">

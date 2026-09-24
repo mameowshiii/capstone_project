@@ -53,7 +53,24 @@ class PaymentController extends Controller
             'total_pending' => (clone $statsQuery)->where('payment_status', 'unpaid')->sum('amount'),
         ];
 
-        return view('admin.payments', compact('payments', 'stats', 'search', 'status', 'method'));
+        // Document-type inventory: count & revenue per certificate
+        $inventory = \DB::table('payments')
+            ->join('requests', 'payments.request_id', '=', 'requests.id')
+            ->join('certificates', 'requests.certificate_id', '=', 'certificates.id')
+            ->select(
+                'certificates.name as cert_name',
+                \DB::raw('COUNT(payments.id) as total_requests'),
+                \DB::raw('SUM(CASE WHEN payments.payment_status = \'paid\' THEN 1 ELSE 0 END) as total_paid_count'),
+                \DB::raw('SUM(CASE WHEN payments.payment_status = \'unpaid\' THEN 1 ELSE 0 END) as total_unpaid_count'),
+                \DB::raw('SUM(CASE WHEN payments.payment_status = \'waived\' THEN 1 ELSE 0 END) as total_waived_count'),
+                \DB::raw('SUM(CASE WHEN payments.payment_status = \'paid\' THEN payments.amount ELSE 0 END) as total_revenue'),
+                'certificates.fee as unit_fee'
+            )
+            ->groupBy('certificates.id', 'certificates.name', 'certificates.fee')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        return view('admin.payments', compact('payments', 'stats', 'search', 'status', 'method', 'inventory'));
     }
 
     public function update(Request $request)
