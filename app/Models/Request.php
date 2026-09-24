@@ -22,6 +22,7 @@ class Request extends Model
         'processed_at',
         'approved_at',
         'released_at',
+        'expected_release_date',
         'archived_at',
         'archived_by'
     ];

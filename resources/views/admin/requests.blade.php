@@ -139,6 +139,17 @@
             <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Document</div>
             <div style="font-weight:600;">{{ $viewedRequest->certificate->name }}</div>
           </div>
+          @if ($viewedRequest->expected_release_date)
+          <div>
+            <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Release Date</div>
+            <div style="font-weight:600; color:#15803d;"><i class="fas fa-calendar-check"></i> {{ \Carbon\Carbon::parse($viewedRequest->expected_release_date)->format('M d, Y h:i A') }}</div>
+          </div>
+          @else
+          <div>
+            <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Release Date</div>
+            <div style="color:#6b7280;">Not set</div>
+          </div>
+          @endif
           <div>
             <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Fee & Payment</div>
             <div style="font-weight:700;color:var(--primary);display:flex;align-items:center;gap:6px;">
@@ -192,18 +203,17 @@
               <label class="form-label">Remarks / Notes</label>
               <textarea name="remarks" class="form-control" rows="2" placeholder="Optional remarks…">{{ old('remarks') }}</textarea>
             </div>
+            @if (in_array($viewedRequest->status, ['pending', 'processing']))
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label">Expected Release Date (Required for Approval) *</label>
+                <input type="datetime-local" name="expected_release_date" class="form-control" 
+                       value="{{ old('expected_release_date', \Carbon\Carbon::now()->addHours(24)->format('Y-m-d\TH:i')) }}">
+              </div>
+            @endif
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              @if ($viewedRequest->status === 'pending')
-                <button type="submit" name="action" value="process" class="btn btn-warning">
-                  <i class="fas fa-cog"></i> Mark Processing
-                </button>
-                <button type="submit" name="action" value="reject" class="btn btn-danger"
-                  onclick="return confirm('Reject this request?')">
-                  <i class="fas fa-times"></i> Reject
-                </button>
-              @elseif ($viewedRequest->status === 'processing')
+              @if ($viewedRequest->status === 'pending' || $viewedRequest->status === 'processing')
                 <button type="submit" name="action" value="approve" class="btn btn-success">
-                  <i class="fas fa-check"></i> Approve
+                  <i class="fas fa-check"></i> Approve & Ready for Release
                 </button>
                 <button type="submit" name="action" value="reject" class="btn btn-danger"
                   onclick="return confirm('Reject this request?')">
@@ -262,9 +272,7 @@
               <div class="form-group">
                 <label class="form-label">Payment Method *</label>
                 <select name="payment_method" class="form-select" required>
-                  <option value="cash" {{ (old('payment_method') ?? ($viewedRequest->payment->payment_method ?? '')) === 'cash' ? 'selected' : '' }}>Cash</option>
-                  <option value="gcash" {{ (old('payment_method') ?? ($viewedRequest->payment->payment_method ?? '')) === 'gcash' ? 'selected' : '' }}>GCash</option>
-                  <option value="maya" {{ (old('payment_method') ?? ($viewedRequest->payment->payment_method ?? '')) === 'maya' ? 'selected' : '' }}>Maya</option>
+                  <option value="cash" selected>Walk-in Payment (Cash)</option>
                 </select>
               </div>
               <div class="form-group">

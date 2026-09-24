@@ -56,6 +56,7 @@ class RequestController extends Controller
             'request_id' => 'required|exists:requests,id',
             'action'     => 'required|in:process,reject,approve,release,archive',
             'remarks'    => 'nullable|string|max:1000',
+            'expected_release_date' => 'nullable|date',
         ]);
 
         $certReq = CertificateRequest::findOrFail($request->request_id);
@@ -87,11 +88,16 @@ class RequestController extends Controller
             $smsText = "Hi {$firstName}, your document request ({$certReq->tracking_number}) has been rejected.{$reasonText} For inquiries, please visit the Barangay Hall.";
 
         } elseif ($action === 'approve') {
+            if (!$request->expected_release_date) {
+                return redirect()->back()->withErrors(['expected_release_date' => 'Release date is required when approving a request.']);
+            }
+            
             $certReq->update([
-                'status'      => 'approved',
-                'approved_by' => $userId,
-                'approved_at' => now(),
-                'remarks'     => $request->remarks,
+                'status'                => 'approved',
+                'approved_by'           => $userId,
+                'approved_at'           => now(),
+                'remarks'               => $request->remarks,
+                'expected_release_date' => $request->expected_release_date,
             ]);
             if (!$certReq->processed_by) {
                 $certReq->update([
@@ -107,7 +113,9 @@ class RequestController extends Controller
                 ]);
             }
             $msg = 'Request approved successfully.';
-            $smsText = "Hi {$firstName}, your document request ({$certReq->tracking_number}) has been APPROVED and is ready for pickup at the Barangay Hall. Please bring a valid ID.";
+            $releaseFormatted = \Carbon\Carbon::parse($request->expected_release_date)->format('M d, Y h:i A');
+            $remarksText = $request->remarks ? ' Remarks: ' . Str::limit($request->remarks, 100) : '';
+            $smsText = "Hi {$firstName}, your request ({$certReq->tracking_number}) is APPROVED and will be ready for release by {$releaseFormatted}.{$remarksText} Pls bring valid ID.";
 
         } elseif ($action === 'release') {
             $certReq->update([
@@ -155,7 +163,7 @@ class RequestController extends Controller
         $request->validate([
             'request_id'     => 'required|exists:requests,id',
             'amount'         => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,gcash,maya',
+            'payment_method' => 'required|in:cash',
             'payment_status' => 'required|in:paid,unpaid,waived',
             'receipt_number' => 'nullable|string|max:100',
         ]);

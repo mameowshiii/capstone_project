@@ -1206,7 +1206,6 @@
         <div class="requests-tab-bar">
           <div class="req-filter-chip active" onclick="filterRequests('all', this)">All</div>
           <div class="req-filter-chip" onclick="filterRequests('Pending', this)">Pending</div>
-          <div class="req-filter-chip" onclick="filterRequests('Processing', this)">Processing</div>
           <div class="req-filter-chip" onclick="filterRequests('Ready for Release', this)">Ready</div>
           <div class="req-filter-chip" onclick="filterRequests('Completed', this)">Completed</div>
           <div class="req-filter-chip" onclick="filterRequests('Rejected', this)">Rejected</div>
@@ -1335,18 +1334,11 @@
               <div class="timeline-step completed">
                 <div class="step-marker"><i class="fas fa-check"></i></div>
                 <div>
-                  <div style="font-size: 13.5px; font-weight: 700;">Processing & Verification</div>
-                  <div style="font-size: 11.5px; color: var(--neutral-500);">Barangay record checked · No pending dispute</div>
-                </div>
-              </div>
-
-              <div class="timeline-step completed">
-                <div class="step-marker"><i class="fas fa-check"></i></div>
-                <div>
                   <div style="font-size: 13.5px; font-weight: 700;">Approved</div>
                   <div style="font-size: 11.5px; color: var(--neutral-500);">Signed by Punong Barangay & Staff</div>
                 </div>
               </div>
+
 
               <div class="timeline-step active-step" id="timelineStepReady">
                 <div class="step-marker"><i class="fas fa-box-archive"></i></div>

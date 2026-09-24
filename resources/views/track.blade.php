@@ -94,9 +94,9 @@
       <!-- Timeline -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:14px;">Request Progress</div>
       @php
-        $status_steps = ['pending','processing','approved','released'];
-        $status_icons = ['fas fa-clock','fas fa-cog','fas fa-check-circle','fas fa-box-open'];
-        $status_labels= ['Request Submitted','Under Review','Approved','Ready for Release'];
+        $status_steps = ['pending','approved','released'];
+        $status_icons = ['fas fa-clock','fas fa-check-circle','fas fa-box-open'];
+        $status_labels= ['Request Submitted','Approved','Released'];
         $current_idx = array_search($result->status, $status_steps);
         if ($result->status === 'rejected') $current_idx = -1;
       @endphp
@@ -124,9 +124,16 @@
         Request was <strong>rejected</strong>.
         @if ($result->remarks)Remarks: {{ $result->remarks }}@endif
       </div>
-      @elseif ($result->remarks)
+      @elseif ($result->expected_release_date && $result->status === 'approved')
+      <div class="alert alert-success" style="margin-top:16px;">
+        <i class="fas fa-calendar-check"></i>
+        Expected Release Date: <strong>{{ \Carbon\Carbon::parse($result->expected_release_date)->format('M d, Y h:i A') }}</strong>
+      </div>
+      @endif
+      
+      @if ($result->remarks)
       <div style="margin-top:20px;padding:16px;background:#ebf8fa;border-radius:10px;border-left:4px solid #0891b2;">
-        <div style="font-size:11px;color:#0891b2;font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-envelope" style="margin-right:6px;"></i>Message from Admin</div>
+        <div style="font-size:11px;color:#0891b2;font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-envelope" style="margin-right:6px;"></i>Message from Admin / Remarks</div>
         <div style="font-size:14px;color:#164e63;line-height:1.5;">{!! nl2br(e($result->remarks)) !!}</div>
       </div>
       @endif

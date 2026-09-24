@@ -190,6 +190,16 @@
                 <span class="badge bg-{{ $r->status === 'pending' ? 'warning' : ($r->status === 'processing' ? 'info' : ($r->status === 'approved' ? 'success' : ($r->status === 'rejected' ? 'danger' : 'primary'))) }}">
                     {{ ucfirst($r->status) }}
                 </span>
+                @if ($r->status === 'approved' && $r->expected_release_date)
+                  <div style="font-size:10px; margin-top:4px; color:#15803d; font-weight:600;">
+                    <i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($r->expected_release_date)->format('M d, g:i A') }}
+                  </div>
+                @endif
+                @if ($r->remarks)
+                  <div style="font-size:10px; margin-top:2px; color:#0369a1; font-weight:600;" title="{{ $r->remarks }}">
+                    <i class="fas fa-envelope"></i> See remarks
+                  </div>
+                @endif
               </td>
               <td>
                 <div style="display:flex;gap:4px;">
@@ -229,9 +239,21 @@
                 </button>
               </div>
             </div>
-            <span class="badge bg-{{ $r->status === 'pending' ? 'warning' : ($r->status === 'processing' ? 'info' : ($r->status === 'approved' ? 'success' : ($r->status === 'rejected' ? 'danger' : 'primary'))) }}" style="flex-shrink:0;">
-              {{ ucfirst($r->status) }}
-            </span>
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <span class="badge bg-{{ $r->status === 'pending' ? 'warning' : ($r->status === 'processing' ? 'info' : ($r->status === 'approved' ? 'success' : ($r->status === 'rejected' ? 'danger' : 'primary'))) }}" style="flex-shrink:0;">
+                {{ ucfirst($r->status) }}
+              </span>
+              @if ($r->status === 'approved' && $r->expected_release_date)
+                <div style="font-size:10px; margin-top:4px; color:#15803d; font-weight:600;">
+                  <i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($r->expected_release_date)->format('M d') }}
+                </div>
+              @endif
+              @if ($r->remarks)
+                <div style="font-size:10px; margin-top:2px; color:#0369a1; font-weight:600;" title="{{ $r->remarks }}">
+                  <i class="fas fa-envelope"></i> Remarks
+                </div>
+              @endif
+            </div>
           </div>
 
           <div class="request-card-meta">
